@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0b16">
+  <title>NEXUS · RescueTap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0b0b16; --surface: #12121f; --surface2: #1a1a2e; --surface3: #20203a;
+      --border: rgba(255,255,255,0.07); --accent: #6c63ff; --accent2: #00e5b0;
+      --danger: #ff6b6b; --warn: #ffc400;
+      --text: #e8e8f0; --muted: #6b6b8a; --sidebar-w: 240px; --topbar-h: 56px;
+    }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; overflow: hidden; }
+    .shell { display: flex; height: 100vh; }
+
+    /* ── Sidebar ── */
+    #sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; transition: transform 0.25s; z-index: 50; }
+    .sidebar-logo { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo h1 { font-size: 22px; font-weight: 800; letter-spacing: 4px; background: linear-gradient(135deg, #6c63ff, #00e5b0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .sidebar-logo p { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 2px; }
+    nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+    .nav-section { font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); letter-spacing: 2px; padding: 10px 10px 4px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.2s; text-decoration: none; border: 1px solid transparent; }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); transform: translateX(4px); }
+    .nav-item.active { background: rgba(108,99,255,0.15); color: var(--accent); border-color: rgba(108,99,255,0.3); }
+    .nav-item .badge { margin-left: auto; font-size: 10px; font-family: 'Space Mono', monospace; background: rgba(108,99,255,0.2); color: var(--accent); padding: 1px 6px; border-radius: 20px; }
+    .nav-item .badge.red { background: rgba(255,107,107,0.2); color: var(--danger); }
+    .sidebar-footer { padding: 12px; border-top: 1px solid var(--border); }
+    .sidebar-footer p { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); text-align: center; }
+
+    /* ── Main ── */
+    #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+    #topbar { height: var(--topbar-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0; }
+    #menu-btn { display: none; background: none; border: none; cursor: pointer; color: var(--text); padding: 4px; }
+    #menu-btn svg { width: 22px; height: 22px; }
+    #topbar-title { font-size: 15px; font-weight: 700; }
+    #topbar-time { margin-left: auto; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); }
+    .top-btn { border-radius: 6px; padding: 5px 12px; font-size: 11px; font-family: 'Space Mono', monospace; cursor: pointer; transition: all 0.15s; border: 1px solid; font-weight: 600; }
+    .top-btn:hover { transform: scale(1.05); }
+    .btn-sync { background: rgba(108,99,255,0.15); border-color: rgba(108,99,255,0.3); color: var(--accent); }
+    .btn-add { background: var(--accent); border-color: var(--accent); color: white; }
+
+    #content { flex: 1; overflow-y: auto; padding: 24px; position: relative; }
+    .view { display: none; animation: fadeIn 0.3s ease; }
+    .view.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    /* ── Dashboard glows ── */
+    #view-dashboard::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 50%, rgba(108,99,255,0.04) 0%, transparent 60%); animation: breathe 8s infinite alternate; pointer-events: none; z-index: -1; }
+    @keyframes breathe { from { opacity: 0.5; transform: scale(0.9); } to { opacity: 1; transform: scale(1.1); } }
+
+    /* ── Stat cards ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; transition: transform 0.25s, box-shadow 0.25s; cursor: pointer; }
+    .stat-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--c1,#6c63ff22), transparent); opacity: 0.5; pointer-events: none; }
+    .stat-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+    .stat-card .icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.07); margin-bottom: 14px; }
+    .stat-card .icon svg { width: 18px; height: 18px; }
+    .stat-card .val { font-size: 26px; font-weight: 800; font-family: 'Space Mono', monospace; color: var(--text); line-height: 1; }
+    .stat-card .lbl { font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 600; }
+
+    /* ── Cards ── */
+    .dash-grid { display: grid; grid-template-columns: 1fr 340px; gap: 16px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .card-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-head h3 { font-size: 14px; font-weight: 700; }
+    .card-head .sub { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); }
+
+    /* ── Tables ── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .data-table th { padding: 10px 16px; text-align: left; font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); font-weight: 400; white-space: nowrap; }
+    .data-table td { padding: 11px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text); vertical-align: middle; }
+    .data-table tbody tr { transition: background 0.2s; cursor: pointer; }
+    .data-table tbody tr:hover td { background: rgba(108,99,255,0.06) !important; }
+
+    /* ── Badges ── */
+    .badge-pill { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; font-family: 'Space Mono', monospace; white-space: nowrap; }
+    .badge-blue   { background: rgba(108,99,255,0.15); color: #9c95ff; border: 1px solid rgba(108,99,255,0.2); }
+    .badge-green  { background: rgba(0,229,176,0.12); color: #00e5b0; border: 1px solid rgba(0,229,176,0.2); }
+    .badge-red    { background: rgba(255,107,107,0.12); color: #ff8080; border: 1px solid rgba(255,107,107,0.2); }
+    .badge-yellow { background: rgba(255,196,0,0.12); color: #ffc400; border: 1px solid rgba(255,196,0,0.2); }
+    .badge-gray   { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
+    .badge-orange { background: rgba(255,152,0,0.12); color: #ff9800; border: 1px solid rgba(255,152,0,0.2); }
+
+    /* ── Progress ── */
+    .progress-track { display: inline-block; width: 50px; height: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; vertical-align: middle; margin-left: 8px; }
+    .progress-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.6s; }
+    .progress-fill.complete { background: var(--accent2); }
+
+    /* ── Pulse dot ── */
+    .pulse { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent2); margin-right: 6px; animation: pulse 2s infinite; }
+    .pulse.warn { background: var(--warn); }
+    .pulse.danger { background: var(--danger); }
+    @keyframes pulse { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; } 50% { opacity: 0.4; box-shadow: 0 0 0 6px transparent; } }
+
+    /* ── Small buttons ── */
+    .btn-sm { padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface2); color: var(--accent); cursor: pointer; font-size: 10px; font-weight: 700; transition: 0.2s; white-space: nowrap; }
+    .btn-sm:hover { background: rgba(108,99,255,0.2); border-color: rgba(108,99,255,0.4); }
+    .btn-sm.danger { color: var(--danger); }
+    .btn-sm.danger:hover { background: rgba(255,107,107,0.15); border-color: rgba(255,107,107,0.4); }
+
+    /* ── Failsafe alert banner ── */
+    .alert-banner { border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; border: 1px solid; display: flex; align-items: flex-start; gap: 12px; }
+    .alert-banner.warn { background: rgba(255,196,0,0.06); border-color: rgba(255,196,0,0.25); }
+    .alert-banner.danger { background: rgba(255,107,107,0.07); border-color: rgba(255,107,107,0.25); }
+    .alert-banner svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
+    .alert-banner.warn svg { color: var(--warn); }
+    .alert-banner.danger svg { color: var(--danger); }
+    .alert-banner h4 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .alert-banner p { font-size: 11px; color: var(--muted); line-height: 1.5; }
+    .alert-banner ul { list-style: none; margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
+    .alert-banner ul li { font-size: 11px; color: var(--text); font-family: 'Space Mono', monospace; }
+    .alert-banner ul li::before { content: '→ '; color: var(--muted); }
+
+    /* ── Drawer ── */
+    #drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 60; display: none; backdrop-filter: blur(2px); }
+    #drawer-overlay.open { display: block; }
+    #drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 440px; background: var(--surface); border-left: 1px solid var(--border); z-index: 70; transform: translateX(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; }
+    #drawer.open { transform: translateX(0); }
+    .drawer-head { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .drawer-head h3 { font-size: 16px; font-weight: 700; }
+    .drawer-tab-hint { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); margin-top: 2px; }
+    .drawer-body { flex: 1; padding: 20px; overflow-y: auto; }
+    .drawer-foot { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 10px; font-weight: 700; color: var(--muted); margin-bottom: 5px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; }
+    .form-group label .required { color: var(--danger); margin-left: 2px; }
+    .form-input { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 9px 12px; font-size: 13px; font-family: 'Syne', sans-serif; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,0.1); }
+    select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b8a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; cursor: pointer; }
+    textarea.form-input { resize: vertical; min-height: 80px; font-size: 12px; font-family: 'Space Mono', monospace; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-section-label { font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; padding: 10px 0 6px; border-bottom: 1px solid var(--border); margin-bottom: 14px; margin-top: 4px; }
+    .btn-primary { background: var(--accent); color: white; border: none; border-radius: 6px; padding: 10px 20px; font-size: 13px; font-weight: 700; cursor: pointer; flex: 1; transition: 0.2s; }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 10px 20px; font-size: 13px; font-weight: 700; cursor: pointer; flex: 1; transition: 0.2s; }
+    .btn-secondary:hover { border-color: var(--accent); }
+
+    /* ── Batch textarea ── */
+    .batch-area { background: var(--bg); border: 1px dashed rgba(108,99,255,0.3); border-radius: 8px; padding: 14px; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); }
+    .batch-area p { margin-bottom: 8px; color: var(--text); font-size: 12px; }
+    .batch-area pre { font-size: 10px; color: var(--muted); background: var(--surface2); padding: 8px; border-radius: 4px; overflow-x: auto; margin-bottom: 10px; }
+
+    /* ── Toggle switch ── */
+    .toggle-wrap { display: flex; align-items: center; justify-content: space-between; }
+    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; inset: 0; background: rgba(255,255,255,0.1); border-radius: 24px; cursor: pointer; transition: 0.3s; border: 1px solid var(--border); }
+    .slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 2px; bottom: 2px; background: #666; border-radius: 50%; transition: 0.3s; }
+    input:checked + .slider { background: rgba(108,99,255,0.4); border-color: rgba(108,99,255,0.5); }
+    input:checked + .slider:before { transform: translateX(20px); background: var(--accent); }
+
+    /* ── Automation cards ── */
+    .auto-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; transition: border-color 0.3s, transform 0.2s; margin-bottom: 12px; }
+    .auto-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
+    .auto-card.enabled { border-color: rgba(108,99,255,0.25); }
+    .auto-card.disabled { opacity: 0.6; }
+    .auto-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .auto-card p { font-size: 11px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+    .auto-meta { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); margin-top: 10px; }
+
+    /* ── Follow-up tracker ── */
+    .followup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .followup-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+    .followup-card h4 { font-size: 12px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .followup-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12px; }
+    .followup-item:last-child { border-bottom: none; }
+    .followup-item .name { color: var(--text); font-weight: 600; }
+    .followup-item .days { font-family: 'Space Mono', monospace; font-size: 10px; }
+
+    /* ── Failsafe view ── */
+    .failsafe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .failsafe-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .failsafe-section .card-head { border-bottom: 1px solid var(--border); }
+
+    /* ── Toast ── */
+    #toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface3); border: 1px solid var(--border); border-radius: 8px; padding: 12px 18px; font-size: 13px; font-weight: 600; z-index: 999; transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: none; max-width: 320px; }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { border-color: rgba(0,229,176,0.4); color: var(--accent2); }
+    #toast.error { border-color: rgba(255,107,107,0.4); color: var(--danger); }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2,1fr); } .dash-grid { grid-template-columns: 1fr; } .followup-grid, .failsafe-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 700px) {
+      #sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      #menu-btn { display: flex; }
+      #content { padding: 14px; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
+      #drawer { width: 100%; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    .overscroll-t { padding-bottom: 40px; }
+  </style>
+</head>
+<body>
+
+<div id="toast"></div>
+<div id="drawer-overlay" onclick="closeDrawer()"></div>
+<div id="drawer">
+  <div class="drawer-head">
+    <div>
+      <h3 id="drawer-title">Add Item</h3>
+      <div class="drawer-tab-hint" id="drawer-hint"></div>
+    </div>
+    <button onclick="closeDrawer()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1">✕</button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+  <div class="drawer-foot">
+    <button class="btn-secondary" id="btn-batch" onclick="toggleBatchMode()">Batch Mode</button>
+    <button class="btn-primary" id="btn-submit" onclick="submitForm()">Save</button>
+  </div>
+</div>
+
+<div class="shell">
+  <aside id="sidebar">
+    <div class="sidebar-logo">
+      <h1>NEXUS</h1>
+      <p>RESCUETAP · OPS CONSOLE</p>
+    </div>
+    <nav>
+      <div class="nav-section">Overview</div>
+      <a class="nav-item active" data-view="dashboard">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" data-view="tasks">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+        Master Tasks
+        <span class="badge" id="nav-badge-tasks">—</span>
+      </a>
+      <a class="nav-item" data-view="cos">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/></svg>
+        COS
+      </a>
+      <a class="nav-item" data-view="partners">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>
+        Partnerships
+      </a>
+      <a class="nav-item" data-view="org">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+        Org Database
+      </a>
+      <a class="nav-item" data-view="kpi">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+        KPI Log
+      </a>
+      <a class="nav-item" data-view="marketing">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
+        Marketing
+      </a>
+      <div class="nav-section">Ops</div>
+      <a class="nav-item" data-view="followup">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+        Follow-Ups
+        <span class="badge red" id="nav-badge-followup">—</span>
+      </a>
+      <a class="nav-item" data-view="failsafe">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+        Failsafe Alerts
+        <span class="badge red" id="nav-badge-failsafe">—</span>
+      </a>
+      <div class="nav-section">Settings</div>
+      <a class="nav-item" data-view="automation">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+        Automation
+      </a>
+    </nav>
+    <div class="sidebar-footer"><p>© 2026 RescueTap · NEXUS v2.3</p></div>
+  </aside>
+
+  <main id="main">
+    <header id="topbar">
+      <button id="menu-btn" onclick="toggleSidebar()">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+      </button>
+      <h2 id="topbar-title">Dashboard</h2>
+      <button class="top-btn btn-sync" onclick="syncData()">↻ Sync</button>
+      <button class="top-btn btn-add" id="add-btn" onclick="openDrawer()">+ NEW</button>
+      <span id="topbar-time">—</span>
+    </header>
+
+    <div id="content" class="overscroll-t">
+
+      <!-- ══ DASHBOARD ══ -->
+      <div id="view-dashboard" class="view active">
+        <div id="dashboard-alerts"></div>
+        <div class="stats-grid">
+          <div class="stat-card" style="--c1:rgba(108,99,255,0.1)" onclick="loadView('tasks')">
+            <div class="icon" style="color:#9c95ff"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg></div>
+            <div class="val" id="stat-tasks">—</div>
+            <div class="lbl">Active Tasks</div>
+          </div>
+          <div class="stat-card" style="--c1:rgba(0,229,176,0.1)" onclick="loadView('partners')">
+            <div class="icon" style="color:#00e5b0"><svg fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg></div>
+            <div class="val" id="stat-partners">—</div>
+            <div class="lbl">Partnerships</div>
+          </div>
+          <div class="stat-card" style="--c1:rgba(255,107,107,0.1)" onclick="loadView('followup')">
+            <div class="icon" style="color:#ff8080"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg></div>
+            <div class="val" id="stat-overdue">—</div>
+            <div class="lbl">Overdue / At Risk</div>
+          </div>
+          <div class="stat-card" style="--c1:rgba(255,196,0,0.1)" onclick="loadView('failsafe')">
+            <div class="icon" style="color:#ffc400"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg></div>
+            <div class="val" id="stat-failsafe">—</div>
+            <div class="lbl">Failsafe Alerts</div>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-head"><h3>Recent Tasks</h3><span class="sub">Latest activity</span></div>
+            <div style="overflow-x:auto">
+              <table class="data-table">
+                <thead><tr><th>ID</th><th>Task</th><th>Assigned</th><th>Status</th><th>Progress</th></tr></thead>
+                <tbody id="dash-tasks-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Automation Status</h3></div>
+            <div style="padding:16px" id="dash-automations"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ TASKS ══ -->
+      <div id="view-tasks" class="view">
+        <div class="card">
+          <div class="card-head"><h3>Master Tasks</h3><button class="btn-sm" onclick="exportCSV('tasks')">Export CSV</button></div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead><tr><th>ID</th><th>Task Description</th><th>Priority</th><th>Assigned To</th><th>Supervisor</th><th>Dept</th><th>Deadline</th><th>Status</th><th>Progress</th><th>Actions</th></tr></thead>
+              <tbody id="tasks-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ COS ══ -->
+      <div id="view-cos" class="view">
+        <div class="card">
+          <div class="card-head"><h3>COS Database</h3><button class="btn-sm" onclick="exportCSV('cos')">Export CSV</button></div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead><tr><th>State</th><th>Admin Name</th><th>Phone</th><th>Email</th><th>WhatsApp Group</th><th>Members</th><th>Status</th><th>Date Launched</th><th>Actions</th></tr></thead>
+              <tbody id="cos-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PARTNERSHIPS ══ -->
+      <div id="view-partners" class="view">
+        <div class="card">
+          <div class="card-head"><h3>Partnerships</h3><button class="btn-sm" onclick="exportCSV('partners')">Export CSV</button></div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead><tr><th>Assigned To</th><th>Organisation</th><th>Contact Name</th><th>Type</th><th>Status</th><th>Follow-Up Date</th><th>MoU Status</th><th>Actions</th></tr></thead>
+              <tbody id="partners-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ ORG ══ -->
+      <div id="view-org" class="view">
+        <div class="card">
+          <div class="card-head"><h3>Org Database</h3><button class="btn-sm" onclick="exportCSV('org')">Export CSV</button></div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead><tr><th>Organisation Name</th><th>Industry</th><th>State</th><th>Contact Person</th><th>Email</th><th>Phone</th><th>Onboarding Status</th><th>Actions</th></tr></thead>
+              <tbody id="org-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ KPI ══ -->
+      <div id="view-kpi" class="view">
+        <div id="kpi-alerts"></div>
+        <div class="card">
+          <div class="card-head"><h3>KPI Log</h3><button class="btn-sm" onclick="exportCSV('kpi')">Export CSV</button></div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead><tr><th>Date</th><th>Day</th><th>Team Member</th><th>Role / Dept</th><th>Completed</th><th>Achievement</th><th>Blockers</th><th>Submitted</th><th>Actions</th></tr></thead>
+              <tbody id="kpi-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ MARKETING ══ -->
+      <div id="view-marketing" class="view">
+        <div class="card">
+          <div class="card-head"><h3>Marketing Content</h3><button class="btn-sm" onclick="exportCSV('marketing')">Export CSV</button></div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead><tr><th>ID</th><th>Type</th><th>Topic / Caption</th><th>Platform</th><th>Assigned To</th><th>Due Date</th><th>Status</th><th>Link</th><th>Actions</th></tr></thead>
+              <tbody id="marketing-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ FOLLOW-UP ══ -->
+      <div id="view-followup" class="view">
+        <div id="followup-alerts"></div>
+        <div class="followup-grid">
+          <div class="followup-card">
+            <h4><span class="pulse danger"></span>Overdue Tasks (No Update 2+ Days)</h4>
+            <div id="fu-overdue-list"><p style="color:var(--muted);font-size:12px">Loading…</p></div>
+          </div>
+          <div class="followup-card">
+            <h4><span class="pulse warn"></span>Partnerships — Pending Follow-Up</h4>
+            <div id="fu-partners-list"><p style="color:var(--muted);font-size:12px">Loading…</p></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>All Assignee Follow-Up Status</h3><span class="sub">Tasks not updated in 2+ days</span></div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead><tr><th>Assignee</th><th>Task ID</th><th>Task</th><th>Days Stale</th><th>Status</th><th>Last Updated</th><th>Actions</th></tr></thead>
+              <tbody id="followup-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ FAILSAFE ALERTS ══ -->
+      <div id="view-failsafe" class="view">
+        <div class="failsafe-grid">
+          <div class="failsafe-section">
+            <div class="card-head"><h3 style="color:var(--danger)">⚠ Missing EOD Reports</h3><span class="sub" id="failsafe-eod-date">Today</span></div>
+            <div style="padding:0"><table class="data-table"><thead><tr><th>Team Member</th><th>Role</th><th>Days Missing</th><th>Last Filed</th></tr></thead><tbody id="failsafe-eod-tbody"></tbody></table></div>
+          </div>
+          <div class="failsafe-section">
+            <div class="card-head"><h3 style="color:var(--warn)">⚡ Blocked Tasks</h3><span class="sub">Needs immediate action</span></div>
+            <div style="padding:0"><table class="data-table"><thead><tr><th>Task</th><th>Assignee</th><th>Blocked Since</th><th>Actions</th></tr></thead><tbody id="failsafe-blocked-tbody"></tbody></table></div>
+          </div>
+          <div class="failsafe-section">
+            <div class="card-head"><h3>Overdue Deadlines</h3></div>
+            <div style="padding:0"><table class="data-table"><thead><tr><th>Task</th><th>Assignee</th><th>Deadline</th><th>Days Late</th></tr></thead><tbody id="failsafe-deadlines-tbody"></tbody></table></div>
+          </div>
+          <div class="failsafe-section">
+            <div class="card-head"><h3>Partners — No Contact 7+ Days</h3></div>
+            <div style="padding:0"><table class="data-table"><thead><tr><th>Organisation</th><th>Assigned To</th><th>Follow-Up Date</th><th>Status</th></tr></thead><tbody id="failsafe-partners-tbody"></tbody></table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ AUTOMATION ══ -->
+      <div id="view-automation" class="view">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px" id="automation-grid"></div>
+        <div class="card">
+          <div class="card-head"><h3>Automation Log</h3><span class="sub">Last 20 events</span></div>
+          <div style="padding:0"><table class="data-table"><thead><tr><th>Key</th><th>Label</th><th>Enabled</th><th>Last Toggled</th><th>By</th></tr></thead><tbody id="automation-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdMI8Ztnjkza8lc883cIfS_e6uypTwHw1NnqNvoEkD-IiTX2Zh61CGX0y7SKpfhBs6/exec';
+
+const ALL_TEAM_MEMBERS = [
+  'Ayo T. Joshua','Shina Samson','Israel Idowu','Darlington','Chizaram',
+  'Adetola','Titi','Naruka','Bukayo','Joshua (Content)','Seth','Nora',
+  'Rashidat','Muyi','Perpetual','Christiana','Mark','Nehemiah','Joshua Alex',
+  'Mr Sam','Joshua (Tech Outreach)'
+];
+
+// ── Per-page form schemas ──
+const FORM_SCHEMAS = {
+  '1. Master Tasks': {
+    label: 'Master Tasks',
+    idKey: 'ID',
+    appendAction: 'appendTask',
+    fields: [
+      { key: 'ID', label: 'Task ID', type: 'text', placeholder: 'e.g. T-001', required: true },
+      { key: 'Task Description', label: 'Task Description', type: 'text', placeholder: 'What needs to be done?', required: true },
+      { section: 'Assignment' },
+      { key: 'Assigned To', label: 'Assigned To', type: 'text', placeholder: 'Team member name', required: true },
+      { key: 'Assigned_To_Email', label: 'Assignee Email', type: 'email', placeholder: 'name@rescuetap.org' },
+      { key: 'Supervisor', label: 'Supervisor', type: 'text', placeholder: 'Supervisor name' },
+      { key: 'Business / Dept', label: 'Department', type: 'select', options: ['COS','Partnerships','Marketing','Tech','Operations','Finance','HR'] },
+      { section: 'Priority & Timing' },
+      { key: 'Priority', label: 'Priority', type: 'select', options: ['URGENT','HIGH','MEDIUM','LOW'], required: true },
+      { key: 'Status', label: 'Status', type: 'select', options: ['Not Started','In Progress','Done','Cancelled','Blocked'], required: true },
+      { key: '% Progress', label: '% Progress (0–100)', type: 'number', placeholder: '0' },
+      { key: 'Start Date', label: 'Start Date', type: 'date' },
+      { key: 'Deadline', label: 'Deadline', type: 'date' },
+      { section: 'Notes' },
+      { key: 'Notes', label: 'Notes', type: 'textarea', placeholder: 'Additional context…' },
+      { key: 'Manual Trigger Required', label: 'Manual Trigger Required', type: 'select', options: ['No','Yes'] },
+    ]
+  },
+  '2. COS': {
+    label: 'COS Entry',
+    idKey: 'State',
+    appendAction: 'appendCOS',
+    fields: [
+      { key: 'State', label: 'State', type: 'text', placeholder: 'e.g. Lagos', required: true },
+      { key: 'Admin Name', label: 'Admin Name', type: 'text', placeholder: 'Full name', required: true },
+      { section: 'Contact Details' },
+      { key: 'Phone', label: 'Phone Number', type: 'tel', placeholder: '080xxxxxxxx' },
+      { key: 'Email', label: 'Email', type: 'email', placeholder: 'name@rescuetap.org' },
+      { section: 'Status' },
+      { key: 'WhatsApp Group Created', label: 'WhatsApp Group Created', type: 'select', options: ['No','Yes'] },
+      { key: 'Members Count', label: 'Members Count', type: 'number', placeholder: '0' },
+      { key: 'Status', label: 'Status', type: 'select', options: ['Pending','In Progress','Active'] },
+      { key: 'Date Launched', label: 'Date Launched', type: 'date' },
+      { key: 'Notes', label: 'Notes', type: 'textarea', placeholder: 'Any additional info…' },
+    ]
+  },
+  '3. Partnerships': {
+    label: 'Partnership',
+    idKey: 'Organisation',
+    appendAction: 'appendPartner',
+    fields: [
+      { key: 'Organisation', label: 'Organisation Name', type: 'text', placeholder: 'Full org name', required: true },
+      { key: 'Assigned To', label: 'Assigned To', type: 'text', placeholder: 'Team member handling this', required: true },
+      { section: 'Contact Info' },
+      { key: 'Contact Name', label: 'Contact Person', type: 'text', placeholder: 'Full name' },
+      { key: 'Contact Email', label: 'Contact Email', type: 'email', placeholder: 'contact@org.com' },
+      { section: 'Classification' },
+      { key: 'Type', label: 'Partner Type', type: 'select', options: ['NGO','Government','Corporate','Individual','Academic','Media'] },
+      { key: 'Current Status', label: 'Current Status', type: 'select', options: ['In Discussion','MoU Pending','Active','Cold','Declined'] },
+      { key: 'MoU Status', label: 'MoU Status', type: 'select', options: ['Not Started','Draft Sent','Under Review','Signed','N/A'] },
+      { section: 'Dates' },
+      { key: 'Date Added', label: 'Date Added', type: 'date' },
+      { key: 'Follow-Up Date', label: 'Follow-Up Date', type: 'date' },
+      { key: 'Notes', label: 'Notes', type: 'textarea', placeholder: 'Notes on this partnership…' },
+      { key: 'Manual Trigger Required', label: 'Manual Trigger Required', type: 'select', options: ['No','Yes'] },
+    ]
+  },
+  '4. Org Database': {
+    label: 'Organisation',
+    idKey: 'Organisation Name',
+    appendAction: 'appendOrg',
+    fields: [
+      { key: 'Organisation Name', label: 'Organisation Name', type: 'text', placeholder: 'Full name', required: true },
+      { key: 'Industry', label: 'Industry / Sector', type: 'text', placeholder: 'e.g. Healthcare, NGO' },
+      { section: 'Location & Contact' },
+      { key: 'State', label: 'State', type: 'text', placeholder: 'e.g. Lagos' },
+      { key: 'Country', label: 'Country', type: 'text', placeholder: 'Nigeria' },
+      { key: 'Contact Person', label: 'Contact Person', type: 'text', placeholder: 'Full name' },
+      { key: 'Email', label: 'Contact Email', type: 'email', placeholder: 'email@org.com' },
+      { key: 'Phone', label: 'Phone', type: 'tel', placeholder: '080xxxxxxxx' },
+      { section: 'Onboarding' },
+      { key: 'Onboarding Status', label: 'Onboarding Status', type: 'select', options: ['Pending','In Progress','Active','Declined'] },
+      { key: 'Notes', label: 'Notes', type: 'textarea', placeholder: 'Notes about this org…' },
+    ]
+  },
+  '5. KPI Log': {
+    label: 'KPI Report',
+    idKey: 'Date',
+    appendAction: 'appendKPI',
+    fields: [
+      { key: 'Date', label: 'Date', type: 'date', required: true },
+      { key: 'Day', label: 'Day of Week', type: 'select', options: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'], required: true },
+      { key: 'Team Member', label: 'Team Member', type: 'text', placeholder: 'Full name', required: true },
+      { key: 'Role/Dept', label: 'Role / Department', type: 'text', placeholder: 'e.g. Deputy COO' },
+      { section: 'Report' },
+      { key: 'What I Completed (with proof)', label: 'What I Completed (with proof)', type: 'textarea', placeholder: 'List tasks completed today with links/evidence…', required: true },
+      { key: 'Key Achievement', label: 'Key Achievement', type: 'textarea', placeholder: 'The single biggest win today…' },
+      { key: 'Blockers', label: 'Blockers', type: 'textarea', placeholder: 'Any blockers / challenges…' },
+      { key: "Tomorrow's Plan", label: "Tomorrow's Plan", type: 'textarea', placeholder: 'What will you tackle tomorrow…' },
+      { key: 'Submitted', label: 'Submitted?', type: 'select', options: ['Y','N'] },
+    ]
+  },
+  '6. Marketing': {
+    label: 'Marketing Content',
+    idKey: 'ID',
+    appendAction: 'appendMarketing',
+    fields: [
+      { key: 'ID', label: 'Content ID', type: 'text', placeholder: 'e.g. M-001', required: true },
+      { key: 'Type', label: 'Content Type', type: 'select', options: ['Reel','Post','Story','Thread','Article','Infographic','Video','Podcast','Other'] },
+      { key: 'Topic / Caption', label: 'Topic / Caption', type: 'textarea', placeholder: 'Topic or caption for this content…', required: true },
+      { section: 'Assignment & Platform' },
+      { key: 'Platform', label: 'Platform(s)', type: 'text', placeholder: 'e.g. Instagram, TikTok' },
+      { key: 'Assigned To', label: 'Assigned To', type: 'text', placeholder: 'Team member' },
+      { key: 'Due Date', label: 'Due Date', type: 'date' },
+      { key: 'Status', label: 'Status', type: 'select', options: ['Not Started','In Progress','In Review','Done','Cancelled'] },
+      { section: 'Details' },
+      { key: 'Link', label: 'Content Link', type: 'url', placeholder: 'https://…' },
+      { key: 'Notes', label: 'Notes', type: 'textarea', placeholder: 'Creative brief or notes…' },
+    ]
+  },
+};
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let currentView = 'dashboard';
+let currentTab = '1. Master Tasks';
+let editingRowId = null;
+let isBatchMode = false;
+let appData = {};
+
+const VIEW_TAB_MAP = {
+  tasks: '1. Master Tasks',
+  cos: '2. COS',
+  partners: '3. Partnerships',
+  org: '4. Org Database',
+  kpi: '5. KPI Log',
+  marketing: '6. Marketing',
+};
+
+const ADD_BTN_LABELS = {
+  dashboard: '+ NEW TASK',
+  tasks: '+ NEW TASK',
+  cos: '+ NEW COS',
+  partners: '+ NEW PARTNER',
+  org: '+ NEW ORG',
+  kpi: '+ NEW KPI',
+  marketing: '+ NEW CONTENT',
+  followup: null,
+  failsafe: null,
+  automation: null,
+};
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  updateTime();
+  setInterval(updateTime, 30000);
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', e => { e.preventDefault(); loadView(item.dataset.view); });
+  });
+  loadData();
+});
+
+// ══════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════
+function loadView(name) {
+  currentView = name;
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.view === name));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === `view-${name}`));
+  const titles = { dashboard:'Dashboard', tasks:'Master Tasks', cos:'COS', partners:'Partnerships', org:'Org Database', kpi:'KPI Log', marketing:'Marketing', followup:'Follow-Up Tracker', failsafe:'Failsafe Alerts', automation:'Automation' };
+  document.getElementById('topbar-title').textContent = titles[name] || name;
+  const lbl = ADD_BTN_LABELS[name];
+  const addBtn = document.getElementById('add-btn');
+  addBtn.style.display = lbl ? '' : 'none';
+  if (lbl) addBtn.textContent = lbl;
+  currentTab = VIEW_TAB_MAP[name] || '1. Master Tasks';
+  // Close sidebar on mobile
+  if (window.innerWidth <= 700) document.getElementById('sidebar').classList.remove('open');
+  // Render view-specific content from cached data
+  renderView(name);
+}
+
+// ══════════════════════════════════════════
+//  DATA LOAD
+// ══════════════════════════════════════════
+async function loadData() {
+  try {
+    const res = await fetch(`${SCRIPT_URL}?action=read`);
+    appData = await res.json();
+    renderView(currentView);
+    updateNavBadges();
+  } catch(e) {
+    showToast('Failed to load data. Check network.', 'error');
+  }
+}
+
+async function syncData() {
+  showToast('Syncing…');
+  await loadData();
+  showToast('Synced!', 'success');
+}
+
+// ══════════════════════════════════════════
+//  RENDER DISPATCHER
+// ══════════════════════════════════════════
+function renderView(name) {
+  if (!appData.tasks) return;
+  switch(name) {
+    case 'dashboard': renderDashboard(); break;
+    case 'tasks': renderTasks(); break;
+    case 'cos': renderCOS(); break;
+    case 'partners': renderPartners(); break;
+    case 'org': renderOrg(); break;
+    case 'kpi': renderKPI(); break;
+    case 'marketing': renderMarketing(); break;
+    case 'followup': renderFollowup(); break;
+    case 'failsafe': renderFailsafe(); break;
+    case 'automation': renderAutomation(); break;
+  }
+}
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+function daysSince(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d)) return null;
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+
+function statusBadge(s) {
+  const m = { 'Not Started':'badge-gray','In Progress':'badge-blue','Done':'badge-green','Cancelled':'badge-gray','Blocked':'badge-red','Active':'badge-green','Pending':'badge-yellow','MoU Pending':'badge-yellow','In Discussion':'badge-blue','Cold':'badge-gray','Draft Sent':'badge-orange','Signed':'badge-green','Declined':'badge-red','In Review':'badge-yellow' };
+  return `<span class="badge-pill ${m[s]||'badge-gray'}">${s||'—'}</span>`;
+}
+function priorityBadge(p) {
+  const m = { 'URGENT':'badge-red','HIGH':'badge-red','MEDIUM':'badge-yellow','LOW':'badge-green' };
+  return `<span class="badge-pill ${m[p]||'badge-gray'}">${p||'—'}</span>`;
+}
+function progressBar(pct) {
+  const n = parseInt(pct)||0;
+  return `${n}%<span class="progress-track"><span class="progress-fill${n>=100?' complete':''}" style="width:${Math.min(n,100)}%"></span></span>`;
+}
+
+// ══════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════
+function renderDashboard() {
+  const tasks = appData.tasks || [];
+  const partners = appData.partners || [];
+  const kpi = appData.kpi || [];
+  const autos = appData.automations || [];
+  const today = new Date().toDateString();
+
+  const active = tasks.filter(t => !['Done','Cancelled'].includes(t.Status)).length;
+  const overdue = tasks.filter(t => !['Done','Cancelled'].includes(t.Status) && daysSince(t.Last_Updated) >= 2).length;
+  const missingKPI = ALL_TEAM_MEMBERS.filter(m => !kpi.some(k => new Date(k.Date).toDateString() === today && k['Team Member'] === m)).length;
+  const blocked = tasks.filter(t => t.Status === 'Blocked').length;
+  const failCount = missingKPI + blocked;
+
+  document.getElementById('stat-tasks').textContent = active;
+  document.getElementById('stat-partners').textContent = partners.length;
+  document.getElementById('stat-overdue').textContent = overdue;
+  document.getElementById('stat-failsafe').textContent = failCount;
+
+  // Alert banners
+  const alerts = [];
+  if (blocked > 0) alerts.push(`<div class="alert-banner danger"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg><div><h4>${blocked} task(s) BLOCKED</h4><p>Immediate attention needed — <button class="btn-sm danger" onclick="loadView('failsafe')" style="display:inline;padding:2px 8px">View Blocked</button></p></div></div>`);
+  if (overdue > 0) alerts.push(`<div class="alert-banner warn"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg><div><h4>${overdue} task(s) not updated in 2+ days</h4><p>Assignees may need a nudge — <button class="btn-sm" onclick="loadView('followup')" style="display:inline;padding:2px 8px">View Follow-Ups</button></p></div></div>`);
+  document.getElementById('dashboard-alerts').innerHTML = alerts.join('');
+
+  // Recent tasks
+  const rows = tasks.slice(0,6).map(t => `<tr onclick="editRow('${escQ(t.ID)}','1. Master Tasks')"><td style="font-family:'Space Mono',monospace;font-size:11px">${t.ID}</td><td>${t['Task Description']}</td><td>${t['Assigned To']}</td><td>${statusBadge(t.Status)}</td><td>${progressBar(t['% Progress'])}</td></tr>`).join('');
+  document.getElementById('dash-tasks-tbody').innerHTML = rows || '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:20px">No tasks loaded</td></tr>';
+
+  // Automations mini
+  const autoHtml = autos.slice(0,4).map(a => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;font-weight:600">${a.Label}</span><span class="badge-pill ${a.Enabled?'badge-green':'badge-gray'}">${a.Enabled?'ON':'OFF'}</span></div>`).join('');
+  document.getElementById('dash-automations').innerHTML = autoHtml || '<p style="color:var(--muted);font-size:12px">No automation data</p>';
+}
+
+// ══════════════════════════════════════════
+//  TASKS
+// ══════════════════════════════════════════
+function renderTasks() {
+  const tasks = appData.tasks || [];
+  document.getElementById('nav-badge-tasks').textContent = tasks.filter(t=>!['Done','Cancelled'].includes(t.Status)).length;
+  const rows = tasks.map(t => {
+    const stale = daysSince(t.Last_Updated);
+    const staleWarn = stale >= 2 && !['Done','Cancelled'].includes(t.Status) ? `<span class="badge-pill badge-red" style="margin-left:4px" title="${stale} days stale">⏱ ${stale}d</span>` : '';
+    return `<tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px">${t.ID}</td>
+      <td>${t['Task Description']}${staleWarn}</td>
+      <td>${priorityBadge(t.Priority)}</td>
+      <td>${t['Assigned To']}</td>
+      <td>${t.Supervisor||'—'}</td>
+      <td>${t['Business / Dept']||'—'}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:11px">${t.Deadline||'—'}</td>
+      <td>${statusBadge(t.Status)}</td>
+      <td>${progressBar(t['% Progress'])}</td>
+      <td><button class="btn-sm" onclick="editRow('${escQ(t.ID)}','1. Master Tasks')">Edit</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tasks-tbody').innerHTML = rows || noDataRow(10);
+}
+
+// ══════════════════════════════════════════
+//  COS
+// ══════════════════════════════════════════
+function renderCOS() {
+  const cos = appData.cos || [];
+  const rows = cos.map(c => `<tr>
+    <td>${c.State}</td><td>${c['Admin Name']}</td><td>${c.Phone||'—'}</td><td>${c.Email||'—'}</td>
+    <td>${statusBadge(c['WhatsApp Group Created']==='Yes'?'Active':'Pending')}</td>
+    <td style="font-family:'Space Mono',monospace">${c['Members Count']||0}</td>
+    <td>${statusBadge(c.Status)}</td>
+    <td style="font-family:'Space Mono',monospace;font-size:11px">${c['Date Launched']||'—'}</td>
+    <td><button class="btn-sm" onclick="editRow('${escQ(c.State)}','2. COS')">Edit</button></td>
+  </tr>`).join('');
+  document.getElementById('cos-tbody').innerHTML = rows || noDataRow(9);
+}
+
+// ══════════════════════════════════════════
+//  PARTNERSHIPS
+// ══════════════════════════════════════════
+function renderPartners() {
+  const partners = appData.partners || [];
+  const rows = partners.map(p => {
+    const fuDays = daysSince(p['Follow-Up Date']);
+    const fuWarn = fuDays !== null && fuDays > 0 ? `<span class="badge-pill badge-red" title="Follow-up overdue by ${fuDays} days">⏱ ${fuDays}d late</span>` : '';
+    return `<tr>
+      <td>${p['Assigned To']}</td>
+      <td><strong>${p.Organisation}</strong></td>
+      <td>${p['Contact Name']||'—'}</td>
+      <td>${statusBadge(p.Type)}</td>
+      <td>${statusBadge(p['Current Status'])}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:11px">${p['Follow-Up Date']||'—'} ${fuWarn}</td>
+      <td>${statusBadge(p['MoU Status'])}</td>
+      <td><button class="btn-sm" onclick="editRow('${escQ(p.Organisation)}','3. Partnerships')">Edit</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('partners-tbody').innerHTML = rows || noDataRow(8);
+}
+
+// ══════════════════════════════════════════
+//  ORG
+// ══════════════════════════════════════════
+function renderOrg() {
+  const orgs = appData.orgs || [];
+  const rows = orgs.map(o => `<tr>
+    <td><strong>${o['Organisation Name']||o.Organization||'—'}</strong></td>
+    <td>${o.Industry||'—'}</td>
+    <td>${o.State||o.Country||'—'}</td>
+    <td>${o['Contact Person']||o.Contact||'—'}</td>
+    <td>${o.Email||'—'}</td>
+    <td>${o.Phone||'—'}</td>
+    <td>${statusBadge(o['Onboarding Status'])}</td>
+    <td><button class="btn-sm" onclick="editRow('${escQ(o['Organisation Name']||o.Organization)}','4. Org Database')">Edit</button></td>
+  </tr>`).join('');
+  document.getElementById('org-tbody').innerHTML = rows || noDataRow(8);
+}
+
+// ══════════════════════════════════════════
+//  KPI
+// ══════════════════════════════════════════
+function renderKPI() {
+  const kpi = appData.kpi || [];
+  const today = new Date().toDateString();
+  const missing = ALL_TEAM_MEMBERS.filter(m => !kpi.some(k => new Date(k.Date).toDateString() === today && k['Team Member'] === m));
+  const alertsEl = document.getElementById('kpi-alerts');
+  if (missing.length > 0) {
+    alertsEl.innerHTML = `<div class="alert-banner warn"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg><div><h4>${missing.length} team member(s) have NOT filed today's KPI report</h4><ul>${missing.slice(0,10).map(m=>`<li>${m}</li>`).join('')}${missing.length>10?`<li>…and ${missing.length-10} more</li>`:''}</ul></div></div>`;
+  } else {
+    alertsEl.innerHTML = '';
+  }
+
+  const rows = [...kpi].reverse().map(k => `<tr>
+    <td style="font-family:'Space Mono',monospace;font-size:11px">${k.Date}</td>
+    <td>${k.Day||'—'}</td>
+    <td>${k['Team Member']}</td>
+    <td>${k['Role/Dept']||'—'}</td>
+    <td style="max-width:200px;white-space:normal">${k['What I Completed (with proof)']||'—'}</td>
+    <td style="max-width:160px;white-space:normal">${k['Key Achievement']||'—'}</td>
+    <td style="max-width:140px;white-space:normal;color:${k.Blockers?'var(--warn)':'var(--muted)'}">${k.Blockers||'None'}</td>
+    <td><span class="badge-pill ${k.Submitted==='Y'?'badge-green':'badge-red'}">${k.Submitted||'N'}</span></td>
+    <td><button class="btn-sm" onclick="editRow('${escQ(k.Date)}','5. KPI Log')">Edit</button></td>
+  </tr>`).join('');
+  document.getElementById('kpi-tbody').innerHTML = rows || noDataRow(9);
+}
+
+// ══════════════════════════════════════════
+//  MARKETING
+// ══════════════════════════════════════════
+function renderMarketing() {
+  const mkt = appData.marketing || [];
+  const typeColors = { 'Reel':'badge-blue','Post':'badge-gray','Story':'badge-yellow','Thread':'badge-orange','Video':'badge-blue','Article':'badge-green' };
+  const rows = mkt.map(m => `<tr>
+    <td style="font-family:'Space Mono',monospace;font-size:11px">${m.ID}</td>
+    <td><span class="badge-pill ${typeColors[m.Type]||'badge-gray'}">${m.Type||'—'}</span></td>
+    <td style="max-width:200px;white-space:normal">${m['Topic / Caption']||'—'}</td>
+    <td>${m.Platform||'—'}</td>
+    <td>${m['Assigned To']||'—'}</td>
+    <td style="font-family:'Space Mono',monospace;font-size:11px">${m['Due Date']||'—'}</td>
+    <td>${statusBadge(m.Status)}</td>
+    <td>${m.Link?`<a href="${m.Link}" target="_blank" style="color:var(--accent);font-size:11px">↗ Link</a>`:'—'}</td>
+    <td><button class="btn-sm" onclick="editRow('${escQ(m.ID)}','6. Marketing')">Edit</button></td>
+  </tr>`).join('');
+  document.getElementById('marketing-tbody').innerHTML = rows || noDataRow(9);
+}
+
+// ══════════════════════════════════════════
+//  FOLLOW-UP TRACKER
+// ══════════════════════════════════════════
+function renderFollowup() {
+  const tasks = appData.tasks || [];
+  const partners = appData.partners || [];
+  const today = new Date();
+
+  // Stale tasks (2+ days without update, not done/cancelled)
+  const staleTasks = tasks.filter(t =>
+    !['Done','Cancelled'].includes(t.Status) &&
+    daysSince(t.Last_Updated) >= 2
+  ).sort((a,b) => (daysSince(b.Last_Updated)||0) - (daysSince(a.Last_Updated)||0));
+
+  // Partners with overdue follow-up
+  const overduePartners = partners.filter(p => {
+    if (!p['Follow-Up Date']) return false;
+    return new Date(p['Follow-Up Date']) < today && !['Active','Declined'].includes(p['Current Status']);
+  });
+
+  // Update badge
+  document.getElementById('nav-badge-followup').textContent = staleTasks.length + overduePartners.length;
+
+  // Overdue tasks list
+  const fuOverdueHtml = staleTasks.slice(0,6).map(t => {
+    const d = daysSince(t.Last_Updated);
+    const cls = d >= 7 ? 'badge-red' : d >= 4 ? 'badge-yellow' : 'badge-gray';
+    return `<div class="followup-item"><span class="name">${t['Assigned To']}</span><span class="days"><span class="badge-pill ${cls}">${d}d stale</span></span></div>`;
+  }).join('') || '<p style="color:var(--muted);font-size:12px;padding:8px 0">No stale tasks 🎉</p>';
+  document.getElementById('fu-overdue-list').innerHTML = fuOverdueHtml;
+
+  // Overdue partners list
+  const fuPartnersHtml = overduePartners.slice(0,6).map(p => {
+    const d = daysSince(p['Follow-Up Date']);
+    return `<div class="followup-item"><span class="name">${p.Organisation}</span><span class="days"><span class="badge-pill badge-red">${d}d late</span></span></div>`;
+  }).join('') || '<p style="color:var(--muted);font-size:12px;padding:8px 0">All follow-ups on track 🎉</p>';
+  document.getElementById('fu-partners-list').innerHTML = fuPartnersHtml;
+
+  // Full table
+  const rows = staleTasks.map(t => {
+    const d = daysSince(t.Last_Updated);
+    const cls = d >= 7 ? 'badge-red' : d >= 4 ? 'badge-yellow' : 'badge-gray';
+    return `<tr>
+      <td>${t['Assigned To']}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:11px">${t.ID}</td>
+      <td>${t['Task Description']}</td>
+      <td><span class="badge-pill ${cls}">${d} day${d!==1?'s':''}</span></td>
+      <td>${statusBadge(t.Status)}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:11px">${t.Last_Updated||'—'}</td>
+      <td><button class="btn-sm" onclick="editRow('${escQ(t.ID)}','1. Master Tasks')">Update</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('followup-tbody').innerHTML = rows || noDataRow(7,'No stale tasks — great job! 🎉');
+
+  // Alert banner
+  const alertEl = document.getElementById('followup-alerts');
+  if (staleTasks.length > 0) {
+    const topCulprits = {};
+    staleTasks.forEach(t => { topCulprits[t['Assigned To']] = (topCulprits[t['Assigned To']]||0)+1; });
+    const sorted = Object.entries(topCulprits).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    alertEl.innerHTML = `<div class="alert-banner danger"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg><div><h4>${staleTasks.length} task(s) need follow-up</h4><ul>${sorted.map(([name,cnt])=>`<li>${name} — ${cnt} stale task${cnt>1?'s':''}</li>`).join('')}</ul></div></div>`;
+  } else { alertEl.innerHTML = ''; }
+}
+
+// ══════════════════════════════════════════
+//  FAILSAFE ALERTS
+// ══════════════════════════════════════════
+function renderFailsafe() {
+  const tasks = appData.tasks || [];
+  const kpi = appData.kpi || [];
+  const partners = appData.partners || [];
+  const today = new Date();
+  const todayStr = today.toDateString();
+
+  // 1. Missing EOD
+  const filedToday = new Set(kpi.filter(k => new Date(k.Date).toDateString() === todayStr).map(k => k['Team Member']));
+  const missingEOD = ALL_TEAM_MEMBERS.filter(m => !filedToday.has(m));
+  document.getElementById('failsafe-eod-date').textContent = today.toLocaleDateString('en-NG',{weekday:'long',day:'numeric',month:'short'});
+  const eodRows = missingEOD.map(m => {
+    const lastEntry = kpi.filter(k=>k['Team Member']===m).sort((a,b)=>new Date(b.Date)-new Date(a.Date))[0];
+    const lastDate = lastEntry ? lastEntry.Date : 'Never';
+    const daysAgo = lastEntry ? daysSince(lastEntry.Date) : '—';
+    return `<tr><td>${m}</td><td style="color:var(--muted)">${lastEntry?.['Role/Dept']||'—'}</td><td><span class="badge-pill badge-red">${daysAgo}d ago</span></td><td style="font-family:'Space Mono',monospace;font-size:11px">${lastDate}</td></tr>`;
+  }).join('');
+  document.getElementById('failsafe-eod-tbody').innerHTML = eodRows || noDataRow(4,'All team members have filed today! ✓');
+
+  // 2. Blocked tasks
+  const blocked = tasks.filter(t => t.Status === 'Blocked');
+  const blockedRows = blocked.map(t => {
+    const d = daysSince(t.Last_Updated);
+    return `<tr><td>${t['Task Description']}</td><td>${t['Assigned To']}</td><td><span class="badge-pill badge-red">${d}d stale</span></td><td><button class="btn-sm danger" onclick="editRow('${escQ(t.ID)}','1. Master Tasks')">Resolve</button></td></tr>`;
+  }).join('');
+  document.getElementById('failsafe-blocked-tbody').innerHTML = blockedRows || noDataRow(4,'No blocked tasks ✓');
+
+  // 3. Overdue deadlines
+  const overDeadline = tasks.filter(t => t.Deadline && !['Done','Cancelled'].includes(t.Status) && new Date(t.Deadline) < today);
+  const deadlineRows = overDeadline.map(t => {
+    const d = daysSince(t.Deadline);
+    return `<tr><td>${t['Task Description']}</td><td>${t['Assigned To']}</td><td style="font-family:'Space Mono',monospace;font-size:11px">${t.Deadline}</td><td><span class="badge-pill badge-red">${d}d late</span></td></tr>`;
+  }).join('');
+  document.getElementById('failsafe-deadlines-tbody').innerHTML = deadlineRows || noDataRow(4,'No overdue deadlines ✓');
+
+  // 4. Partners no contact 7+ days
+  const stalePartners = partners.filter(p => p['Follow-Up Date'] && daysSince(p['Follow-Up Date']) >= 7 && !['Active','Declined'].includes(p['Current Status']));
+  const partnerRows = stalePartners.map(p => `<tr><td><strong>${p.Organisation}</strong></td><td>${p['Assigned To']}</td><td style="font-family:'Space Mono',monospace;font-size:11px">${p['Follow-Up Date']}</td><td>${statusBadge(p['Current Status'])}</td></tr>`).join('');
+  document.getElementById('failsafe-partners-tbody').innerHTML = partnerRows || noDataRow(4,'No stale partnerships ✓');
+
+  // Nav badge
+  const total = missingEOD.length + blocked.length + overDeadline.length + stalePartners.length;
+  document.getElementById('nav-badge-failsafe').textContent = total;
+}
+
+// ══════════════════════════════════════════
+//  AUTOMATION
+// ══════════════════════════════════════════
+function renderAutomation() {
+  const autos = appData.automations || [];
+  const grid = autos.map(a => `
+    <div class="auto-card ${a.Enabled?'enabled':'disabled'}">
+      <div class="toggle-wrap">
+        <div><h4>${a.Label}</h4><p>${a.Description}</p></div>
+        <label class="toggle"><input type="checkbox" ${a.Enabled?'checked':''} onchange="toggleAutomation('${a.Key}',this.checked)"><span class="slider"></span></label>
+      </div>
+      <div class="auto-meta">Last toggled: ${a.LastToggled||'Never'} · By: ${a.ToggledBy||'—'}</div>
+    </div>`).join('');
+  document.getElementById('automation-grid').innerHTML = grid;
+
+  const rows = autos.map(a => `<tr>
+    <td style="font-family:'Space Mono',monospace;font-size:11px">${a.Key}</td>
+    <td>${a.Label}</td>
+    <td><span class="badge-pill ${a.Enabled?'badge-green':'badge-gray'}">${a.Enabled?'ENABLED':'DISABLED'}</span></td>
+    <td style="font-family:'Space Mono',monospace;font-size:11px">${a.LastToggled||'—'}</td>
+    <td>${a.ToggledBy||'—'}</td>
+  </tr>`).join('');
+  document.getElementById('automation-tbody').innerHTML = rows;
+}
+
+async function toggleAutomation(key, enabled) {
+  const user = prompt('Enter your name to confirm (leadership only):');
+  if (!user) return;
+  try {
+    const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'setAutomation', key, enabled, user }) });
+    const r = await res.json();
+    if (r.error) { showToast(r.error, 'error'); return; }
+    showToast(`Automation ${enabled?'enabled':'disabled'}`, 'success');
+    await loadData();
+  } catch(e) { showToast('Failed to update automation', 'error'); }
+}
+
+// ══════════════════════════════════════════
+//  NAV BADGES
+// ══════════════════════════════════════════
+function updateNavBadges() {
+  const tasks = appData.tasks || [];
+  const partners = appData.partners || [];
+  const kpi = appData.kpi || [];
+  const today = new Date();
+  const todayStr = today.toDateString();
+
+  const activeTasks = tasks.filter(t=>!['Done','Cancelled'].includes(t.Status)).length;
+  document.getElementById('nav-badge-tasks').textContent = activeTasks;
+
+  const staleTasks = tasks.filter(t=>!['Done','Cancelled'].includes(t.Status)&&daysSince(t.Last_Updated)>=2).length;
+  const overduePartners = partners.filter(p=>p['Follow-Up Date']&&new Date(p['Follow-Up Date'])<today&&!['Active','Declined'].includes(p['Current Status'])).length;
+  document.getElementById('nav-badge-followup').textContent = staleTasks + overduePartners;
+
+  const filedToday = new Set(kpi.filter(k=>new Date(k.Date).toDateString()===todayStr).map(k=>k['Team Member']));
+  const missingEOD = ALL_TEAM_MEMBERS.filter(m=>!filedToday.has(m)).length;
+  const blocked = tasks.filter(t=>t.Status==='Blocked').length;
+  const overDeadline = tasks.filter(t=>t.Deadline&&!['Done','Cancelled'].includes(t.Status)&&new Date(t.Deadline)<today).length;
+  const stalePartners = partners.filter(p=>p['Follow-Up Date']&&daysSince(p['Follow-Up Date'])>=7&&!['Active','Declined'].includes(p['Current Status'])).length;
+  document.getElementById('nav-badge-failsafe').textContent = missingEOD + blocked + overDeadline + stalePartners;
+}
+
+// ══════════════════════════════════════════
+//  DRAWER — FORMS
+// ══════════════════════════════════════════
+function openDrawer(tab, rowId) {
+  if (!tab) tab = currentTab;
+  currentTab = tab;
+  editingRowId = rowId || null;
+  isBatchMode = false;
+  document.getElementById('btn-batch').textContent = 'Batch Mode';
+
+  const schema = FORM_SCHEMAS[tab];
+  const label = schema ? schema.label : tab;
+  document.getElementById('drawer-title').textContent = rowId ? `Edit ${label}` : `Add ${label}`;
+  document.getElementById('drawer-hint').textContent = tab;
+  generateForm();
+
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+
+function toggleBatchMode() {
+  isBatchMode = !isBatchMode;
+  document.getElementById('btn-batch').textContent = isBatchMode ? '✕ Single Mode' : 'Batch Mode';
+  generateForm();
+}
+
+function generateForm() {
+  const body = document.getElementById('drawer-body');
+  body.innerHTML = '';
+  const schema = FORM_SCHEMAS[currentTab];
+  if (!schema) { body.innerHTML = '<p style="color:var(--muted)">No form schema for this tab.</p>'; return; }
+
+  if (isBatchMode) {
+    const headers = schema.fields.filter(f=>!f.section).map(f=>f.key);
+    body.innerHTML = `
+      <div class="batch-area">
+        <p>Paste multiple rows — one per line, comma-separated in this order:</p>
+        <pre>${headers.join(', ')}</pre>
+        <p style="color:var(--muted);font-size:11px">Leave a field blank with an empty comma. First column (ID) can be left blank to auto-generate.</p>
+      </div>
+      <div class="form-group" style="margin-top:12px">
+        <label>Batch Data (CSV lines)</label>
+        <textarea class="form-input" name="batch" style="min-height:200px" placeholder="T-010,Fix login bug,HIGH,Chizaram,Ayo T. Joshua,Tech,2026-06-01,2026-06-10,Not Started,0,..."></textarea>
+      </div>`;
+    return;
+  }
+
+  // Find row data if editing
+  let rowData = null;
+  if (editingRowId) rowData = findRowById(currentTab, editingRowId);
+
+  schema.fields.forEach(field => {
+    if (field.section) {
+      body.innerHTML += `<div class="form-section-label">${field.section}</div>`;
+      return;
+    }
+    const val = rowData ? (rowData[field.key] || '') : '';
+    const reqMark = field.required ? '<span class="required">*</span>' : '';
+
+    let input = '';
+    if (field.type === 'select') {
+      const opts = field.options.map(o => `<option value="${o}" ${o===val?'selected':''}>${o}</option>`).join('');
+      input = `<select class="form-input" name="${escAttr(field.key)}">${opts}</select>`;
+    } else if (field.type === 'textarea') {
+      input = `<textarea class="form-input" name="${escAttr(field.key)}" placeholder="${field.placeholder||''}">${val}</textarea>`;
+    } else {
+      input = `<input type="${field.type}" class="form-input" name="${escAttr(field.key)}" value="${escAttr(val)}" placeholder="${field.placeholder||''}">`;
+    }
+    body.innerHTML += `<div class="form-group"><label>${field.label}${reqMark}</label>${input}</div>`;
+  });
+}
+
+async function submitForm() {
+  const body = document.getElementById('drawer-body');
+  const schema = FORM_SCHEMAS[currentTab];
+
+  try {
+    if (isBatchMode) {
+      const batchText = body.querySelector('[name="batch"]')?.value || '';
+      const headers = schema.fields.filter(f=>!f.section).map(f=>f.key);
+      const rows = batchText.split('\n').map(line => {
+        const vals = line.split(',').map(v=>v.trim());
+        const obj = {};
+        headers.forEach((h,i) => obj[h] = vals[i]||'');
+        return obj;
+      }).filter(r => Object.values(r).some(v=>v));
+
+      if (!rows.length) { showToast('No data to submit', 'error'); return; }
+      const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'batchAppend', tabName: currentTab, rows }) });
+      const r = await res.json();
+      if (r.error) { showToast(r.error, 'error'); return; }
+      showToast(`Added ${r.count} rows`, 'success');
+    } else {
+      const formData = {};
+      body.querySelectorAll('.form-input').forEach(el => { formData[el.name] = el.value; });
+
+      // Validate required
+      const missing = schema.fields.filter(f=>f.required && !formData[f.key]).map(f=>f.label);
+      if (missing.length) { showToast(`Required: ${missing.join(', ')}`, 'error'); return; }
+
+      let payload;
+      if (editingRowId) {
+        payload = { action:'updateRow', tabName: currentTab, id: editingRowId, data: formData };
+      } else {
+        payload = { action: schema.appendAction, tabName: currentTab, data: formData };
+      }
+      const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      const r = await res.json();
+      if (r.error) { showToast(r.error, 'error'); return; }
+      showToast(editingRowId ? 'Updated ✓' : 'Added ✓', 'success');
+    }
+    closeDrawer();
+    await loadData();
+  } catch(e) {
+    showToast('Error: ' + e.message, 'error');
+  }
+}
+
+function editRow(id, tab) { openDrawer(tab, id); }
+
+function findRowById(tab, id) {
+  const map = { '1. Master Tasks': ['tasks','ID'], '2. COS': ['cos','State'], '3. Partnerships': ['partners','Organisation'], '4. Org Database': ['orgs','Organisation Name'], '5. KPI Log': ['kpi','Date'], '6. Marketing': ['marketing','ID'] };
+  const [key, field] = map[tab] || [];
+  if (!key) return null;
+  return (appData[key]||[]).find(r => String(r[field]) === String(id)) || null;
+}
+
+// ══════════════════════════════════════════
+//  EXPORT CSV
+// ══════════════════════════════════════════
+function exportCSV(view) {
+  const map = { tasks: appData.tasks, cos: appData.cos, partners: appData.partners, org: appData.orgs, kpi: appData.kpi, marketing: appData.marketing };
+  const rows = map[view];
+  if (!rows || !rows.length) { showToast('No data to export', 'error'); return; }
+  const headers = Object.keys(rows[0]);
+  const csv = [headers.join(','), ...rows.map(r => headers.map(h=>`"${String(r[h]||'').replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = `${view}_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+}
+
+// ══════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════
+function noDataRow(cols, msg) {
+  return `<tr><td colspan="${cols}" style="color:var(--muted);text-align:center;padding:24px;font-size:12px">${msg||'No data loaded. Press ↻ Sync.'}</td></tr>`;
+}
+function escQ(s) { return String(s||'').replace(/'/g,"\\'"); }
+function escAttr(s) { return String(s||'').replace(/"/g,'&quot;'); }
+
+function updateTime() {
+  document.getElementById('topbar-time').textContent = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+}
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `show ${type}`;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.classList.remove('show', 'success', 'error'); }, 3200);
+}
+</script>
+</body>
+</html>
