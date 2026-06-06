@@ -52,7 +52,8 @@
 
     /* MAIN */
     #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
-    #topbar { height: var(--topbar-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 18px; gap: 10px; flex-shrink: 0; }
+    #topbar { height: var(--topbar-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 10px; gap: 6px; flex-shrink: 0; overflow-x: auto; scrollbar-width: none; }
+    #topbar::-webkit-scrollbar { display: none; }
     #menu-btn { display: none; background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; }
     #menu-btn svg { width: 20px; height: 20px; }
     #topbar-title { font-size: 14px; font-weight: 700; color: var(--text); }
@@ -399,6 +400,7 @@
       .form-row { grid-template-columns: 1fr; }
       .launch-btns-grid { grid-template-columns: 1fr; }
       #topbar-time { display: none; }
+      .btn-cal, .btn-mytasks { display: none; }
     }
     .btn-sm.active { background:rgba(91,82,240,0.25);border-color:rgba(91,82,240,0.5);color:#8880ff; }
     @media(max-width:700px){#mytasks-panel{width:100%;}}
@@ -427,7 +429,7 @@
     </div>
     <div class="form-group">
       <label>Passphrase</label>
-      <input type="password" class="form-input" id="login-pass" placeholder="Your secret passphrase" autocomplete="off">
+      <input type="password" class="form-input" id="login-pass" placeholder="Your secret passphrase" autocomplete="off" onkeydown="if(event.key==='Enter')submitLogin()">
     </div>
     <div id="login-error"></div>
     <button class="btn-primary" id="login-btn" style="width:100%;margin-bottom:10px" onclick="submitLogin()">Authenticate</button>
@@ -570,7 +572,7 @@
       <div class="top-gap"></div>
       <span id="topbar-time">--:--</span>
       <button class="top-btn btn-cal" onclick="loadView('meetings');setTimeout(()=>switchMtgTab('calendar'),80);" title="View task deadlines calendar">⊕ Calendar</button>
-      <button class="top-btn" style="background:rgba(0,212,160,0.1);border-color:rgba(0,212,160,0.25);color:var(--accent2)" onclick="openMyTasks()" title="Team member quick-update view">👤 My Tasks</button>
+      <button class="top-btn btn-mytasks" style="background:rgba(0,212,160,0.1);border-color:rgba(0,212,160,0.25);color:var(--accent2)" onclick="openMyTasks()" title="Team member quick-update view">👤 My Tasks</button>
       <button class="top-btn btn-sync" id="btn-sync" onclick="syncData()">↻ Sync</button>
       <button class="top-btn" style="background:rgba(91,82,240,0.1);border-color:rgba(91,82,240,0.25);color:var(--muted)" onclick="openLoginModal()">Login</button>
       <button class="top-btn btn-add" id="add-btn" onclick="openDrawer()">+ NEW</button>
