@@ -3,206 +3,323 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b0b16">
-  <title>NEXUS · RescueTap</title>
+  <meta name="theme-color" content="#080810">
+  <title>NEXUS · RescueTap Operations v3.1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0b0b16; --surface: #12121f; --surface2: #1a1a2e; --surface3: #20203a;
-      --border: rgba(255,255,255,0.07); --accent: #6c63ff; --accent2: #00e5b0;
-      --danger: #ff6b6b; --warn: #ffc400;
-      --text: #e8e8f0; --muted: #6b6b8a; --sidebar-w: 240px; --topbar-h: 56px;
+      --bg: #080810; --surface: #0f0f1c; --surface2: #161627; --surface3: #1d1d32;
+      --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.1);
+      --accent: #5b52f0; --accent2: #00d4a0; --accent3: #f0a030;
+      --danger: #f05060; --warn: #f0c040; --info: #4090f0;
+      --text: #e2e2ee; --muted: #5a5a7a; --sidebar-w: 244px; --topbar-h: 54px;
     }
     html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; overflow: hidden; }
     .shell { display: flex; height: 100vh; }
 
     /* ── Sidebar ── */
-    #sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; transition: transform 0.25s; z-index: 50; }
-    .sidebar-logo { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
-    .sidebar-logo h1 { font-size: 22px; font-weight: 800; letter-spacing: 4px; background: linear-gradient(135deg, #6c63ff, #00e5b0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .sidebar-logo p { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 2px; }
-    nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+    #sidebar {
+      width: var(--sidebar-w); background: var(--surface);
+      border-right: 1px solid var(--border); display: flex; flex-direction: column;
+      flex-shrink: 0; transition: transform 0.28s cubic-bezier(.4,0,.2,1); z-index: 50;
+    }
+    .sidebar-logo { padding: 18px 18px 14px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo .wordmark { font-size: 20px; font-weight: 800; letter-spacing: 5px; color: var(--text); }
+    .sidebar-logo .wordmark span { color: var(--accent2); }
+    .sidebar-logo p { font-size: 9px; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 3px; letter-spacing: 1.5px; }
+    .sidebar-logo .version-pill { display: inline-block; margin-top: 6px; font-size: 9px; font-family: 'Space Mono', monospace; background: rgba(91,82,240,0.15); color: var(--accent); border: 1px solid rgba(91,82,240,0.25); padding: 2px 7px; border-radius: 20px; }
+    nav { flex: 1; padding: 10px 8px; display: flex; flex-direction: column; gap: 1px; overflow-y: auto; }
     .nav-section { font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); letter-spacing: 2px; padding: 10px 10px 4px; text-transform: uppercase; }
-    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.2s; text-decoration: none; border: 1px solid transparent; }
-    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
-    .nav-item:hover { background: var(--surface2); color: var(--text); transform: translateX(4px); }
-    .nav-item.active { background: rgba(108,99,255,0.15); color: var(--accent); border-color: rgba(108,99,255,0.3); }
-    .nav-item .badge { margin-left: auto; font-size: 10px; font-family: 'Space Mono', monospace; background: rgba(108,99,255,0.2); color: var(--accent); padding: 1px 6px; border-radius: 20px; }
-    .nav-item .badge.red { background: rgba(255,107,107,0.2); color: var(--danger); }
-    .sidebar-footer { padding: 12px; border-top: 1px solid var(--border); }
-    .sidebar-footer p { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); text-align: center; }
+    .nav-item {
+      display: flex; align-items: center; gap: 9px; padding: 8px 11px;
+      border-radius: 7px; font-size: 12.5px; font-weight: 600; color: var(--muted);
+      cursor: pointer; transition: all 0.18s; text-decoration: none;
+      border: 1px solid transparent; position: relative;
+    }
+    .nav-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); transform: translateX(3px); }
+    .nav-item.active { background: rgba(91,82,240,0.12); color: #8880ff; border-color: rgba(91,82,240,0.22); }
+    .nav-item.active::before { content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 2px; background: var(--accent); border-radius: 2px; }
+    .nav-badge { margin-left: auto; font-size: 9px; font-family: 'Space Mono', monospace; background: rgba(91,82,240,0.18); color: #8880ff; padding: 1px 6px; border-radius: 20px; min-width: 20px; text-align: center; }
+    .nav-badge.red { background: rgba(240,80,96,0.18); color: #f08090; }
+    .nav-badge.amber { background: rgba(240,192,64,0.18); color: var(--warn); }
+    .sidebar-footer { padding: 10px 12px; border-top: 1px solid var(--border); }
+    .sidebar-footer p { font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); text-align: center; }
 
     /* ── Main ── */
     #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
-    #topbar { height: var(--topbar-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0; }
-    #menu-btn { display: none; background: none; border: none; cursor: pointer; color: var(--text); padding: 4px; }
-    #menu-btn svg { width: 22px; height: 22px; }
-    #topbar-title { font-size: 15px; font-weight: 700; }
-    #topbar-time { margin-left: auto; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); }
-    .top-btn { border-radius: 6px; padding: 5px 12px; font-size: 11px; font-family: 'Space Mono', monospace; cursor: pointer; transition: all 0.15s; border: 1px solid; font-weight: 600; }
-    .top-btn:hover { transform: scale(1.05); }
-    .btn-sync { background: rgba(108,99,255,0.15); border-color: rgba(108,99,255,0.3); color: var(--accent); }
+    #topbar {
+      height: var(--topbar-h); background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 18px; gap: 10px; flex-shrink: 0;
+    }
+    #menu-btn { display: none; background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; }
+    #menu-btn svg { width: 20px; height: 20px; }
+    #topbar-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    #topbar-sub { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); margin-left: 4px; }
+    .top-gap { flex: 1; }
+    #topbar-time { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); padding-right: 10px; border-right: 1px solid var(--border); }
+    .top-btn { border-radius: 5px; padding: 5px 11px; font-size: 10px; font-family: 'Space Mono', monospace; cursor: pointer; transition: all 0.15s; border: 1px solid; font-weight: 700; line-height: 1.4; }
+    .top-btn:hover { transform: scale(1.04); }
+    .btn-sync { background: rgba(91,82,240,0.1); border-color: rgba(91,82,240,0.25); color: #8880ff; }
+    .btn-sync.loading { opacity: 0.6; pointer-events: none; }
+    .btn-cal { background: rgba(0,212,160,0.1); border-color: rgba(0,212,160,0.25); color: var(--accent2); }
     .btn-add { background: var(--accent); border-color: var(--accent); color: white; }
 
-    #content { flex: 1; overflow-y: auto; padding: 24px; position: relative; }
-    .view { display: none; animation: fadeIn 0.3s ease; }
+    #content { flex: 1; overflow-y: auto; padding: 22px; position: relative; }
+    .view { display: none; animation: fadeUp 0.25s ease; }
     .view.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-    /* ── Dashboard glows ── */
-    #view-dashboard::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 50%, rgba(108,99,255,0.04) 0%, transparent 60%); animation: breathe 8s infinite alternate; pointer-events: none; z-index: -1; }
-    @keyframes breathe { from { opacity: 0.5; transform: scale(0.9); } to { opacity: 1; transform: scale(1.1); } }
+    /* ── Filter bar ── */
+    .filter-bar {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 14px; margin-bottom: 14px;
+    }
+    .filter-bar label { font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .filter-input {
+      background: var(--bg); border: 1px solid var(--border2); color: var(--text);
+      border-radius: 5px; padding: 5px 9px; font-size: 11px; font-family: 'Space Mono', monospace;
+      outline: none; transition: border-color 0.2s;
+    }
+    .filter-input:focus { border-color: var(--accent); }
+    select.filter-input { appearance: none; cursor: pointer; padding-right: 22px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%235a5a7a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 7px center; }
+    .filter-clear { font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); background: none; border: none; cursor: pointer; padding: 4px 8px; transition: color 0.2s; }
+    .filter-clear:hover { color: var(--danger); }
+    .filter-count { font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); margin-left: auto; }
 
-    /* ── Stat cards ── */
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; transition: transform 0.25s, box-shadow 0.25s; cursor: pointer; }
-    .stat-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--c1,#6c63ff22), transparent); opacity: 0.5; pointer-events: none; }
-    .stat-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
-    .stat-card .icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.07); margin-bottom: 14px; }
-    .stat-card .icon svg { width: 18px; height: 18px; }
-    .stat-card .val { font-size: 26px; font-weight: 800; font-family: 'Space Mono', monospace; color: var(--text); line-height: 1; }
-    .stat-card .lbl { font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 600; }
+    /* ── Stats grid ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 18px; position: relative; overflow: hidden; cursor: pointer;
+      transition: transform 0.22s, border-color 0.22s, box-shadow 0.22s;
+    }
+    .stat-card:hover { transform: translateY(-4px); border-color: var(--border2); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+    .stat-card .sc-accent { position: absolute; top: 0; right: 0; width: 60px; height: 60px; border-radius: 0 10px 0 60px; opacity: 0.12; }
+    .stat-card .sc-icon { width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+    .stat-card .sc-icon svg { width: 16px; height: 16px; }
+    .stat-card .sc-val { font-size: 28px; font-weight: 800; font-family: 'Space Mono', monospace; line-height: 1; }
+    .stat-card .sc-lbl { font-size: 10px; color: var(--muted); margin-top: 5px; font-weight: 600; letter-spacing: 0.5px; }
+    .stat-card .sc-delta { font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); margin-top: 6px; }
 
     /* ── Cards ── */
-    .dash-grid { display: grid; grid-template-columns: 1fr 340px; gap: 16px; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-    .card-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-    .card-head h3 { font-size: 14px; font-weight: 700; }
-    .card-head .sub { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); }
+    .dash-grid { display: grid; grid-template-columns: 1fr 320px; gap: 14px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .card-head { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-head h3 { font-size: 13px; font-weight: 700; }
+    .card-head .sub { font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); }
 
     /* ── Tables ── */
-    .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-    .data-table th { padding: 10px 16px; text-align: left; font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); font-weight: 400; white-space: nowrap; }
-    .data-table td { padding: 11px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text); vertical-align: middle; }
-    .data-table tbody tr { transition: background 0.2s; cursor: pointer; }
-    .data-table tbody tr:hover td { background: rgba(108,99,255,0.06) !important; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .data-table th { padding: 9px 14px; text-align: left; font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; border-bottom: 1px solid var(--border); font-weight: 400; white-space: nowrap; }
+    .data-table td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text); vertical-align: middle; }
+    .data-table tbody tr { transition: background 0.15s; cursor: pointer; }
+    .data-table tbody tr:hover td { background: rgba(91,82,240,0.05) !important; }
+    .data-table tbody tr.row-overdue td { background: rgba(240,80,96,0.03); }
+    .data-table tbody tr.row-at-risk td { background: rgba(240,192,64,0.03); }
+    .data-table tbody tr.row-done td { opacity: 0.5; }
+
+    /* ── Deadline pill ── */
+    .dl-pill { display: inline-flex; align-items: center; gap: 4px; font-family: 'Space Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 4px; }
+    .dl-pill.overdue { background: rgba(240,80,96,0.15); color: #f08090; border: 1px solid rgba(240,80,96,0.2); }
+    .dl-pill.soon { background: rgba(240,192,64,0.12); color: var(--warn); border: 1px solid rgba(240,192,64,0.2); }
+    .dl-pill.ok { background: rgba(0,212,160,0.08); color: var(--accent2); border: 1px solid rgba(0,212,160,0.15); }
+    .dl-pill.none { color: var(--muted); }
+
+    /* ── Dependency chip ── */
+    .dep-chip { display: inline-block; font-size: 9px; font-family: 'Space Mono', monospace; padding: 1px 6px; border-radius: 3px; margin-right: 3px; }
+    .dep-chip.done { background: rgba(0,212,160,0.1); color: var(--accent2); border: 1px solid rgba(0,212,160,0.2); }
+    .dep-chip.pending { background: rgba(240,80,96,0.1); color: #f08090; border: 1px solid rgba(240,80,96,0.2); }
+    .dep-chip.unknown { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+
+    /* ── Recurring badge ── */
+    .recur-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-family: 'Space Mono', monospace; background: rgba(64,144,240,0.1); color: var(--info); border: 1px solid rgba(64,144,240,0.2); padding: 1px 6px; border-radius: 3px; }
 
     /* ── Badges ── */
-    .badge-pill { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; font-family: 'Space Mono', monospace; white-space: nowrap; }
-    .badge-blue   { background: rgba(108,99,255,0.15); color: #9c95ff; border: 1px solid rgba(108,99,255,0.2); }
-    .badge-green  { background: rgba(0,229,176,0.12); color: #00e5b0; border: 1px solid rgba(0,229,176,0.2); }
-    .badge-red    { background: rgba(255,107,107,0.12); color: #ff8080; border: 1px solid rgba(255,107,107,0.2); }
-    .badge-yellow { background: rgba(255,196,0,0.12); color: #ffc400; border: 1px solid rgba(255,196,0,0.2); }
-    .badge-gray   { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
-    .badge-orange { background: rgba(255,152,0,0.12); color: #ff9800; border: 1px solid rgba(255,152,0,0.2); }
+    .bp { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; font-family: 'Space Mono', monospace; white-space: nowrap; border: 1px solid; }
+    .bp-blue   { background: rgba(91,82,240,0.12);  color: #8880ff;  border-color: rgba(91,82,240,0.2); }
+    .bp-green  { background: rgba(0,212,160,0.1);   color: #00d4a0;  border-color: rgba(0,212,160,0.18); }
+    .bp-red    { background: rgba(240,80,96,0.1);   color: #f08090;  border-color: rgba(240,80,96,0.18); }
+    .bp-yellow { background: rgba(240,192,64,0.1);  color: #f0c040;  border-color: rgba(240,192,64,0.18); }
+    .bp-gray   { background: rgba(255,255,255,0.05); color: var(--muted); border-color: var(--border); }
+    .bp-orange { background: rgba(240,160,48,0.12); color: #f0a030;  border-color: rgba(240,160,48,0.2); }
+    .bp-info   { background: rgba(64,144,240,0.1);  color: var(--info); border-color: rgba(64,144,240,0.2); }
 
     /* ── Progress ── */
-    .progress-track { display: inline-block; width: 50px; height: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; vertical-align: middle; margin-left: 8px; }
-    .progress-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.6s; }
-    .progress-fill.complete { background: var(--accent2); }
+    .prog-wrap { display: inline-flex; align-items: center; gap: 6px; }
+    .prog-track { display: inline-block; width: 44px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+    .prog-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.6s; }
+    .prog-fill.full { background: var(--accent2); }
+    .prog-txt { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); }
 
     /* ── Pulse dot ── */
-    .pulse { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent2); margin-right: 6px; animation: pulse 2s infinite; }
-    .pulse.warn { background: var(--warn); }
-    .pulse.danger { background: var(--danger); }
-    @keyframes pulse { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; } 50% { opacity: 0.4; box-shadow: 0 0 0 6px transparent; } }
+    .pulse { display: inline-block; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; animation: pulseAnim 2s infinite; }
+    .pulse.green { background: var(--accent2); }
+    .pulse.amber { background: var(--warn); }
+    .pulse.red { background: var(--danger); }
+    @keyframes pulseAnim { 0%,100%{opacity:1;box-shadow:0 0 0 0 currentColor} 50%{opacity:.5;box-shadow:0 0 0 5px transparent} }
 
-    /* ── Small buttons ── */
-    .btn-sm { padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface2); color: var(--accent); cursor: pointer; font-size: 10px; font-weight: 700; transition: 0.2s; white-space: nowrap; }
-    .btn-sm:hover { background: rgba(108,99,255,0.2); border-color: rgba(108,99,255,0.4); }
-    .btn-sm.danger { color: var(--danger); }
-    .btn-sm.danger:hover { background: rgba(255,107,107,0.15); border-color: rgba(255,107,107,0.4); }
-
-    /* ── Failsafe alert banner ── */
-    .alert-banner { border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; border: 1px solid; display: flex; align-items: flex-start; gap: 12px; }
-    .alert-banner.warn { background: rgba(255,196,0,0.06); border-color: rgba(255,196,0,0.25); }
-    .alert-banner.danger { background: rgba(255,107,107,0.07); border-color: rgba(255,107,107,0.25); }
-    .alert-banner svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
+    /* ── Alert banners ── */
+    .alert-banner { border-radius: 8px; padding: 12px 16px; margin-bottom: 14px; border: 1px solid; display: flex; align-items: flex-start; gap: 10px; }
+    .alert-banner.warn { background: rgba(240,192,64,0.05); border-color: rgba(240,192,64,0.2); }
+    .alert-banner.danger { background: rgba(240,80,96,0.05); border-color: rgba(240,80,96,0.2); }
+    .alert-banner.info { background: rgba(64,144,240,0.05); border-color: rgba(64,144,240,0.2); }
+    .alert-banner svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
     .alert-banner.warn svg { color: var(--warn); }
     .alert-banner.danger svg { color: var(--danger); }
-    .alert-banner h4 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .alert-banner.info svg { color: var(--info); }
+    .alert-banner h4 { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
     .alert-banner p { font-size: 11px; color: var(--muted); line-height: 1.5; }
-    .alert-banner ul { list-style: none; margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
-    .alert-banner ul li { font-size: 11px; color: var(--text); font-family: 'Space Mono', monospace; }
-    .alert-banner ul li::before { content: '→ '; color: var(--muted); }
+    .alert-banner ul { list-style: none; margin-top: 5px; display: flex; flex-direction: column; gap: 2px; }
+    .alert-banner ul li { font-size: 10px; color: var(--text); font-family: 'Space Mono', monospace; }
+    .alert-banner ul li::before { content: '↗ '; color: var(--muted); }
+
+    /* ── Buttons ── */
+    .btn-sm { padding: 3px 9px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface2); color: #8880ff; cursor: pointer; font-size: 9px; font-weight: 700; font-family: 'Space Mono', monospace; transition: all 0.15s; white-space: nowrap; }
+    .btn-sm:hover { background: rgba(91,82,240,0.18); border-color: rgba(91,82,240,0.35); }
+    .btn-sm.danger { color: var(--danger); }
+    .btn-sm.danger:hover { background: rgba(240,80,96,0.12); border-color: rgba(240,80,96,0.3); }
+    .btn-sm.success { color: var(--accent2); }
+    .btn-sm.success:hover { background: rgba(0,212,160,0.1); border-color: rgba(0,212,160,0.3); }
+
+    /* ── Stale indicator ── */
+    .stale-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-family: 'Space Mono', monospace; padding: 1px 5px; border-radius: 3px; margin-left: 5px; }
+    .stale-tag.d2 { background: rgba(240,192,64,0.1); color: var(--warn); border: 1px solid rgba(240,192,64,0.2); }
+    .stale-tag.d5 { background: rgba(240,128,48,0.12); color: #f08030; border: 1px solid rgba(240,128,48,0.2); }
+    .stale-tag.d7 { background: rgba(240,80,96,0.12); color: #f08090; border: 1px solid rgba(240,80,96,0.2); }
 
     /* ── Drawer ── */
-    #drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 60; display: none; backdrop-filter: blur(2px); }
+    #drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 60; display: none; backdrop-filter: blur(3px); }
     #drawer-overlay.open { display: block; }
-    #drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 440px; background: var(--surface); border-left: 1px solid var(--border); z-index: 70; transform: translateX(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; }
+    #drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 460px; background: var(--surface); border-left: 1px solid var(--border); z-index: 70; transform: translateX(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; }
     #drawer.open { transform: translateX(0); }
-    .drawer-head { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-    .drawer-head h3 { font-size: 16px; font-weight: 700; }
-    .drawer-tab-hint { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); margin-top: 2px; }
-    .drawer-body { flex: 1; padding: 20px; overflow-y: auto; }
-    .drawer-foot { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 10px; font-weight: 700; color: var(--muted); margin-bottom: 5px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; }
-    .form-group label .required { color: var(--danger); margin-left: 2px; }
-    .form-input { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 9px 12px; font-size: 13px; font-family: 'Syne', sans-serif; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
-    .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,0.1); }
-    select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b8a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; cursor: pointer; }
-    textarea.form-input { resize: vertical; min-height: 80px; font-size: 12px; font-family: 'Space Mono', monospace; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .form-section-label { font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; padding: 10px 0 6px; border-bottom: 1px solid var(--border); margin-bottom: 14px; margin-top: 4px; }
-    .btn-primary { background: var(--accent); color: white; border: none; border-radius: 6px; padding: 10px 20px; font-size: 13px; font-weight: 700; cursor: pointer; flex: 1; transition: 0.2s; }
-    .btn-primary:hover { filter: brightness(1.1); }
-    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 10px 20px; font-size: 13px; font-weight: 700; cursor: pointer; flex: 1; transition: 0.2s; }
+    .drawer-head { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
+    .drawer-head h3 { font-size: 15px; font-weight: 700; }
+    .drawer-tab-hint { font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); margin-top: 3px; }
+    .drawer-body { flex: 1; padding: 18px 20px; overflow-y: auto; }
+    .drawer-foot { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+    .form-group { margin-bottom: 13px; }
+    .form-group label { display: block; font-size: 9px; font-weight: 700; color: var(--muted); margin-bottom: 4px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; text-transform: uppercase; }
+    .form-group label .req { color: var(--danger); margin-left: 2px; }
+    .form-input { width: 100%; background: var(--bg); border: 1px solid var(--border2); color: var(--text); border-radius: 5px; padding: 8px 11px; font-size: 12px; font-family: 'Syne', sans-serif; outline: none; transition: border-color 0.18s, box-shadow 0.18s; }
+    .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,82,240,0.1); }
+    select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%235a5a7a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; }
+    textarea.form-input { resize: vertical; min-height: 76px; font-size: 11px; font-family: 'Space Mono', monospace; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-section-label { font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; padding: 10px 0 5px; border-bottom: 1px solid var(--border); margin-bottom: 12px; margin-top: 4px; }
+    .btn-primary { background: var(--accent); color: white; border: none; border-radius: 5px; padding: 9px 18px; font-size: 12px; font-weight: 700; cursor: pointer; flex: 1; transition: 0.18s; font-family: 'Syne', sans-serif; }
+    .btn-primary:hover { filter: brightness(1.12); }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 5px; padding: 9px 18px; font-size: 12px; font-weight: 700; cursor: pointer; flex: 1; transition: 0.18s; font-family: 'Syne', sans-serif; }
     .btn-secondary:hover { border-color: var(--accent); }
+    .rbac-notice { background: rgba(240,192,64,0.06); border: 1px solid rgba(240,192,64,0.2); border-radius: 6px; padding: 8px 12px; margin-bottom: 12px; font-size: 10px; font-family: 'Space Mono', monospace; color: var(--warn); }
 
-    /* ── Batch textarea ── */
-    .batch-area { background: var(--bg); border: 1px dashed rgba(108,99,255,0.3); border-radius: 8px; padding: 14px; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); }
-    .batch-area p { margin-bottom: 8px; color: var(--text); font-size: 12px; }
-    .batch-area pre { font-size: 10px; color: var(--muted); background: var(--surface2); padding: 8px; border-radius: 4px; overflow-x: auto; margin-bottom: 10px; }
+    /* ── Batch area ── */
+    .batch-area { background: var(--bg); border: 1px dashed rgba(91,82,240,0.25); border-radius: 7px; padding: 12px; }
+    .batch-area p { margin-bottom: 6px; color: var(--text); font-size: 12px; }
+    .batch-area pre { font-size: 9px; color: var(--muted); background: var(--surface2); padding: 8px; border-radius: 4px; overflow-x: auto; margin-bottom: 8px; line-height: 1.6; }
 
     /* ── Toggle switch ── */
     .toggle-wrap { display: flex; align-items: center; justify-content: space-between; }
-    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle { position: relative; display: inline-block; width: 42px; height: 22px; flex-shrink: 0; }
     .toggle input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; inset: 0; background: rgba(255,255,255,0.1); border-radius: 24px; cursor: pointer; transition: 0.3s; border: 1px solid var(--border); }
-    .slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 2px; bottom: 2px; background: #666; border-radius: 50%; transition: 0.3s; }
-    input:checked + .slider { background: rgba(108,99,255,0.4); border-color: rgba(108,99,255,0.5); }
+    .slider { position: absolute; inset: 0; background: rgba(255,255,255,0.08); border-radius: 22px; cursor: pointer; transition: 0.25s; border: 1px solid var(--border); }
+    .slider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 2px; bottom: 2px; background: #555; border-radius: 50%; transition: 0.25s; }
+    input:checked + .slider { background: rgba(91,82,240,0.35); border-color: rgba(91,82,240,0.5); }
     input:checked + .slider:before { transform: translateX(20px); background: var(--accent); }
 
     /* ── Automation cards ── */
-    .auto-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; transition: border-color 0.3s, transform 0.2s; margin-bottom: 12px; }
-    .auto-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
-    .auto-card.enabled { border-color: rgba(108,99,255,0.25); }
-    .auto-card.disabled { opacity: 0.6; }
-    .auto-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-    .auto-card p { font-size: 11px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
-    .auto-meta { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); margin-top: 10px; }
+    .auto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+    .auto-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; transition: border-color 0.25s, transform 0.18s; }
+    .auto-card:hover { transform: translateY(-2px); border-color: var(--border2); }
+    .auto-card.enabled { border-color: rgba(91,82,240,0.2); }
+    .auto-card.disabled { opacity: 0.55; }
+    .auto-card .ac-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+    .auto-card h4 { font-size: 13px; font-weight: 700; }
+    .auto-card p { font-size: 10px; color: var(--muted); line-height: 1.5; }
+    .auto-card .ac-meta { font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); margin-top: 10px; }
+    .auto-card .ac-category { font-size: 8px; font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }
 
-    /* ── Follow-up tracker ── */
-    .followup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-    .followup-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
-    .followup-card h4 { font-size: 12px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-    .followup-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12px; }
+    /* ── Follow-up ── */
+    .followup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+    .followup-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+    .followup-card h4 { font-size: 11px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .followup-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 11px; }
     .followup-item:last-child { border-bottom: none; }
-    .followup-item .name { color: var(--text); font-weight: 600; }
-    .followup-item .days { font-family: 'Space Mono', monospace; font-size: 10px; }
 
-    /* ── Failsafe view ── */
-    .failsafe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .failsafe-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-    .failsafe-section .card-head { border-bottom: 1px solid var(--border); }
+    /* ── Failsafe ── */
+    .failsafe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .failsafe-section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 
     /* ── Toast ── */
-    #toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface3); border: 1px solid var(--border); border-radius: 8px; padding: 12px 18px; font-size: 13px; font-weight: 600; z-index: 999; transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: none; max-width: 320px; }
+    #toast { position: fixed; bottom: 22px; right: 22px; background: var(--surface3); border: 1px solid var(--border); border-radius: 7px; padding: 11px 16px; font-size: 12px; font-weight: 600; z-index: 999; transform: translateY(70px); opacity: 0; transition: all 0.28s cubic-bezier(.4,0,.2,1); pointer-events: none; max-width: 300px; font-family: 'Space Mono', monospace; }
     #toast.show { transform: translateY(0); opacity: 1; }
-    #toast.success { border-color: rgba(0,229,176,0.4); color: var(--accent2); }
-    #toast.error { border-color: rgba(255,107,107,0.4); color: var(--danger); }
+    #toast.success { border-color: rgba(0,212,160,0.4); color: var(--accent2); }
+    #toast.error { border-color: rgba(240,80,96,0.4); color: var(--danger); }
+    #toast.info { border-color: rgba(64,144,240,0.4); color: var(--info); }
+
+    /* ── Loader ── */
+    .loader-wrap { display: flex; align-items: center; justify-content: center; padding: 60px 0; gap: 10px; }
+    .loader-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: ld 1s ease-in-out infinite; }
+    .loader-dot:nth-child(2) { animation-delay: 0.16s; }
+    .loader-dot:nth-child(3) { animation-delay: 0.32s; }
+    @keyframes ld { 0%,80%,100%{opacity:.2;transform:scale(.8)} 40%{opacity:1;transform:scale(1)} }
 
     /* ── Responsive ── */
-    @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2,1fr); } .dash-grid { grid-template-columns: 1fr; } .followup-grid, .failsafe-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 960px) { .stats-grid { grid-template-columns: repeat(2,1fr); } .dash-grid { grid-template-columns: 1fr; } .followup-grid, .failsafe-grid, .auto-grid { grid-template-columns: 1fr; } }
     @media (max-width: 700px) {
       #sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); }
       #sidebar.open { transform: translateX(0); }
       #menu-btn { display: flex; }
-      #content { padding: 14px; }
-      .stats-grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
+      #content { padding: 12px; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); gap: 8px; }
       #drawer { width: 100%; }
       .form-row { grid-template-columns: 1fr; }
     }
-    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-    .overscroll-t { padding-bottom: 40px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+    .pb { padding-bottom: 40px; }
   </style>
 </head>
 <body>
+
+<!-- ═══ MY TASKS MODAL (team quick-update) ═══ -->
+<div id="mytasks-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:80;display:none;backdrop-filter:blur(4px)" onclick="if(event.target===this)closeMT()"></div>
+<div id="mytasks-panel" style="position:fixed;top:0;right:0;bottom:0;width:520px;background:var(--surface);border-left:1px solid var(--border);z-index:90;transform:translateX(100%);transition:transform 0.3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column">
+  <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <h3 style="font-size:15px;font-weight:700">My Tasks</h3>
+      <div style="font-size:9px;font-family:'Space Mono',monospace;color:var(--muted);margin-top:3px">Update your progress — only your tasks shown</div>
+    </div>
+    <button onclick="closeMT()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px">✕</button>
+  </div>
+  <div style="padding:14px 20px;border-bottom:1px solid var(--border)">
+    <label style="font-size:9px;font-family:'Space Mono',monospace;color:var(--muted);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Who are you?</label>
+    <select id="mt-member" class="form-input" onchange="renderMyTasks()" style="max-width:260px">
+      <option value="">— Select your name —</option>
+    </select>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:14px 20px" id="mt-tasks-list">
+    <p style="color:var(--muted);font-size:12px;text-align:center;padding:40px 0">Select your name above to see your tasks</p>
+  </div>
+</div>
+
+<!-- ═══ QUICK-UPDATE MINI DRAWER ═══ -->
+<div id="qupdate-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none" onclick="if(event.target===this)closeQUpdate()"></div>
+<div id="qupdate-panel" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.96);background:var(--surface);border:1px solid var(--border2);border-radius:12px;width:420px;max-width:95vw;z-index:110;opacity:0;transition:all 0.2s;display:none;flex-direction:column;overflow:hidden">
+  <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+    <h3 id="qu-title" style="font-size:14px;font-weight:700"></h3>
+    <button onclick="closeQUpdate()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:2px">✕</button>
+  </div>
+  <div style="padding:16px 20px" id="qu-body"></div>
+  <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px">
+    <button class="btn-secondary" onclick="closeQUpdate()" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="submitQUpdate()" id="qu-save" style="flex:2">Save Update</button>
+  </div>
+</div>
 
 <div id="toast"></div>
 <div id="drawer-overlay" onclick="closeDrawer()"></div>
@@ -212,7 +329,7 @@
       <h3 id="drawer-title">Add Item</h3>
       <div class="drawer-tab-hint" id="drawer-hint"></div>
     </div>
-    <button onclick="closeDrawer()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1">✕</button>
+    <button onclick="closeDrawer()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;padding:4px">✕</button>
   </div>
   <div class="drawer-body" id="drawer-body"></div>
   <div class="drawer-foot">
@@ -224,8 +341,9 @@
 <div class="shell">
   <aside id="sidebar">
     <div class="sidebar-logo">
-      <h1>NEXUS</h1>
+      <div class="wordmark">NEX<span>US</span></div>
       <p>RESCUETAP · OPS CONSOLE</p>
+      <span class="version-pill">v3.1</span>
     </div>
     <nav>
       <div class="nav-section">Overview</div>
@@ -236,7 +354,7 @@
       <a class="nav-item" data-view="tasks">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
         Master Tasks
-        <span class="badge" id="nav-badge-tasks">—</span>
+        <span class="nav-badge" id="nb-tasks">—</span>
       </a>
       <a class="nav-item" data-view="cos">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/></svg>
@@ -258,16 +376,16 @@
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
         Marketing
       </a>
-      <div class="nav-section">Ops</div>
+      <div class="nav-section">Operations</div>
       <a class="nav-item" data-view="followup">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
         Follow-Ups
-        <span class="badge red" id="nav-badge-followup">—</span>
+        <span class="nav-badge red" id="nb-followup">—</span>
       </a>
       <a class="nav-item" data-view="failsafe">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
         Failsafe Alerts
-        <span class="badge red" id="nav-badge-failsafe">—</span>
+        <span class="nav-badge red" id="nb-failsafe">—</span>
       </a>
       <div class="nav-section">Settings</div>
       <a class="nav-item" data-view="automation">
@@ -275,7 +393,7 @@
         Automation
       </a>
     </nav>
-    <div class="sidebar-footer"><p>© 2026 RescueTap · NEXUS v2.3</p></div>
+    <div class="sidebar-footer"><p>© 2026 RescueTap · NEXUS v3.1</p></div>
   </aside>
 
   <main id="main">
@@ -284,62 +402,86 @@
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
       </button>
       <h2 id="topbar-title">Dashboard</h2>
-      <button class="top-btn btn-sync" onclick="syncData()">↻ Sync</button>
-      <button class="top-btn btn-add" id="add-btn" onclick="openDrawer()">+ NEW</button>
+      <span id="topbar-sub"></span>
+      <div class="top-gap"></div>
       <span id="topbar-time">—</span>
+      <button class="top-btn btn-cal" id="btn-cal" onclick="triggerCalendarSync()" title="Sync all task deadlines to Google Calendar">⊕ Calendar</button>
+      <button class="top-btn" style="background:rgba(0,212,160,0.1);border-color:rgba(0,212,160,0.25);color:var(--accent2)" onclick="openMyTasks()" title="Team member quick-update view">👤 My Tasks</button>
+      <button class="top-btn btn-sync" id="btn-sync" onclick="syncData()">↻ Sync</button>
+      <button class="top-btn btn-add" id="add-btn" onclick="openDrawer()">+ NEW</button>
     </header>
 
-    <div id="content" class="overscroll-t">
+    <div id="content" class="pb">
 
       <!-- ══ DASHBOARD ══ -->
       <div id="view-dashboard" class="view active">
         <div id="dashboard-alerts"></div>
         <div class="stats-grid">
-          <div class="stat-card" style="--c1:rgba(108,99,255,0.1)" onclick="loadView('tasks')">
-            <div class="icon" style="color:#9c95ff"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg></div>
-            <div class="val" id="stat-tasks">—</div>
-            <div class="lbl">Active Tasks</div>
+          <div class="stat-card" onclick="loadView('tasks')">
+            <div class="sc-accent" style="background:var(--accent)"></div>
+            <div class="sc-icon" style="background:rgba(91,82,240,0.15);color:#8880ff"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg></div>
+            <div class="sc-val" id="stat-tasks">—</div>
+            <div class="sc-lbl">Active Tasks</div>
+            <div class="sc-delta" id="stat-tasks-d"></div>
           </div>
-          <div class="stat-card" style="--c1:rgba(0,229,176,0.1)" onclick="loadView('partners')">
-            <div class="icon" style="color:#00e5b0"><svg fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg></div>
-            <div class="val" id="stat-partners">—</div>
-            <div class="lbl">Partnerships</div>
+          <div class="stat-card" onclick="loadView('partners')">
+            <div class="sc-accent" style="background:var(--accent2)"></div>
+            <div class="sc-icon" style="background:rgba(0,212,160,0.12);color:var(--accent2)"><svg fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg></div>
+            <div class="sc-val" id="stat-partners">—</div>
+            <div class="sc-lbl">Partnerships</div>
+            <div class="sc-delta" id="stat-partners-d"></div>
           </div>
-          <div class="stat-card" style="--c1:rgba(255,107,107,0.1)" onclick="loadView('followup')">
-            <div class="icon" style="color:#ff8080"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg></div>
-            <div class="val" id="stat-overdue">—</div>
-            <div class="lbl">Overdue / At Risk</div>
+          <div class="stat-card" onclick="loadView('followup')">
+            <div class="sc-accent" style="background:var(--danger)"></div>
+            <div class="sc-icon" style="background:rgba(240,80,96,0.12);color:var(--danger)"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg></div>
+            <div class="sc-val" id="stat-overdue">—</div>
+            <div class="sc-lbl">Overdue / At Risk</div>
+            <div class="sc-delta" id="stat-overdue-d"></div>
           </div>
-          <div class="stat-card" style="--c1:rgba(255,196,0,0.1)" onclick="loadView('failsafe')">
-            <div class="icon" style="color:#ffc400"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg></div>
-            <div class="val" id="stat-failsafe">—</div>
-            <div class="lbl">Failsafe Alerts</div>
+          <div class="stat-card" onclick="loadView('failsafe')">
+            <div class="sc-accent" style="background:var(--warn)"></div>
+            <div class="sc-icon" style="background:rgba(240,192,64,0.12);color:var(--warn)"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg></div>
+            <div class="sc-val" id="stat-failsafe">—</div>
+            <div class="sc-lbl">Failsafe Alerts</div>
+            <div class="sc-delta" id="stat-failsafe-d"></div>
           </div>
         </div>
         <div class="dash-grid">
           <div class="card">
-            <div class="card-head"><h3>Recent Tasks</h3><span class="sub">Latest activity</span></div>
-            <div style="overflow-x:auto">
-              <table class="data-table">
-                <thead><tr><th>ID</th><th>Task</th><th>Assigned</th><th>Status</th><th>Progress</th></tr></thead>
-                <tbody id="dash-tasks-tbody"></tbody>
-              </table>
-            </div>
+            <div class="card-head"><h3>Recent Tasks</h3><span class="sub">Last 6 activities</span></div>
+            <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>ID</th><th>Task</th><th>Assigned</th><th>Deadline</th><th>Status</th><th>Progress</th><th>Notes</th></tr></thead><tbody id="dash-tasks-tbody"></tbody></table></div>
           </div>
           <div class="card">
-            <div class="card-head"><h3>Automation Status</h3></div>
-            <div style="padding:16px" id="dash-automations"></div>
+            <div class="card-head"><h3>Automations</h3><span class="sub" id="dash-auto-sub">—</span></div>
+            <div style="padding:14px" id="dash-automations"></div>
           </div>
         </div>
       </div>
 
       <!-- ══ TASKS ══ -->
       <div id="view-tasks" class="view">
+        <div class="filter-bar" id="tasks-filter-bar">
+          <label>Filter:</label>
+          <select class="filter-input" id="tf-status" onchange="renderTasks()">
+            <option value="">All Status</option>
+            <option>Not Started</option><option>In Progress</option><option>Done</option><option>Blocked</option><option>Cancelled</option>
+          </select>
+          <select class="filter-input" id="tf-priority" onchange="renderTasks()">
+            <option value="">All Priority</option>
+            <option>URGENT</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option>
+          </select>
+          <input class="filter-input" id="tf-owner" placeholder="Assignee…" oninput="renderTasks()" style="width:120px">
+          <input class="filter-input" id="tf-date-from" type="date" onchange="renderTasks()" title="Deadline from">
+          <input class="filter-input" id="tf-date-to" type="date" onchange="renderTasks()" title="Deadline to">
+          <button class="filter-clear" onclick="clearTaskFilters()">✕ Clear</button>
+          <span class="filter-count" id="tasks-filter-count"></span>
+          <button class="btn-sm" onclick="exportCSV('tasks')">Export CSV</button>
+        </div>
         <div class="card">
-          <div class="card-head"><h3>Master Tasks</h3><button class="btn-sm" onclick="exportCSV('tasks')">Export CSV</button></div>
+          <div class="card-head"><h3>Master Tasks</h3></div>
           <div style="overflow-x:auto">
             <table class="data-table">
-              <thead><tr><th>ID</th><th>Task Description</th><th>Priority</th><th>Assigned To</th><th>Supervisor</th><th>Dept</th><th>Deadline</th><th>Status</th><th>Progress</th><th>Actions</th></tr></thead>
+              <thead><tr><th>ID</th><th>Task Description</th><th>Priority</th><th>Assigned To</th><th>Supervisor</th><th>Dept</th><th>Deadline</th><th>Status</th><th>Progress</th><th>Deps</th><th>Recurring</th><th>Notes</th><th>Actions</th></tr></thead>
               <tbody id="tasks-tbody"></tbody>
             </table>
           </div>
@@ -350,25 +492,29 @@
       <div id="view-cos" class="view">
         <div class="card">
           <div class="card-head"><h3>COS Database</h3><button class="btn-sm" onclick="exportCSV('cos')">Export CSV</button></div>
-          <div style="overflow-x:auto">
-            <table class="data-table">
-              <thead><tr><th>State</th><th>Admin Name</th><th>Phone</th><th>Email</th><th>WhatsApp Group</th><th>Members</th><th>Status</th><th>Date Launched</th><th>Actions</th></tr></thead>
-              <tbody id="cos-tbody"></tbody>
-            </table>
-          </div>
+          <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>State</th><th>Admin Name</th><th>Phone</th><th>Email</th><th>WhatsApp Group</th><th>Members</th><th>Status</th><th>Date Launched</th><th>Actions</th></tr></thead><tbody id="cos-tbody"></tbody></table></div>
         </div>
       </div>
 
       <!-- ══ PARTNERSHIPS ══ -->
       <div id="view-partners" class="view">
+        <div class="filter-bar">
+          <label>Filter:</label>
+          <select class="filter-input" id="pf-status" onchange="renderPartners()">
+            <option value="">All Status</option>
+            <option>Active</option><option>MoU Pending</option><option>In Discussion</option><option>Cold</option><option>Declined</option>
+          </select>
+          <select class="filter-input" id="pf-type" onchange="renderPartners()">
+            <option value="">All Types</option>
+            <option>NGO</option><option>Government</option><option>Corporate</option><option>Individual</option><option>Academic</option><option>Media</option>
+          </select>
+          <button class="filter-clear" onclick="document.getElementById('pf-status').value='';document.getElementById('pf-type').value='';renderPartners()">✕ Clear</button>
+          <span class="filter-count" id="partners-filter-count"></span>
+          <button class="btn-sm" onclick="exportCSV('partners')">Export CSV</button>
+        </div>
         <div class="card">
-          <div class="card-head"><h3>Partnerships</h3><button class="btn-sm" onclick="exportCSV('partners')">Export CSV</button></div>
-          <div style="overflow-x:auto">
-            <table class="data-table">
-              <thead><tr><th>Assigned To</th><th>Organisation</th><th>Contact Name</th><th>Type</th><th>Status</th><th>Follow-Up Date</th><th>MoU Status</th><th>Actions</th></tr></thead>
-              <tbody id="partners-tbody"></tbody>
-            </table>
-          </div>
+          <div class="card-head"><h3>Partnerships</h3></div>
+          <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Assigned To</th><th>Organisation</th><th>Contact Name</th><th>Type</th><th>Status</th><th>Follow-Up Date</th><th>MoU Status</th><th>Actions</th></tr></thead><tbody id="partners-tbody"></tbody></table></div>
         </div>
       </div>
 
@@ -376,39 +522,52 @@
       <div id="view-org" class="view">
         <div class="card">
           <div class="card-head"><h3>Org Database</h3><button class="btn-sm" onclick="exportCSV('org')">Export CSV</button></div>
-          <div style="overflow-x:auto">
-            <table class="data-table">
-              <thead><tr><th>Organisation Name</th><th>Industry</th><th>State</th><th>Contact Person</th><th>Email</th><th>Phone</th><th>Onboarding Status</th><th>Actions</th></tr></thead>
-              <tbody id="org-tbody"></tbody>
-            </table>
-          </div>
+          <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Organisation Name</th><th>Industry</th><th>State</th><th>Contact Person</th><th>Email</th><th>Phone</th><th>Onboarding Status</th><th>Actions</th></tr></thead><tbody id="org-tbody"></tbody></table></div>
         </div>
       </div>
 
       <!-- ══ KPI ══ -->
       <div id="view-kpi" class="view">
         <div id="kpi-alerts"></div>
+        <div class="filter-bar">
+          <label>Filter:</label>
+          <input class="filter-input" id="kf-member" placeholder="Team member…" oninput="renderKPI()" style="width:140px">
+          <input class="filter-input" id="kf-date" type="date" onchange="renderKPI()">
+          <select class="filter-input" id="kf-submitted" onchange="renderKPI()">
+            <option value="">All</option><option value="Y">Submitted</option><option value="N">Not Submitted</option>
+          </select>
+          <button class="filter-clear" onclick="document.getElementById('kf-member').value='';document.getElementById('kf-date').value='';document.getElementById('kf-submitted').value='';renderKPI()">✕ Clear</button>
+          <span class="filter-count" id="kpi-filter-count"></span>
+          <button class="btn-sm" onclick="exportCSV('kpi')">Export CSV</button>
+        </div>
+        <div id="kpi-alerts-main"></div>
         <div class="card">
-          <div class="card-head"><h3>KPI Log</h3><button class="btn-sm" onclick="exportCSV('kpi')">Export CSV</button></div>
-          <div style="overflow-x:auto">
-            <table class="data-table">
-              <thead><tr><th>Date</th><th>Day</th><th>Team Member</th><th>Role / Dept</th><th>Completed</th><th>Achievement</th><th>Blockers</th><th>Submitted</th><th>Actions</th></tr></thead>
-              <tbody id="kpi-tbody"></tbody>
-            </table>
-          </div>
+          <div class="card-head"><h3>KPI Log</h3></div>
+          <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Date</th><th>Day</th><th>Team Member</th><th>Role / Dept</th><th>Completed</th><th>Achievement</th><th>Blockers</th><th>Submitted</th><th>Actions</th></tr></thead><tbody id="kpi-tbody"></tbody></table></div>
         </div>
       </div>
 
       <!-- ══ MARKETING ══ -->
       <div id="view-marketing" class="view">
+        <div class="filter-bar">
+          <label>Filter:</label>
+          <select class="filter-input" id="mf-status" onchange="renderMarketing()">
+            <option value="">All Status</option>
+            <option>Not Started</option><option>In Progress</option><option>In Review</option><option>Done</option><option>Cancelled</option>
+          </select>
+          <select class="filter-input" id="mf-type" onchange="renderMarketing()">
+            <option value="">All Types</option>
+            <option>Reel</option><option>Post</option><option>Story</option><option>Thread</option><option>Article</option><option>Video</option><option>Infographic</option>
+          </select>
+          <input class="filter-input" id="mf-due-from" type="date" onchange="renderMarketing()" title="Due from">
+          <input class="filter-input" id="mf-due-to" type="date" onchange="renderMarketing()" title="Due to">
+          <button class="filter-clear" onclick="clearMktFilters()">✕ Clear</button>
+          <span class="filter-count" id="mkt-filter-count"></span>
+          <button class="btn-sm" onclick="exportCSV('marketing')">Export CSV</button>
+        </div>
         <div class="card">
-          <div class="card-head"><h3>Marketing Content</h3><button class="btn-sm" onclick="exportCSV('marketing')">Export CSV</button></div>
-          <div style="overflow-x:auto">
-            <table class="data-table">
-              <thead><tr><th>ID</th><th>Type</th><th>Topic / Caption</th><th>Platform</th><th>Assigned To</th><th>Due Date</th><th>Status</th><th>Link</th><th>Actions</th></tr></thead>
-              <tbody id="marketing-tbody"></tbody>
-            </table>
-          </div>
+          <div class="card-head"><h3>Marketing Content</h3></div>
+          <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>ID</th><th>Type</th><th>Topic / Caption</th><th>Platform</th><th>Assigned To</th><th>Due Date</th><th>Status</th><th>Link</th><th>Actions</th></tr></thead><tbody id="marketing-tbody"></tbody></table></div>
         </div>
       </div>
 
@@ -417,53 +576,59 @@
         <div id="followup-alerts"></div>
         <div class="followup-grid">
           <div class="followup-card">
-            <h4><span class="pulse danger"></span>Overdue Tasks (No Update 2+ Days)</h4>
-            <div id="fu-overdue-list"><p style="color:var(--muted);font-size:12px">Loading…</p></div>
+            <h4><span class="pulse red"></span> Overdue Tasks (No Update 2+ Days)</h4>
+            <div id="fu-overdue-list"><div class="loader-wrap"><div class="loader-dot"></div><div class="loader-dot"></div><div class="loader-dot"></div></div></div>
           </div>
           <div class="followup-card">
-            <h4><span class="pulse warn"></span>Partnerships — Pending Follow-Up</h4>
-            <div id="fu-partners-list"><p style="color:var(--muted);font-size:12px">Loading…</p></div>
+            <h4><span class="pulse amber"></span> Partnerships — Pending Follow-Up</h4>
+            <div id="fu-partners-list"><div class="loader-wrap"><div class="loader-dot"></div><div class="loader-dot"></div><div class="loader-dot"></div></div></div>
           </div>
         </div>
         <div class="card">
           <div class="card-head"><h3>All Assignee Follow-Up Status</h3><span class="sub">Tasks not updated in 2+ days</span></div>
-          <div style="overflow-x:auto">
-            <table class="data-table">
-              <thead><tr><th>Assignee</th><th>Task ID</th><th>Task</th><th>Days Stale</th><th>Status</th><th>Last Updated</th><th>Actions</th></tr></thead>
-              <tbody id="followup-tbody"></tbody>
-            </table>
-          </div>
+          <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Assignee</th><th>Task ID</th><th>Task</th><th>Days Stale</th><th>Status</th><th>Last Updated</th><th>Actions</th></tr></thead><tbody id="followup-tbody"></tbody></table></div>
         </div>
       </div>
 
-      <!-- ══ FAILSAFE ALERTS ══ -->
+      <!-- ══ FAILSAFE ══ -->
       <div id="view-failsafe" class="view">
         <div class="failsafe-grid">
           <div class="failsafe-section">
-            <div class="card-head"><h3 style="color:var(--danger)">⚠ Missing EOD Reports</h3><span class="sub" id="failsafe-eod-date">Today</span></div>
-            <div style="padding:0"><table class="data-table"><thead><tr><th>Team Member</th><th>Role</th><th>Days Missing</th><th>Last Filed</th></tr></thead><tbody id="failsafe-eod-tbody"></tbody></table></div>
+            <div class="card-head"><h3 style="color:var(--danger)">⚠ Missing EOD Reports</h3><span class="sub" id="fs-eod-date">Today</span></div>
+            <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Team Member</th><th>Role</th><th>Days Since</th><th>Last Filed</th></tr></thead><tbody id="fs-eod-tbody"></tbody></table></div>
           </div>
           <div class="failsafe-section">
-            <div class="card-head"><h3 style="color:var(--warn)">⚡ Blocked Tasks</h3><span class="sub">Needs immediate action</span></div>
-            <div style="padding:0"><table class="data-table"><thead><tr><th>Task</th><th>Assignee</th><th>Blocked Since</th><th>Actions</th></tr></thead><tbody id="failsafe-blocked-tbody"></tbody></table></div>
+            <div class="card-head"><h3 style="color:var(--warn)">⚡ Blocked Tasks</h3><span class="sub">Immediate action needed</span></div>
+            <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Task</th><th>Assignee</th><th>Blocked Since</th><th>Dependencies</th><th>Actions</th></tr></thead><tbody id="fs-blocked-tbody"></tbody></table></div>
           </div>
           <div class="failsafe-section">
-            <div class="card-head"><h3>Overdue Deadlines</h3></div>
-            <div style="padding:0"><table class="data-table"><thead><tr><th>Task</th><th>Assignee</th><th>Deadline</th><th>Days Late</th></tr></thead><tbody id="failsafe-deadlines-tbody"></tbody></table></div>
+            <div class="card-head"><h3>Overdue Deadlines</h3><span class="sub">Past deadline, not complete</span></div>
+            <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Task</th><th>Assignee</th><th>Deadline</th><th>Days Late</th><th>Actions</th></tr></thead><tbody id="fs-deadlines-tbody"></tbody></table></div>
           </div>
           <div class="failsafe-section">
             <div class="card-head"><h3>Partners — No Contact 7+ Days</h3></div>
-            <div style="padding:0"><table class="data-table"><thead><tr><th>Organisation</th><th>Assigned To</th><th>Follow-Up Date</th><th>Status</th></tr></thead><tbody id="failsafe-partners-tbody"></tbody></table></div>
+            <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Organisation</th><th>Assigned To</th><th>Follow-Up Date</th><th>Status</th></tr></thead><tbody id="fs-partners-tbody"></tbody></table></div>
           </div>
         </div>
       </div>
 
       <!-- ══ AUTOMATION ══ -->
       <div id="view-automation" class="view">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px" id="automation-grid"></div>
+        <div class="alert-banner info" style="margin-bottom:10px">
+          <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+          <div><h4>Leadership access required</h4><p>Toggling automations requires a leadership username. You'll be prompted on every toggle.</p></div>
+        </div>
+        <div class="alert-banner warn" style="margin-bottom:16px">
+          <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+          <div>
+            <h4>About n8n — you don't need it</h4>
+            <p>n8n is an optional automation tool. <strong>All core emails work without it</strong> — the Apps Script backend sends Gmail directly on a daily schedule. n8n is only needed if you want Slack notifications, WhatsApp alerts, or other integrations in future. The "n8n Webhook Triggers" toggle simply adds a secondary ping to n8n if you ever set it up. Leave it ON but ignore it for now — it silently skips if no URL is configured.</p>
+          </div>
+        </div>
+        <div class="auto-grid" id="auto-grid"></div>
         <div class="card">
-          <div class="card-head"><h3>Automation Log</h3><span class="sub">Last 20 events</span></div>
-          <div style="padding:0"><table class="data-table"><thead><tr><th>Key</th><th>Label</th><th>Enabled</th><th>Last Toggled</th><th>By</th></tr></thead><tbody id="automation-tbody"></tbody></table></div>
+          <div class="card-head"><h3>Automation Log</h3><span class="sub">All 8 automation controls</span></div>
+          <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Key</th><th>Label</th><th>Status</th><th>Last Toggled</th><th>By</th></tr></thead><tbody id="auto-tbody"></tbody></table></div>
         </div>
       </div>
 
@@ -473,135 +638,133 @@
 
 <script>
 // ══════════════════════════════════════════
-//  CONFIG
+//  CONFIG — paste your deployed web app URL
 // ══════════════════════════════════════════
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdMI8Ztnjkza8lc883cIfS_e6uypTwHw1NnqNvoEkD-IiTX2Zh61CGX0y7SKpfhBs6/exec';
 
-const ALL_TEAM_MEMBERS = [
+const ALL_TEAM = [
   'Ayo T. Joshua','Shina Samson','Israel Idowu','Darlington','Chizaram',
   'Adetola','Titi','Naruka','Bukayo','Joshua (Content)','Seth','Nora',
   'Rashidat','Muyi','Perpetual','Christiana','Mark','Nehemiah','Joshua Alex',
   'Mr Sam','Joshua (Tech Outreach)'
 ];
 
-// ── Per-page form schemas ──
-const FORM_SCHEMAS = {
+// ══════════════════════════════════════════
+//  FORM SCHEMAS
+// ══════════════════════════════════════════
+const SCHEMAS = {
   '1. Master Tasks': {
-    label: 'Master Tasks',
-    idKey: 'ID',
-    appendAction: 'appendTask',
+    label: 'Task', appendAction: 'appendTask',
     fields: [
-      { key: 'ID', label: 'Task ID', type: 'text', placeholder: 'e.g. T-001', required: true },
-      { key: 'Task Description', label: 'Task Description', type: 'text', placeholder: 'What needs to be done?', required: true },
-      { section: 'Assignment' },
-      { key: 'Assigned To', label: 'Assigned To', type: 'text', placeholder: 'Team member name', required: true },
-      { key: 'Assigned_To_Email', label: 'Assignee Email', type: 'email', placeholder: 'name@rescuetap.org' },
-      { key: 'Supervisor', label: 'Supervisor', type: 'text', placeholder: 'Supervisor name' },
-      { key: 'Business / Dept', label: 'Department', type: 'select', options: ['COS','Partnerships','Marketing','Tech','Operations','Finance','HR'] },
-      { section: 'Priority & Timing' },
-      { key: 'Priority', label: 'Priority', type: 'select', options: ['URGENT','HIGH','MEDIUM','LOW'], required: true },
-      { key: 'Status', label: 'Status', type: 'select', options: ['Not Started','In Progress','Done','Cancelled','Blocked'], required: true },
-      { key: '% Progress', label: '% Progress (0–100)', type: 'number', placeholder: '0' },
-      { key: 'Start Date', label: 'Start Date', type: 'date' },
-      { key: 'Deadline', label: 'Deadline', type: 'date' },
-      { section: 'Notes' },
-      { key: 'Notes', label: 'Notes', type: 'textarea', placeholder: 'Additional context…' },
-      { key: 'Manual Trigger Required', label: 'Manual Trigger Required', type: 'select', options: ['No','Yes'] },
+      { key:'ID', label:'Task ID', type:'text', placeholder:'e.g. T-007', required:true },
+      { key:'Task Description', label:'Task Description', type:'text', placeholder:'What needs to be done?', required:true },
+      { section:'Assignment' },
+      { key:'Assigned To', label:'Assigned To', type:'text', placeholder:'Team member name', required:true },
+      { key:'Assigned_To_Email', label:'Assignee Email', type:'email', placeholder:'name@rescuetap.org' },
+      { key:'Supervisor', label:'Supervisor', type:'text', placeholder:'Supervisor name' },
+      { key:'Business / Dept', label:'Department', type:'select', options:['COS','Partnerships','Marketing','Tech','Operations','Finance','HR'] },
+      { section:'Priority & Timing' },
+      { key:'Priority', label:'Priority', type:'select', options:['URGENT','HIGH','MEDIUM','LOW'], required:true },
+      { key:'Status', label:'Status', type:'select', options:['Not Started','In Progress','Done','Cancelled','Blocked'], required:true },
+      { key:'% Progress', label:'% Progress (0–100)', type:'number', placeholder:'0' },
+      { key:'Start Date', label:'Start Date', type:'date' },
+      { key:'Deadline', label:'Deadline', type:'date' },
+      { section:'Dependencies & Recurrence' },
+      { key:'Depends On', label:'Depends On (Task IDs, comma-separated)', type:'text', placeholder:'e.g. T-001, T-002' },
+      { key:'Recurring', label:'Recurring Task?', type:'select', options:['No','Yes'] },
+      { key:'Recur Interval', label:'Recur Interval (days)', type:'number', placeholder:'7 for weekly, 30 for monthly' },
+      { section:'Notes' },
+      { key:'Notes', label:'Notes', type:'textarea', placeholder:'Additional context…' },
+      { key:'Manual Trigger Required', label:'Manual Trigger Required', type:'select', options:['No','Yes'] },
     ]
   },
   '2. COS': {
-    label: 'COS Entry',
-    idKey: 'State',
-    appendAction: 'appendCOS',
+    label: 'COS Entry', appendAction: 'appendCOS',
     fields: [
-      { key: 'State', label: 'State', type: 'text', placeholder: 'e.g. Lagos', required: true },
-      { key: 'Admin Name', label: 'Admin Name', type: 'text', placeholder: 'Full name', required: true },
-      { section: 'Contact Details' },
-      { key: 'Phone', label: 'Phone Number', type: 'tel', placeholder: '080xxxxxxxx' },
-      { key: 'Email', label: 'Email', type: 'email', placeholder: 'name@rescuetap.org' },
-      { section: 'Status' },
-      { key: 'WhatsApp Group Created', label: 'WhatsApp Group Created', type: 'select', options: ['No','Yes'] },
-      { key: 'Members Count', label: 'Members Count', type: 'number', placeholder: '0' },
-      { key: 'Status', label: 'Status', type: 'select', options: ['Pending','In Progress','Active'] },
-      { key: 'Date Launched', label: 'Date Launched', type: 'date' },
-      { key: 'Notes', label: 'Notes', type: 'textarea', placeholder: 'Any additional info…' },
+      { key:'State', label:'State', type:'text', placeholder:'e.g. Lagos', required:true },
+      { key:'Admin Name', label:'Admin Name', type:'text', placeholder:'Full name', required:true },
+      { section:'Contact Details' },
+      { key:'Phone', label:'Phone Number', type:'tel', placeholder:'080xxxxxxxx' },
+      { key:'Email', label:'Email', type:'email', placeholder:'name@rescuetap.org' },
+      { section:'Status' },
+      { key:'WhatsApp Group Created', label:'WhatsApp Group Created', type:'select', options:['No','Yes'] },
+      { key:'Members Count', label:'Members Count', type:'number', placeholder:'0' },
+      { key:'Status', label:'Status', type:'select', options:['Pending','In Progress','Active'] },
+      { key:'Date Launched', label:'Date Launched', type:'date' },
+      { key:'Notes', label:'Notes', type:'textarea', placeholder:'Additional info…' },
     ]
   },
   '3. Partnerships': {
-    label: 'Partnership',
-    idKey: 'Organisation',
-    appendAction: 'appendPartner',
+    label: 'Partnership', appendAction: 'appendPartner',
     fields: [
-      { key: 'Organisation', label: 'Organisation Name', type: 'text', placeholder: 'Full org name', required: true },
-      { key: 'Assigned To', label: 'Assigned To', type: 'text', placeholder: 'Team member handling this', required: true },
-      { section: 'Contact Info' },
-      { key: 'Contact Name', label: 'Contact Person', type: 'text', placeholder: 'Full name' },
-      { key: 'Contact Email', label: 'Contact Email', type: 'email', placeholder: 'contact@org.com' },
-      { section: 'Classification' },
-      { key: 'Type', label: 'Partner Type', type: 'select', options: ['NGO','Government','Corporate','Individual','Academic','Media'] },
-      { key: 'Current Status', label: 'Current Status', type: 'select', options: ['In Discussion','MoU Pending','Active','Cold','Declined'] },
-      { key: 'MoU Status', label: 'MoU Status', type: 'select', options: ['Not Started','Draft Sent','Under Review','Signed','N/A'] },
-      { section: 'Dates' },
-      { key: 'Date Added', label: 'Date Added', type: 'date' },
-      { key: 'Follow-Up Date', label: 'Follow-Up Date', type: 'date' },
-      { key: 'Notes', label: 'Notes', type: 'textarea', placeholder: 'Notes on this partnership…' },
-      { key: 'Manual Trigger Required', label: 'Manual Trigger Required', type: 'select', options: ['No','Yes'] },
+      { key:'Organisation', label:'Organisation Name', type:'text', placeholder:'Full org name', required:true },
+      { key:'Assigned To', label:'Assigned To', type:'text', placeholder:'Team member', required:true },
+      { section:'Contact' },
+      { key:'Contact Name', label:'Contact Person', type:'text', placeholder:'Full name' },
+      { key:'Contact Email', label:'Contact Email', type:'email', placeholder:'contact@org.com' },
+      { section:'Classification' },
+      { key:'Type', label:'Partner Type', type:'select', options:['NGO','Government','Corporate','Individual','Academic','Media'] },
+      { key:'Current Status', label:'Current Status', type:'select', options:['In Discussion','MoU Pending','Active','Cold','Declined'] },
+      { key:'MoU Status', label:'MoU Status', type:'select', options:['Not Started','Draft Sent','Under Review','Signed','N/A'] },
+      { section:'Dates' },
+      { key:'Date Added', label:'Date Added', type:'date' },
+      { key:'Follow-Up Date', label:'Follow-Up Date', type:'date' },
+      { key:'Notes', label:'Notes', type:'textarea', placeholder:'Notes on this partnership…' },
+      { key:'Manual Trigger Required', label:'Manual Trigger Required', type:'select', options:['No','Yes'] },
     ]
   },
   '4. Org Database': {
-    label: 'Organisation',
-    idKey: 'Organisation Name',
-    appendAction: 'appendOrg',
+    label: 'Organisation', appendAction: 'appendOrg',
     fields: [
-      { key: 'Organisation Name', label: 'Organisation Name', type: 'text', placeholder: 'Full name', required: true },
-      { key: 'Industry', label: 'Industry / Sector', type: 'text', placeholder: 'e.g. Healthcare, NGO' },
-      { section: 'Location & Contact' },
-      { key: 'State', label: 'State', type: 'text', placeholder: 'e.g. Lagos' },
-      { key: 'Country', label: 'Country', type: 'text', placeholder: 'Nigeria' },
-      { key: 'Contact Person', label: 'Contact Person', type: 'text', placeholder: 'Full name' },
-      { key: 'Email', label: 'Contact Email', type: 'email', placeholder: 'email@org.com' },
-      { key: 'Phone', label: 'Phone', type: 'tel', placeholder: '080xxxxxxxx' },
-      { section: 'Onboarding' },
-      { key: 'Onboarding Status', label: 'Onboarding Status', type: 'select', options: ['Pending','In Progress','Active','Declined'] },
-      { key: 'Notes', label: 'Notes', type: 'textarea', placeholder: 'Notes about this org…' },
+      { key:'Organisation Name', label:'Organisation Name', type:'text', placeholder:'Full name', required:true },
+      { key:'Industry', label:'Industry / Sector', type:'text', placeholder:'e.g. Healthcare, NGO' },
+      { section:'Location & Contact' },
+      { key:'State', label:'State', type:'text', placeholder:'e.g. Lagos' },
+      { key:'Country', label:'Country', type:'text', placeholder:'Nigeria' },
+      { key:'Contact Person', label:'Contact Person', type:'text', placeholder:'Full name' },
+      { key:'Email', label:'Contact Email', type:'email', placeholder:'email@org.com' },
+      { key:'Phone', label:'Phone', type:'tel', placeholder:'080xxxxxxxx' },
+      { section:'Onboarding' },
+      { key:'Onboarding Status', label:'Onboarding Status', type:'select', options:['Pending','In Progress','Active','Declined'] },
+      { key:'Notes', label:'Notes', type:'textarea', placeholder:'Notes about this org…' },
     ]
   },
   '5. KPI Log': {
-    label: 'KPI Report',
-    idKey: 'Date',
-    appendAction: 'appendKPI',
+    label: 'KPI Report', appendAction: 'appendKPI',
     fields: [
-      { key: 'Date', label: 'Date', type: 'date', required: true },
-      { key: 'Day', label: 'Day of Week', type: 'select', options: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'], required: true },
-      { key: 'Team Member', label: 'Team Member', type: 'text', placeholder: 'Full name', required: true },
-      { key: 'Role/Dept', label: 'Role / Department', type: 'text', placeholder: 'e.g. Deputy COO' },
-      { section: 'Report' },
-      { key: 'What I Completed (with proof)', label: 'What I Completed (with proof)', type: 'textarea', placeholder: 'List tasks completed today with links/evidence…', required: true },
-      { key: 'Key Achievement', label: 'Key Achievement', type: 'textarea', placeholder: 'The single biggest win today…' },
-      { key: 'Blockers', label: 'Blockers', type: 'textarea', placeholder: 'Any blockers / challenges…' },
-      { key: "Tomorrow's Plan", label: "Tomorrow's Plan", type: 'textarea', placeholder: 'What will you tackle tomorrow…' },
-      { key: 'Submitted', label: 'Submitted?', type: 'select', options: ['Y','N'] },
+      { key:'Date', label:'Date', type:'date', required:true },
+      { key:'Day', label:'Day of Week', type:'select', options:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'], required:true },
+      { key:'Team Member', label:'Team Member', type:'text', placeholder:'Full name', required:true },
+      { key:'Role/Dept', label:'Role / Department', type:'text', placeholder:'e.g. Deputy COO' },
+      { section:'Report' },
+      { key:'What I Completed (with proof)', label:'What I Completed (with proof)', type:'textarea', placeholder:'Tasks completed with links/evidence…', required:true },
+      { key:'Key Achievement', label:'Key Achievement', type:'textarea', placeholder:'Single biggest win today…' },
+      { key:'Blockers', label:'Blockers', type:'textarea', placeholder:'Any blockers / challenges…' },
+      { key:"Tomorrow's Plan", label:"Tomorrow's Plan", type:'textarea', placeholder:'What will you tackle tomorrow…' },
+      { key:'Submitted', label:'Submitted?', type:'select', options:['Y','N'] },
     ]
   },
   '6. Marketing': {
-    label: 'Marketing Content',
-    idKey: 'ID',
-    appendAction: 'appendMarketing',
+    label: 'Marketing Content', appendAction: 'appendMarketing',
     fields: [
-      { key: 'ID', label: 'Content ID', type: 'text', placeholder: 'e.g. M-001', required: true },
-      { key: 'Type', label: 'Content Type', type: 'select', options: ['Reel','Post','Story','Thread','Article','Infographic','Video','Podcast','Other'] },
-      { key: 'Topic / Caption', label: 'Topic / Caption', type: 'textarea', placeholder: 'Topic or caption for this content…', required: true },
-      { section: 'Assignment & Platform' },
-      { key: 'Platform', label: 'Platform(s)', type: 'text', placeholder: 'e.g. Instagram, TikTok' },
-      { key: 'Assigned To', label: 'Assigned To', type: 'text', placeholder: 'Team member' },
-      { key: 'Due Date', label: 'Due Date', type: 'date' },
-      { key: 'Status', label: 'Status', type: 'select', options: ['Not Started','In Progress','In Review','Done','Cancelled'] },
-      { section: 'Details' },
-      { key: 'Link', label: 'Content Link', type: 'url', placeholder: 'https://…' },
-      { key: 'Notes', label: 'Notes', type: 'textarea', placeholder: 'Creative brief or notes…' },
+      { key:'ID', label:'Content ID', type:'text', placeholder:'e.g. M-004', required:true },
+      { key:'Type', label:'Content Type', type:'select', options:['Reel','Post','Story','Thread','Article','Infographic','Video','Podcast','Other'] },
+      { key:'Topic / Caption', label:'Topic / Caption', type:'textarea', placeholder:'Topic or caption…', required:true },
+      { section:'Assignment & Platform' },
+      { key:'Platform', label:'Platform(s)', type:'text', placeholder:'e.g. Instagram, TikTok' },
+      { key:'Assigned To', label:'Assigned To', type:'text', placeholder:'Team member' },
+      { key:'Due Date', label:'Due Date', type:'date' },
+      { key:'Status', label:'Status', type:'select', options:['Not Started','In Progress','In Review','Done','Cancelled'] },
+      { section:'Details' },
+      { key:'Link', label:'Content Link', type:'url', placeholder:'https://…' },
+      { key:'Notes', label:'Notes', type:'textarea', placeholder:'Creative brief or notes…' },
     ]
   },
 };
+
+const VIEW_TAB = { tasks:'1. Master Tasks', cos:'2. COS', partners:'3. Partnerships', org:'4. Org Database', kpi:'5. KPI Log', marketing:'6. Marketing' };
+const ADD_LABELS = { dashboard:'+ NEW TASK', tasks:'+ NEW TASK', cos:'+ NEW COS', partners:'+ NEW PARTNER', org:'+ NEW ORG', kpi:'+ NEW KPI', marketing:'+ NEW CONTENT' };
+const VIEW_TITLES = { dashboard:'Dashboard', tasks:'Master Tasks', cos:'COS', partners:'Partnerships', org:'Org Database', kpi:'KPI Log', marketing:'Marketing', followup:'Follow-Up Tracker', failsafe:'Failsafe Alerts', automation:'Automation Controls' };
 
 // ══════════════════════════════════════════
 //  STATE
@@ -611,28 +774,6 @@ let currentTab = '1. Master Tasks';
 let editingRowId = null;
 let isBatchMode = false;
 let appData = {};
-
-const VIEW_TAB_MAP = {
-  tasks: '1. Master Tasks',
-  cos: '2. COS',
-  partners: '3. Partnerships',
-  org: '4. Org Database',
-  kpi: '5. KPI Log',
-  marketing: '6. Marketing',
-};
-
-const ADD_BTN_LABELS = {
-  dashboard: '+ NEW TASK',
-  tasks: '+ NEW TASK',
-  cos: '+ NEW COS',
-  partners: '+ NEW PARTNER',
-  org: '+ NEW ORG',
-  kpi: '+ NEW KPI',
-  marketing: '+ NEW CONTENT',
-  followup: null,
-  failsafe: null,
-  automation: null,
-};
 
 // ══════════════════════════════════════════
 //  INIT
@@ -653,37 +794,48 @@ function loadView(name) {
   currentView = name;
   document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.view === name));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === `view-${name}`));
-  const titles = { dashboard:'Dashboard', tasks:'Master Tasks', cos:'COS', partners:'Partnerships', org:'Org Database', kpi:'KPI Log', marketing:'Marketing', followup:'Follow-Up Tracker', failsafe:'Failsafe Alerts', automation:'Automation' };
-  document.getElementById('topbar-title').textContent = titles[name] || name;
-  const lbl = ADD_BTN_LABELS[name];
+  document.getElementById('topbar-title').textContent = VIEW_TITLES[name] || name;
+  const lbl = ADD_LABELS[name];
   const addBtn = document.getElementById('add-btn');
   addBtn.style.display = lbl ? '' : 'none';
   if (lbl) addBtn.textContent = lbl;
-  currentTab = VIEW_TAB_MAP[name] || '1. Master Tasks';
-  // Close sidebar on mobile
+  currentTab = VIEW_TAB[name] || '1. Master Tasks';
   if (window.innerWidth <= 700) document.getElementById('sidebar').classList.remove('open');
-  // Render view-specific content from cached data
   renderView(name);
 }
 
 // ══════════════════════════════════════════
-//  DATA LOAD
+//  DATA
 // ══════════════════════════════════════════
 async function loadData() {
   try {
+    const btn = document.getElementById('btn-sync');
+    btn.classList.add('loading'); btn.textContent = '↻ …';
     const res = await fetch(`${SCRIPT_URL}?action=read`);
     appData = await res.json();
     renderView(currentView);
     updateNavBadges();
+    btn.classList.remove('loading'); btn.textContent = '↻ Sync';
   } catch(e) {
-    showToast('Failed to load data. Check network.', 'error');
+    document.getElementById('btn-sync').textContent = '↻ Sync';
+    document.getElementById('btn-sync').classList.remove('loading');
+    showToast('Failed to load data. Check SCRIPT_URL.', 'error');
   }
 }
 
-async function syncData() {
-  showToast('Syncing…');
-  await loadData();
-  showToast('Synced!', 'success');
+async function syncData() { showToast('Syncing…', 'info'); await loadData(); showToast('Synced ✓', 'success'); }
+
+// ── FIX 1: triggerCalendarSync — removed Content-Type header ──
+async function triggerCalendarSync() {
+  const user = prompt('Enter your name (manager/leadership access required):');
+  if (!user) return;
+  try {
+    showToast('Syncing to Google Calendar…', 'info');
+    const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'syncCalendar', user }) });
+    const r = await res.json();
+    if (r.error) { showToast(r.error, 'error'); return; }
+    showToast(`Calendar sync done — ${r.eventsCreated} events created`, 'success');
+  } catch(e) { showToast('Calendar sync failed', 'error'); }
 }
 
 // ══════════════════════════════════════════
@@ -691,42 +843,59 @@ async function syncData() {
 // ══════════════════════════════════════════
 function renderView(name) {
   if (!appData.tasks) return;
-  switch(name) {
-    case 'dashboard': renderDashboard(); break;
-    case 'tasks': renderTasks(); break;
-    case 'cos': renderCOS(); break;
-    case 'partners': renderPartners(); break;
-    case 'org': renderOrg(); break;
-    case 'kpi': renderKPI(); break;
-    case 'marketing': renderMarketing(); break;
-    case 'followup': renderFollowup(); break;
-    case 'failsafe': renderFailsafe(); break;
-    case 'automation': renderAutomation(); break;
-  }
+  const fn = { dashboard:renderDashboard, tasks:renderTasks, cos:renderCOS, partners:renderPartners, org:renderOrg, kpi:renderKPI, marketing:renderMarketing, followup:renderFollowup, failsafe:renderFailsafe, automation:renderAutomation };
+  if (fn[name]) fn[name]();
 }
 
 // ══════════════════════════════════════════
-//  HELPERS
+//  SHARED HELPERS
 // ══════════════════════════════════════════
-function daysSince(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  if (isNaN(d)) return null;
-  return Math.floor((Date.now() - d.getTime()) / 86400000);
-}
+function daysSince(d) { if (!d) return null; const dt = new Date(d); if (isNaN(dt)) return null; return Math.floor((Date.now() - dt.getTime()) / 86400000); }
+function daysUntil(d) { if (!d) return null; const dt = new Date(d); if (isNaN(dt)) return null; return Math.ceil((dt.getTime() - Date.now()) / 86400000); }
 
+function bp(text, cls) { return `<span class="bp bp-${cls}">${text}</span>`; }
 function statusBadge(s) {
-  const m = { 'Not Started':'badge-gray','In Progress':'badge-blue','Done':'badge-green','Cancelled':'badge-gray','Blocked':'badge-red','Active':'badge-green','Pending':'badge-yellow','MoU Pending':'badge-yellow','In Discussion':'badge-blue','Cold':'badge-gray','Draft Sent':'badge-orange','Signed':'badge-green','Declined':'badge-red','In Review':'badge-yellow' };
-  return `<span class="badge-pill ${m[s]||'badge-gray'}">${s||'—'}</span>`;
+  const m = { 'Not Started':'gray','In Progress':'blue','Done':'green','Cancelled':'gray','Blocked':'red','Active':'green','Pending':'yellow','MoU Pending':'yellow','In Discussion':'blue','Cold':'gray','Draft Sent':'orange','Signed':'green','Declined':'red','In Review':'yellow','Y':'green','N':'red' };
+  return bp(s||'—', m[s]||'gray');
 }
 function priorityBadge(p) {
-  const m = { 'URGENT':'badge-red','HIGH':'badge-red','MEDIUM':'badge-yellow','LOW':'badge-green' };
-  return `<span class="badge-pill ${m[p]||'badge-gray'}">${p||'—'}</span>`;
+  const m = { 'URGENT':'red','HIGH':'orange','MEDIUM':'yellow','LOW':'green' };
+  return bp(p||'—', m[p]||'gray');
 }
 function progressBar(pct) {
-  const n = parseInt(pct)||0;
-  return `${n}%<span class="progress-track"><span class="progress-fill${n>=100?' complete':''}" style="width:${Math.min(n,100)}%"></span></span>`;
+  const n = Math.min(parseInt(pct)||0, 100);
+  return `<div class="prog-wrap"><span class="prog-txt">${n}%</span><span class="prog-track"><span class="prog-fill${n>=100?' full':''}" style="width:${n}%"></span></span></div>`;
 }
+
+function deadlinePill(dateStr, status) {
+  if (!dateStr) return `<span class="dl-pill none">—</span>`;
+  const days = daysUntil(dateStr);
+  if (['Done','Cancelled'].includes(status)) return `<span class="dl-pill none" style="font-family:'Space Mono',monospace;font-size:10px">${dateStr}</span>`;
+  if (days < 0) return `<span class="dl-pill overdue">⏱ ${Math.abs(days)}d late</span>`;
+  if (days <= 3) return `<span class="dl-pill soon">⚡ ${days}d left</span>`;
+  return `<span class="dl-pill ok">${dateStr}</span>`;
+}
+
+function depChips(depsStr, tasks) {
+  if (!depsStr) return '—';
+  return depsStr.split(',').map(id => {
+    id = id.trim();
+    const task = tasks.find(t => t.ID === id);
+    const cls = !task ? 'unknown' : task.Status === 'Done' ? 'done' : 'pending';
+    return `<span class="dep-chip ${cls}" title="${task ? task.Status : 'Not found'}">${id}</span>`;
+  }).join('');
+}
+
+function staleTag(days) {
+  if (days === null || days < 2) return '';
+  const cls = days >= 7 ? 'd7' : days >= 5 ? 'd5' : 'd2';
+  return `<span class="stale-tag ${cls}">⏱ ${days}d</span>`;
+}
+
+function noRow(cols, msg) { return `<tr><td colspan="${cols}" style="color:var(--muted);text-align:center;padding:22px;font-size:11px;font-family:'Space Mono',monospace">${msg||'No data — press ↻ Sync'}</td></tr>`; }
+// escQ: safe for use in onclick='editRow(...)' — numeric IDs passed as-is, strings escaped
+function escQ(s) { if (typeof s === 'number') return s; return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function escAttr(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
 // ══════════════════════════════════════════
 //  DASHBOARD
@@ -739,54 +908,96 @@ function renderDashboard() {
   const today = new Date().toDateString();
 
   const active = tasks.filter(t => !['Done','Cancelled'].includes(t.Status)).length;
-  const overdue = tasks.filter(t => !['Done','Cancelled'].includes(t.Status) && daysSince(t.Last_Updated) >= 2).length;
-  const missingKPI = ALL_TEAM_MEMBERS.filter(m => !kpi.some(k => new Date(k.Date).toDateString() === today && k['Team Member'] === m)).length;
   const blocked = tasks.filter(t => t.Status === 'Blocked').length;
-  const failCount = missingKPI + blocked;
+  const overdueDeadlines = tasks.filter(t => !['Done','Cancelled'].includes(t.Status) && t.Deadline && daysUntil(t.Deadline) < 0).length;
+  const stale = tasks.filter(t => !['Done','Cancelled'].includes(t.Status) && daysSince(t.Last_Updated) >= 2).length;
+  const missingKPI = ALL_TEAM.filter(m => !kpi.some(k => new Date(k.Date).toDateString() === today && k['Team Member'] === m)).length;
+  const failCount = missingKPI + blocked + overdueDeadlines;
 
   document.getElementById('stat-tasks').textContent = active;
+  document.getElementById('stat-tasks-d').textContent = `${blocked} blocked`;
   document.getElementById('stat-partners').textContent = partners.length;
-  document.getElementById('stat-overdue').textContent = overdue;
+  document.getElementById('stat-partners-d').textContent = `${partners.filter(p=>p['Current Status']==='Active').length} active`;
+  document.getElementById('stat-overdue').textContent = stale + overdueDeadlines;
+  document.getElementById('stat-overdue-d').textContent = `${overdueDeadlines} past deadline`;
   document.getElementById('stat-failsafe').textContent = failCount;
+  document.getElementById('stat-failsafe-d').textContent = `${missingKPI} missing EOD`;
 
-  // Alert banners
   const alerts = [];
-  if (blocked > 0) alerts.push(`<div class="alert-banner danger"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg><div><h4>${blocked} task(s) BLOCKED</h4><p>Immediate attention needed — <button class="btn-sm danger" onclick="loadView('failsafe')" style="display:inline;padding:2px 8px">View Blocked</button></p></div></div>`);
-  if (overdue > 0) alerts.push(`<div class="alert-banner warn"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg><div><h4>${overdue} task(s) not updated in 2+ days</h4><p>Assignees may need a nudge — <button class="btn-sm" onclick="loadView('followup')" style="display:inline;padding:2px 8px">View Follow-Ups</button></p></div></div>`);
+  if (blocked > 0) alerts.push(`<div class="alert-banner danger"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg><div><h4>${blocked} task(s) BLOCKED</h4><p>Immediate attention needed — dependencies may be unresolved. <button class="btn-sm danger" onclick="loadView('failsafe')">View Blocked</button></p></div></div>`);
+  if (overdueDeadlines > 0) alerts.push(`<div class="alert-banner danger"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg><div><h4>${overdueDeadlines} task(s) past deadline</h4><p>Assignees should have received email reminders. <button class="btn-sm danger" onclick="loadView('failsafe')">View Overdue</button></p></div></div>`);
+  if (stale > 0) alerts.push(`<div class="alert-banner warn"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg><div><h4>${stale} task(s) not updated in 2+ days</h4><p><button class="btn-sm" onclick="loadView('followup')">View Follow-Ups</button></p></div></div>`);
   document.getElementById('dashboard-alerts').innerHTML = alerts.join('');
 
-  // Recent tasks
-  const rows = tasks.slice(0,6).map(t => `<tr onclick="editRow('${escQ(t.ID)}','1. Master Tasks')"><td style="font-family:'Space Mono',monospace;font-size:11px">${t.ID}</td><td>${t['Task Description']}</td><td>${t['Assigned To']}</td><td>${statusBadge(t.Status)}</td><td>${progressBar(t['% Progress'])}</td></tr>`).join('');
-  document.getElementById('dash-tasks-tbody').innerHTML = rows || '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:20px">No tasks loaded</td></tr>';
+  const rows = tasks.slice(0,6).map(t => `<tr onclick="editRow('${escQ(t.ID)}','1. Master Tasks')">
+    <td style="font-family:'Space Mono',monospace;font-size:10px">${t.ID}</td>
+    <td>${t['Task Description']}</td>
+    <td>${t['Assigned To']}</td>
+    <td>${deadlinePill(t.Deadline, t.Status)}</td>
+    <td>${statusBadge(t.Status)}</td>
+    <td>${progressBar(t['% Progress'])}</td>
+    <td style="max-width:140px;white-space:normal;font-size:11px;color:var(--muted)">${t.Notes||'—'}</td>
+  </tr>`).join('');
+  document.getElementById('dash-tasks-tbody').innerHTML = rows || noRow(7,'No tasks loaded');
 
-  // Automations mini
-  const autoHtml = autos.slice(0,4).map(a => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;font-weight:600">${a.Label}</span><span class="badge-pill ${a.Enabled?'badge-green':'badge-gray'}">${a.Enabled?'ON':'OFF'}</span></div>`).join('');
-  document.getElementById('dash-automations').innerHTML = autoHtml || '<p style="color:var(--muted);font-size:12px">No automation data</p>';
+  const enabled = autos.filter(a=>a.Enabled).length;
+  document.getElementById('dash-auto-sub').textContent = `${enabled}/${autos.length} enabled`;
+  const autoHtml = autos.map(a => `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+    <span style="font-size:11px;font-weight:600">${a.Label}</span>
+    <span class="bp bp-${a.Enabled?'green':'gray'}" style="font-size:8px">${a.Enabled?'ON':'OFF'}</span>
+  </div>`).join('');
+  document.getElementById('dash-automations').innerHTML = autoHtml || '<p style="color:var(--muted);font-size:11px">No automation data</p>';
 }
 
 // ══════════════════════════════════════════
 //  TASKS
 // ══════════════════════════════════════════
 function renderTasks() {
-  const tasks = appData.tasks || [];
-  document.getElementById('nav-badge-tasks').textContent = tasks.filter(t=>!['Done','Cancelled'].includes(t.Status)).length;
+  let tasks = [...(appData.tasks || [])];
+  const status = document.getElementById('tf-status')?.value;
+  const priority = document.getElementById('tf-priority')?.value;
+  const owner = document.getElementById('tf-owner')?.value?.toLowerCase();
+  const dateFrom = document.getElementById('tf-date-from')?.value;
+  const dateTo = document.getElementById('tf-date-to')?.value;
+
+  if (status)   tasks = tasks.filter(t => t.Status === status);
+  if (priority) tasks = tasks.filter(t => t.Priority === priority);
+  if (owner)    tasks = tasks.filter(t => (t['Assigned To']||'').toLowerCase().includes(owner));
+  if (dateFrom) tasks = tasks.filter(t => t.Deadline && t.Deadline >= dateFrom);
+  if (dateTo)   tasks = tasks.filter(t => t.Deadline && t.Deadline <= dateTo);
+
+  const active = tasks.filter(t=>!['Done','Cancelled'].includes(t.Status)).length;
+  document.getElementById('nb-tasks').textContent = active;
+  document.getElementById('tasks-filter-count').textContent = `${tasks.length} row${tasks.length!==1?'s':''}`;
+
+  const allTasks = appData.tasks || [];
   const rows = tasks.map(t => {
     const stale = daysSince(t.Last_Updated);
-    const staleWarn = stale >= 2 && !['Done','Cancelled'].includes(t.Status) ? `<span class="badge-pill badge-red" style="margin-left:4px" title="${stale} days stale">⏱ ${stale}d</span>` : '';
-    return `<tr>
-      <td style="font-family:'Space Mono',monospace;font-size:11px">${t.ID}</td>
-      <td>${t['Task Description']}${staleWarn}</td>
+    const rowCls = t.Status==='Blocked'||daysUntil(t.Deadline)<0 ? 'row-overdue' : stale>=2&&!['Done','Cancelled'].includes(t.Status)?'row-at-risk':t.Status==='Done'?'row-done':'';
+    const recurBadge = t.Recurring==='Yes' ? `<span class="recur-badge">↻ ${t['Recur Interval']||'?'}d</span>` : '';
+    return `<tr class="${rowCls}">
+      <td style="font-family:'Space Mono',monospace;font-size:10px">${t.ID}</td>
+      <td>${t['Task Description']}${staleTag(stale)}</td>
       <td>${priorityBadge(t.Priority)}</td>
       <td>${t['Assigned To']}</td>
       <td>${t.Supervisor||'—'}</td>
-      <td>${t['Business / Dept']||'—'}</td>
-      <td style="font-family:'Space Mono',monospace;font-size:11px">${t.Deadline||'—'}</td>
+      <td style="font-size:11px;color:var(--muted)">${t['Business / Dept']||'—'}</td>
+      <td>${deadlinePill(t.Deadline, t.Status)}</td>
       <td>${statusBadge(t.Status)}</td>
       <td>${progressBar(t['% Progress'])}</td>
+      <td>${depChips(t['Depends On'], allTasks)}</td>
+      <td>${recurBadge||'—'}</td>
+      <td style="max-width:160px;white-space:normal;font-size:11px;color:var(--muted)">${t.Notes||'—'}</td>
       <td><button class="btn-sm" onclick="editRow('${escQ(t.ID)}','1. Master Tasks')">Edit</button></td>
     </tr>`;
   }).join('');
-  document.getElementById('tasks-tbody').innerHTML = rows || noDataRow(10);
+  document.getElementById('tasks-tbody').innerHTML = rows || noRow(13,'No tasks match filters');
+}
+function clearTaskFilters() {
+  ['tf-status','tf-priority','tf-owner','tf-date-from','tf-date-to'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  renderTasks();
 }
 
 // ══════════════════════════════════════════
@@ -795,36 +1006,44 @@ function renderTasks() {
 function renderCOS() {
   const cos = appData.cos || [];
   const rows = cos.map(c => `<tr>
-    <td>${c.State}</td><td>${c['Admin Name']}</td><td>${c.Phone||'—'}</td><td>${c.Email||'—'}</td>
+    <td>${c.State}</td><td>${c['Admin Name']}</td>
+    <td style="font-family:'Space Mono',monospace;font-size:10px">${c.Phone||'—'}</td>
+    <td style="font-size:11px">${c.Email||'—'}</td>
     <td>${statusBadge(c['WhatsApp Group Created']==='Yes'?'Active':'Pending')}</td>
     <td style="font-family:'Space Mono',monospace">${c['Members Count']||0}</td>
     <td>${statusBadge(c.Status)}</td>
-    <td style="font-family:'Space Mono',monospace;font-size:11px">${c['Date Launched']||'—'}</td>
+    <td style="font-family:'Space Mono',monospace;font-size:10px">${c['Date Launched']||'—'}</td>
     <td><button class="btn-sm" onclick="editRow('${escQ(c.State)}','2. COS')">Edit</button></td>
   </tr>`).join('');
-  document.getElementById('cos-tbody').innerHTML = rows || noDataRow(9);
+  document.getElementById('cos-tbody').innerHTML = rows || noRow(9);
 }
 
 // ══════════════════════════════════════════
 //  PARTNERSHIPS
 // ══════════════════════════════════════════
 function renderPartners() {
-  const partners = appData.partners || [];
+  let partners = [...(appData.partners || [])];
+  const status = document.getElementById('pf-status')?.value;
+  const type = document.getElementById('pf-type')?.value;
+  if (status) partners = partners.filter(p => p['Current Status'] === status);
+  if (type)   partners = partners.filter(p => p.Type === type);
+  document.getElementById('partners-filter-count').textContent = `${partners.length} row${partners.length!==1?'s':''}`;
+
   const rows = partners.map(p => {
-    const fuDays = daysSince(p['Follow-Up Date']);
-    const fuWarn = fuDays !== null && fuDays > 0 ? `<span class="badge-pill badge-red" title="Follow-up overdue by ${fuDays} days">⏱ ${fuDays}d late</span>` : '';
+    const fuDays = p['Follow-Up Date'] ? daysUntil(p['Follow-Up Date']) : null;
+    const fuPill = fuDays !== null && fuDays < 0 ? `<span class="dl-pill overdue">${Math.abs(fuDays)}d late</span>` : fuDays !== null && fuDays <= 3 ? `<span class="dl-pill soon">${fuDays}d</span>` : `<span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">${p['Follow-Up Date']||'—'}</span>`;
     return `<tr>
       <td>${p['Assigned To']}</td>
       <td><strong>${p.Organisation}</strong></td>
       <td>${p['Contact Name']||'—'}</td>
       <td>${statusBadge(p.Type)}</td>
       <td>${statusBadge(p['Current Status'])}</td>
-      <td style="font-family:'Space Mono',monospace;font-size:11px">${p['Follow-Up Date']||'—'} ${fuWarn}</td>
+      <td>${fuPill}</td>
       <td>${statusBadge(p['MoU Status'])}</td>
       <td><button class="btn-sm" onclick="editRow('${escQ(p.Organisation)}','3. Partnerships')">Edit</button></td>
     </tr>`;
   }).join('');
-  document.getElementById('partners-tbody').innerHTML = rows || noDataRow(8);
+  document.getElementById('partners-tbody').innerHTML = rows || noRow(8);
 }
 
 // ══════════════════════════════════════════
@@ -833,132 +1052,132 @@ function renderPartners() {
 function renderOrg() {
   const orgs = appData.orgs || [];
   const rows = orgs.map(o => `<tr>
-    <td><strong>${o['Organisation Name']||o.Organization||'—'}</strong></td>
+    <td><strong>${o['Organisation Name']||'—'}</strong></td>
     <td>${o.Industry||'—'}</td>
-    <td>${o.State||o.Country||'—'}</td>
-    <td>${o['Contact Person']||o.Contact||'—'}</td>
-    <td>${o.Email||'—'}</td>
-    <td>${o.Phone||'—'}</td>
+    <td>${o.State||'—'}</td>
+    <td>${o['Contact Person']||'—'}</td>
+    <td style="font-size:11px">${o.Email||'—'}</td>
+    <td style="font-family:'Space Mono',monospace;font-size:10px">${o.Phone||'—'}</td>
     <td>${statusBadge(o['Onboarding Status'])}</td>
-    <td><button class="btn-sm" onclick="editRow('${escQ(o['Organisation Name']||o.Organization)}','4. Org Database')">Edit</button></td>
+    <td><button class="btn-sm" onclick="editRow('${escQ(o['Organisation Name'])}','4. Org Database')">Edit</button></td>
   </tr>`).join('');
-  document.getElementById('org-tbody').innerHTML = rows || noDataRow(8);
+  document.getElementById('org-tbody').innerHTML = rows || noRow(8);
 }
 
 // ══════════════════════════════════════════
 //  KPI
 // ══════════════════════════════════════════
 function renderKPI() {
-  const kpi = appData.kpi || [];
-  const today = new Date().toDateString();
-  const missing = ALL_TEAM_MEMBERS.filter(m => !kpi.some(k => new Date(k.Date).toDateString() === today && k['Team Member'] === m));
-  const alertsEl = document.getElementById('kpi-alerts');
-  if (missing.length > 0) {
-    alertsEl.innerHTML = `<div class="alert-banner warn"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg><div><h4>${missing.length} team member(s) have NOT filed today's KPI report</h4><ul>${missing.slice(0,10).map(m=>`<li>${m}</li>`).join('')}${missing.length>10?`<li>…and ${missing.length-10} more</li>`:''}</ul></div></div>`;
-  } else {
-    alertsEl.innerHTML = '';
-  }
+  let kpi = [...(appData.kpi || [])].reverse();
+  const member = document.getElementById('kf-member')?.value?.toLowerCase();
+  const date = document.getElementById('kf-date')?.value;
+  const submitted = document.getElementById('kf-submitted')?.value;
+  if (member) kpi = kpi.filter(k => (k['Team Member']||'').toLowerCase().includes(member));
+  if (date)   kpi = kpi.filter(k => k.Date === date);
+  if (submitted) kpi = kpi.filter(k => k.Submitted === submitted);
+  document.getElementById('kpi-filter-count').textContent = `${kpi.length} rows`;
 
-  const rows = [...kpi].reverse().map(k => `<tr>
-    <td style="font-family:'Space Mono',monospace;font-size:11px">${k.Date}</td>
-    <td>${k.Day||'—'}</td>
+  const today = new Date().toDateString();
+  const filed = new Set((appData.kpi||[]).filter(k=>new Date(k.Date).toDateString()===today).map(k=>k['Team Member']));
+  const missing = ALL_TEAM.filter(m=>!filed.has(m));
+  const alertEl = document.getElementById('kpi-alerts-main');
+  alertEl.innerHTML = missing.length > 0 ? `<div class="alert-banner warn"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg><div><h4>${missing.length} member(s) haven't filed today's KPI</h4><ul>${missing.slice(0,8).map(m=>`<li>${m}</li>`).join('')}${missing.length>8?`<li>…and ${missing.length-8} more</li>`:''}</ul></div></div>` : '';
+
+  const rows = kpi.map(k => `<tr>
+    <td style="font-family:'Space Mono',monospace;font-size:10px">${k.Date}</td>
+    <td style="font-size:10px;color:var(--muted)">${k.Day||'—'}</td>
     <td>${k['Team Member']}</td>
-    <td>${k['Role/Dept']||'—'}</td>
-    <td style="max-width:200px;white-space:normal">${k['What I Completed (with proof)']||'—'}</td>
-    <td style="max-width:160px;white-space:normal">${k['Key Achievement']||'—'}</td>
-    <td style="max-width:140px;white-space:normal;color:${k.Blockers?'var(--warn)':'var(--muted)'}">${k.Blockers||'None'}</td>
-    <td><span class="badge-pill ${k.Submitted==='Y'?'badge-green':'badge-red'}">${k.Submitted||'N'}</span></td>
-    <td><button class="btn-sm" onclick="editRow('${escQ(k.Date)}','5. KPI Log')">Edit</button></td>
+    <td style="font-size:11px">${k['Role/Dept']||'—'}</td>
+    <td style="max-width:180px;white-space:normal;font-size:11px">${k['What I Completed (with proof)']||'—'}</td>
+    <td style="max-width:150px;white-space:normal;font-size:11px">${k['Key Achievement']||'—'}</td>
+    <td style="max-width:130px;white-space:normal;font-size:11px;color:${k.Blockers?'var(--warn)':'var(--muted)'}">${k.Blockers||'None'}</td>
+    <td>${statusBadge(k.Submitted)}</td>
+    <td><button class="btn-sm" onclick="editKPIRow(${escQ(k._rowIndex)})">Edit</button></td>
   </tr>`).join('');
-  document.getElementById('kpi-tbody').innerHTML = rows || noDataRow(9);
+  document.getElementById('kpi-tbody').innerHTML = rows || noRow(9);
 }
+
+function editKPIRow(rowIndex) { openDrawer('5. KPI Log', rowIndex); }
 
 // ══════════════════════════════════════════
 //  MARKETING
 // ══════════════════════════════════════════
 function renderMarketing() {
-  const mkt = appData.marketing || [];
-  const typeColors = { 'Reel':'badge-blue','Post':'badge-gray','Story':'badge-yellow','Thread':'badge-orange','Video':'badge-blue','Article':'badge-green' };
+  let mkt = [...(appData.marketing || [])];
+  const status = document.getElementById('mf-status')?.value;
+  const type = document.getElementById('mf-type')?.value;
+  const from = document.getElementById('mf-due-from')?.value;
+  const to = document.getElementById('mf-due-to')?.value;
+  if (status) mkt = mkt.filter(m => m.Status === status);
+  if (type)   mkt = mkt.filter(m => m.Type === type);
+  if (from)   mkt = mkt.filter(m => m['Due Date'] && m['Due Date'] >= from);
+  if (to)     mkt = mkt.filter(m => m['Due Date'] && m['Due Date'] <= to);
+  document.getElementById('mkt-filter-count').textContent = `${mkt.length} rows`;
+
+  const typeColors = { 'Reel':'blue','Post':'gray','Story':'yellow','Thread':'orange','Video':'blue','Article':'green','Infographic':'info' };
   const rows = mkt.map(m => `<tr>
-    <td style="font-family:'Space Mono',monospace;font-size:11px">${m.ID}</td>
-    <td><span class="badge-pill ${typeColors[m.Type]||'badge-gray'}">${m.Type||'—'}</span></td>
-    <td style="max-width:200px;white-space:normal">${m['Topic / Caption']||'—'}</td>
-    <td>${m.Platform||'—'}</td>
+    <td style="font-family:'Space Mono',monospace;font-size:10px">${m.ID}</td>
+    <td>${bp(m.Type||'—', typeColors[m.Type]||'gray')}</td>
+    <td style="max-width:190px;white-space:normal;font-size:11px">${m['Topic / Caption']||'—'}</td>
+    <td style="font-size:11px">${m.Platform||'—'}</td>
     <td>${m['Assigned To']||'—'}</td>
-    <td style="font-family:'Space Mono',monospace;font-size:11px">${m['Due Date']||'—'}</td>
+    <td>${deadlinePill(m['Due Date'], m.Status)}</td>
     <td>${statusBadge(m.Status)}</td>
-    <td>${m.Link?`<a href="${m.Link}" target="_blank" style="color:var(--accent);font-size:11px">↗ Link</a>`:'—'}</td>
+    <td>${m.Link?`<a href="${m.Link}" target="_blank" style="color:var(--accent2);font-size:10px;font-family:'Space Mono',monospace">↗ link</a>`:'—'}</td>
     <td><button class="btn-sm" onclick="editRow('${escQ(m.ID)}','6. Marketing')">Edit</button></td>
   </tr>`).join('');
-  document.getElementById('marketing-tbody').innerHTML = rows || noDataRow(9);
+  document.getElementById('marketing-tbody').innerHTML = rows || noRow(9);
 }
+function clearMktFilters() { ['mf-status','mf-type','mf-due-from','mf-due-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';}); renderMarketing(); }
 
 // ══════════════════════════════════════════
-//  FOLLOW-UP TRACKER
+//  FOLLOW-UP
 // ══════════════════════════════════════════
 function renderFollowup() {
   const tasks = appData.tasks || [];
   const partners = appData.partners || [];
   const today = new Date();
 
-  // Stale tasks (2+ days without update, not done/cancelled)
-  const staleTasks = tasks.filter(t =>
-    !['Done','Cancelled'].includes(t.Status) &&
-    daysSince(t.Last_Updated) >= 2
-  ).sort((a,b) => (daysSince(b.Last_Updated)||0) - (daysSince(a.Last_Updated)||0));
+  const stale = tasks.filter(t => !['Done','Cancelled'].includes(t.Status) && daysSince(t.Last_Updated) >= 2)
+    .sort((a,b) => (daysSince(b.Last_Updated)||0) - (daysSince(a.Last_Updated)||0));
+  const overdueP = partners.filter(p => p['Follow-Up Date'] && new Date(p['Follow-Up Date']) < today && !['Active','Declined'].includes(p['Current Status']));
 
-  // Partners with overdue follow-up
-  const overduePartners = partners.filter(p => {
-    if (!p['Follow-Up Date']) return false;
-    return new Date(p['Follow-Up Date']) < today && !['Active','Declined'].includes(p['Current Status']);
-  });
+  document.getElementById('nb-followup').textContent = stale.length + overdueP.length;
 
-  // Update badge
-  document.getElementById('nav-badge-followup').textContent = staleTasks.length + overduePartners.length;
-
-  // Overdue tasks list
-  const fuOverdueHtml = staleTasks.slice(0,6).map(t => {
+  document.getElementById('fu-overdue-list').innerHTML = stale.slice(0,6).map(t => {
     const d = daysSince(t.Last_Updated);
-    const cls = d >= 7 ? 'badge-red' : d >= 4 ? 'badge-yellow' : 'badge-gray';
-    return `<div class="followup-item"><span class="name">${t['Assigned To']}</span><span class="days"><span class="badge-pill ${cls}">${d}d stale</span></span></div>`;
-  }).join('') || '<p style="color:var(--muted);font-size:12px;padding:8px 0">No stale tasks 🎉</p>';
-  document.getElementById('fu-overdue-list').innerHTML = fuOverdueHtml;
+    return `<div class="followup-item"><span style="font-weight:600">${t['Assigned To']}</span><span class="bp bp-${d>=7?'red':d>=4?'orange':'yellow'}" style="font-size:8px">${d}d stale</span></div>`;
+  }).join('') || '<p style="color:var(--muted);font-size:11px;padding:8px 0">No stale tasks 🎉</p>';
 
-  // Overdue partners list
-  const fuPartnersHtml = overduePartners.slice(0,6).map(p => {
-    const d = daysSince(p['Follow-Up Date']);
-    return `<div class="followup-item"><span class="name">${p.Organisation}</span><span class="days"><span class="badge-pill badge-red">${d}d late</span></span></div>`;
-  }).join('') || '<p style="color:var(--muted);font-size:12px;padding:8px 0">All follow-ups on track 🎉</p>';
-  document.getElementById('fu-partners-list').innerHTML = fuPartnersHtml;
+  document.getElementById('fu-partners-list').innerHTML = overdueP.slice(0,6).map(p => {
+    const d = Math.abs(daysUntil(p['Follow-Up Date']));
+    return `<div class="followup-item"><span style="font-weight:600">${p.Organisation}</span><span class="bp bp-red" style="font-size:8px">${d}d late</span></div>`;
+  }).join('') || '<p style="color:var(--muted);font-size:11px;padding:8px 0">All follow-ups on track 🎉</p>';
 
-  // Full table
-  const rows = staleTasks.map(t => {
+  if (stale.length > 0) {
+    const counts = {};
+    stale.forEach(t => { counts[t['Assigned To']] = (counts[t['Assigned To']]||0)+1; });
+    const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    document.getElementById('followup-alerts').innerHTML = `<div class="alert-banner danger"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg><div><h4>${stale.length} task(s) need follow-up</h4><ul>${top.map(([n,c])=>`<li>${n} — ${c} stale task${c>1?'s':''}</li>`).join('')}</ul></div></div>`;
+  } else { document.getElementById('followup-alerts').innerHTML = ''; }
+
+  const rows = stale.map(t => {
     const d = daysSince(t.Last_Updated);
-    const cls = d >= 7 ? 'badge-red' : d >= 4 ? 'badge-yellow' : 'badge-gray';
     return `<tr>
       <td>${t['Assigned To']}</td>
-      <td style="font-family:'Space Mono',monospace;font-size:11px">${t.ID}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:10px">${t.ID}</td>
       <td>${t['Task Description']}</td>
-      <td><span class="badge-pill ${cls}">${d} day${d!==1?'s':''}</span></td>
+      <td><span class="bp bp-${d>=7?'red':d>=4?'orange':'yellow'}">${d}d</span></td>
       <td>${statusBadge(t.Status)}</td>
-      <td style="font-family:'Space Mono',monospace;font-size:11px">${t.Last_Updated||'—'}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:10px">${t.Last_Updated||'—'}</td>
       <td><button class="btn-sm" onclick="editRow('${escQ(t.ID)}','1. Master Tasks')">Update</button></td>
     </tr>`;
   }).join('');
-  document.getElementById('followup-tbody').innerHTML = rows || noDataRow(7,'No stale tasks — great job! 🎉');
-
-  // Alert banner
-  const alertEl = document.getElementById('followup-alerts');
-  if (staleTasks.length > 0) {
-    const topCulprits = {};
-    staleTasks.forEach(t => { topCulprits[t['Assigned To']] = (topCulprits[t['Assigned To']]||0)+1; });
-    const sorted = Object.entries(topCulprits).sort((a,b)=>b[1]-a[1]).slice(0,3);
-    alertEl.innerHTML = `<div class="alert-banner danger"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg><div><h4>${staleTasks.length} task(s) need follow-up</h4><ul>${sorted.map(([name,cnt])=>`<li>${name} — ${cnt} stale task${cnt>1?'s':''}</li>`).join('')}</ul></div></div>`;
-  } else { alertEl.innerHTML = ''; }
+  document.getElementById('followup-tbody').innerHTML = rows || noRow(7,'No stale tasks — great work! 🎉');
 }
 
 // ══════════════════════════════════════════
-//  FAILSAFE ALERTS
+//  FAILSAFE
 // ══════════════════════════════════════════
 function renderFailsafe() {
   const tasks = appData.tasks || [];
@@ -967,42 +1186,32 @@ function renderFailsafe() {
   const today = new Date();
   const todayStr = today.toDateString();
 
-  // 1. Missing EOD
-  const filedToday = new Set(kpi.filter(k => new Date(k.Date).toDateString() === todayStr).map(k => k['Team Member']));
-  const missingEOD = ALL_TEAM_MEMBERS.filter(m => !filedToday.has(m));
-  document.getElementById('failsafe-eod-date').textContent = today.toLocaleDateString('en-NG',{weekday:'long',day:'numeric',month:'short'});
-  const eodRows = missingEOD.map(m => {
-    const lastEntry = kpi.filter(k=>k['Team Member']===m).sort((a,b)=>new Date(b.Date)-new Date(a.Date))[0];
-    const lastDate = lastEntry ? lastEntry.Date : 'Never';
-    const daysAgo = lastEntry ? daysSince(lastEntry.Date) : '—';
-    return `<tr><td>${m}</td><td style="color:var(--muted)">${lastEntry?.['Role/Dept']||'—'}</td><td><span class="badge-pill badge-red">${daysAgo}d ago</span></td><td style="font-family:'Space Mono',monospace;font-size:11px">${lastDate}</td></tr>`;
-  }).join('');
-  document.getElementById('failsafe-eod-tbody').innerHTML = eodRows || noDataRow(4,'All team members have filed today! ✓');
+  const filed = new Set(kpi.filter(k=>new Date(k.Date).toDateString()===todayStr).map(k=>k['Team Member']));
+  const missing = ALL_TEAM.filter(m=>!filed.has(m));
+  document.getElementById('fs-eod-date').textContent = today.toLocaleDateString('en-NG',{weekday:'long',day:'numeric',month:'short'});
+  document.getElementById('fs-eod-tbody').innerHTML = missing.map(m => {
+    const last = kpi.filter(k=>k['Team Member']===m).sort((a,b)=>new Date(b.Date)-new Date(a.Date))[0];
+    const d = last ? daysSince(last.Date) : null;
+    return `<tr><td>${m}</td><td style="font-size:10px;color:var(--muted)">${last?.['Role/Dept']||'—'}</td><td>${d!==null?`<span class="bp bp-red" style="font-size:8px">${d}d ago</span>`:'<span class="bp bp-gray" style="font-size:8px">Never</span>'}</td><td style="font-family:'Space Mono',monospace;font-size:10px">${last?last.Date:'—'}</td></tr>`;
+  }).join('') || noRow(4,'All team members have filed today ✓');
 
-  // 2. Blocked tasks
-  const blocked = tasks.filter(t => t.Status === 'Blocked');
-  const blockedRows = blocked.map(t => {
+  const blocked = tasks.filter(t=>t.Status==='Blocked');
+  document.getElementById('fs-blocked-tbody').innerHTML = blocked.map(t => {
     const d = daysSince(t.Last_Updated);
-    return `<tr><td>${t['Task Description']}</td><td>${t['Assigned To']}</td><td><span class="badge-pill badge-red">${d}d stale</span></td><td><button class="btn-sm danger" onclick="editRow('${escQ(t.ID)}','1. Master Tasks')">Resolve</button></td></tr>`;
-  }).join('');
-  document.getElementById('failsafe-blocked-tbody').innerHTML = blockedRows || noDataRow(4,'No blocked tasks ✓');
+    const allTasks = appData.tasks || [];
+    return `<tr><td>${t['Task Description']}</td><td>${t['Assigned To']}</td><td><span class="bp bp-red" style="font-size:8px">${d}d stale</span></td><td>${depChips(t['Depends On'],allTasks)}</td><td><button class="btn-sm danger" onclick="editRow('${escQ(t.ID)}','1. Master Tasks')">Resolve</button></td></tr>`;
+  }).join('') || noRow(5,'No blocked tasks ✓');
 
-  // 3. Overdue deadlines
-  const overDeadline = tasks.filter(t => t.Deadline && !['Done','Cancelled'].includes(t.Status) && new Date(t.Deadline) < today);
-  const deadlineRows = overDeadline.map(t => {
-    const d = daysSince(t.Deadline);
-    return `<tr><td>${t['Task Description']}</td><td>${t['Assigned To']}</td><td style="font-family:'Space Mono',monospace;font-size:11px">${t.Deadline}</td><td><span class="badge-pill badge-red">${d}d late</span></td></tr>`;
-  }).join('');
-  document.getElementById('failsafe-deadlines-tbody').innerHTML = deadlineRows || noDataRow(4,'No overdue deadlines ✓');
+  const overDL = tasks.filter(t=>t.Deadline&&!['Done','Cancelled'].includes(t.Status)&&daysUntil(t.Deadline)<0);
+  document.getElementById('fs-deadlines-tbody').innerHTML = overDL.map(t => {
+    const d = Math.abs(daysUntil(t.Deadline));
+    return `<tr><td>${t['Task Description']}</td><td>${t['Assigned To']}</td><td style="font-family:'Space Mono',monospace;font-size:10px">${t.Deadline}</td><td><span class="bp bp-red">${d}d late</span></td><td><button class="btn-sm" onclick="editRow('${escQ(t.ID)}','1. Master Tasks')">Update</button></td></tr>`;
+  }).join('') || noRow(5,'No overdue deadlines ✓');
 
-  // 4. Partners no contact 7+ days
-  const stalePartners = partners.filter(p => p['Follow-Up Date'] && daysSince(p['Follow-Up Date']) >= 7 && !['Active','Declined'].includes(p['Current Status']));
-  const partnerRows = stalePartners.map(p => `<tr><td><strong>${p.Organisation}</strong></td><td>${p['Assigned To']}</td><td style="font-family:'Space Mono',monospace;font-size:11px">${p['Follow-Up Date']}</td><td>${statusBadge(p['Current Status'])}</td></tr>`).join('');
-  document.getElementById('failsafe-partners-tbody').innerHTML = partnerRows || noDataRow(4,'No stale partnerships ✓');
+  const staleP = partners.filter(p=>p['Follow-Up Date']&&daysSince(p['Follow-Up Date'])>=7&&!['Active','Declined'].includes(p['Current Status']));
+  document.getElementById('fs-partners-tbody').innerHTML = staleP.map(p => `<tr><td><strong>${p.Organisation}</strong></td><td>${p['Assigned To']}</td><td style="font-family:'Space Mono',monospace;font-size:10px">${p['Follow-Up Date']}</td><td>${statusBadge(p['Current Status'])}</td></tr>`).join('') || noRow(4,'No stale partnerships ✓');
 
-  // Nav badge
-  const total = missingEOD.length + blocked.length + overDeadline.length + stalePartners.length;
-  document.getElementById('nav-badge-failsafe').textContent = total;
+  document.getElementById('nb-failsafe').textContent = missing.length + blocked.length + overDL.length + staleP.length;
 }
 
 // ══════════════════════════════════════════
@@ -1010,36 +1219,45 @@ function renderFailsafe() {
 // ══════════════════════════════════════════
 function renderAutomation() {
   const autos = appData.automations || [];
+  const categories = {
+    'email_assignments': 'Notifications', 'overdue_reminders': 'Notifications',
+    'eod_nudges': 'Notifications', 'deadline_reminders': 'Notifications',
+    'n8n_webhooks': 'Integrations', 'calendar_sync': 'Integrations',
+    'dependency_checks': 'Task Logic', 'recurring_tasks': 'Task Logic',
+  };
   const grid = autos.map(a => `
     <div class="auto-card ${a.Enabled?'enabled':'disabled'}">
-      <div class="toggle-wrap">
-        <div><h4>${a.Label}</h4><p>${a.Description}</p></div>
-        <label class="toggle"><input type="checkbox" ${a.Enabled?'checked':''} onchange="toggleAutomation('${a.Key}',this.checked)"><span class="slider"></span></label>
+      <div class="ac-category">${categories[a.Key]||'General'}</div>
+      <div class="ac-top">
+        <div><h4>${a.Label}</h4></div>
+        <label class="toggle"><input type="checkbox" ${a.Enabled?'checked':''} onchange="toggleAuto('${a.Key}',this.checked)"><span class="slider"></span></label>
       </div>
-      <div class="auto-meta">Last toggled: ${a.LastToggled||'Never'} · By: ${a.ToggledBy||'—'}</div>
+      <p>${a.Description}</p>
+      <div class="ac-meta">Last toggled: ${a.LastToggled?a.LastToggled.split('T')[0]:'Never'} · By: ${a.ToggledBy||'—'}</div>
     </div>`).join('');
-  document.getElementById('automation-grid').innerHTML = grid;
+  document.getElementById('auto-grid').innerHTML = grid;
 
   const rows = autos.map(a => `<tr>
-    <td style="font-family:'Space Mono',monospace;font-size:11px">${a.Key}</td>
+    <td style="font-family:'Space Mono',monospace;font-size:10px">${a.Key}</td>
     <td>${a.Label}</td>
-    <td><span class="badge-pill ${a.Enabled?'badge-green':'badge-gray'}">${a.Enabled?'ENABLED':'DISABLED'}</span></td>
-    <td style="font-family:'Space Mono',monospace;font-size:11px">${a.LastToggled||'—'}</td>
+    <td><span class="bp bp-${a.Enabled?'green':'gray'}">${a.Enabled?'ENABLED':'DISABLED'}</span></td>
+    <td style="font-family:'Space Mono',monospace;font-size:10px">${a.LastToggled?a.LastToggled.split('T')[0]:'—'}</td>
     <td>${a.ToggledBy||'—'}</td>
   </tr>`).join('');
-  document.getElementById('automation-tbody').innerHTML = rows;
+  document.getElementById('auto-tbody').innerHTML = rows;
 }
 
-async function toggleAutomation(key, enabled) {
+// ── FIX 2: toggleAuto — removed Content-Type header ──
+async function toggleAuto(key, enabled) {
   const user = prompt('Enter your name to confirm (leadership only):');
-  if (!user) return;
+  if (!user) { await loadData(); return; }
   try {
-    const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'setAutomation', key, enabled, user }) });
+    const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'setAutomation', key, enabled, user }) });
     const r = await res.json();
-    if (r.error) { showToast(r.error, 'error'); return; }
-    showToast(`Automation ${enabled?'enabled':'disabled'}`, 'success');
+    if (r.error) { showToast(r.error, 'error'); await loadData(); return; }
+    showToast(`${key} ${enabled?'enabled':'disabled'}`, 'success');
     await loadData();
-  } catch(e) { showToast('Failed to update automation', 'error'); }
+  } catch(e) { showToast('Failed to update automation', 'error'); await loadData(); }
 }
 
 // ══════════════════════════════════════════
@@ -1052,37 +1270,33 @@ function updateNavBadges() {
   const today = new Date();
   const todayStr = today.toDateString();
 
-  const activeTasks = tasks.filter(t=>!['Done','Cancelled'].includes(t.Status)).length;
-  document.getElementById('nav-badge-tasks').textContent = activeTasks;
+  document.getElementById('nb-tasks').textContent = tasks.filter(t=>!['Done','Cancelled'].includes(t.Status)).length;
 
-  const staleTasks = tasks.filter(t=>!['Done','Cancelled'].includes(t.Status)&&daysSince(t.Last_Updated)>=2).length;
-  const overduePartners = partners.filter(p=>p['Follow-Up Date']&&new Date(p['Follow-Up Date'])<today&&!['Active','Declined'].includes(p['Current Status'])).length;
-  document.getElementById('nav-badge-followup').textContent = staleTasks + overduePartners;
+  const stale = tasks.filter(t=>!['Done','Cancelled'].includes(t.Status)&&daysSince(t.Last_Updated)>=2).length;
+  const overdueP = partners.filter(p=>p['Follow-Up Date']&&new Date(p['Follow-Up Date'])<today&&!['Active','Declined'].includes(p['Current Status'])).length;
+  document.getElementById('nb-followup').textContent = stale + overdueP;
 
-  const filedToday = new Set(kpi.filter(k=>new Date(k.Date).toDateString()===todayStr).map(k=>k['Team Member']));
-  const missingEOD = ALL_TEAM_MEMBERS.filter(m=>!filedToday.has(m)).length;
+  const filed = new Set(kpi.filter(k=>new Date(k.Date).toDateString()===todayStr).map(k=>k['Team Member']));
+  const missingEOD = ALL_TEAM.filter(m=>!filed.has(m)).length;
   const blocked = tasks.filter(t=>t.Status==='Blocked').length;
-  const overDeadline = tasks.filter(t=>t.Deadline&&!['Done','Cancelled'].includes(t.Status)&&new Date(t.Deadline)<today).length;
-  const stalePartners = partners.filter(p=>p['Follow-Up Date']&&daysSince(p['Follow-Up Date'])>=7&&!['Active','Declined'].includes(p['Current Status'])).length;
-  document.getElementById('nav-badge-failsafe').textContent = missingEOD + blocked + overDeadline + stalePartners;
+  const overDL = tasks.filter(t=>t.Deadline&&!['Done','Cancelled'].includes(t.Status)&&daysUntil(t.Deadline)<0).length;
+  const staleP = partners.filter(p=>p['Follow-Up Date']&&daysSince(p['Follow-Up Date'])>=7&&!['Active','Declined'].includes(p['Current Status'])).length;
+  document.getElementById('nb-failsafe').textContent = missingEOD + blocked + overDL + staleP;
 }
 
 // ══════════════════════════════════════════
-//  DRAWER — FORMS
+//  DRAWER + FORMS
 // ══════════════════════════════════════════
 function openDrawer(tab, rowId) {
   if (!tab) tab = currentTab;
   currentTab = tab;
-  editingRowId = rowId || null;
+  editingRowId = rowId !== undefined ? rowId : null;
   isBatchMode = false;
   document.getElementById('btn-batch').textContent = 'Batch Mode';
-
-  const schema = FORM_SCHEMAS[tab];
-  const label = schema ? schema.label : tab;
-  document.getElementById('drawer-title').textContent = rowId ? `Edit ${label}` : `Add ${label}`;
+  const schema = SCHEMAS[tab];
+  document.getElementById('drawer-title').textContent = rowId ? `Edit ${schema?.label||tab}` : `Add ${schema?.label||tab}`;
   document.getElementById('drawer-hint').textContent = tab;
   generateForm();
-
   document.getElementById('drawer-overlay').classList.add('open');
   document.getElementById('drawer').classList.add('open');
 }
@@ -1101,52 +1315,60 @@ function toggleBatchMode() {
 function generateForm() {
   const body = document.getElementById('drawer-body');
   body.innerHTML = '';
-  const schema = FORM_SCHEMAS[currentTab];
-  if (!schema) { body.innerHTML = '<p style="color:var(--muted)">No form schema for this tab.</p>'; return; }
+  const schema = SCHEMAS[currentTab];
+  if (!schema) { body.innerHTML = '<p style="color:var(--muted);font-size:12px">No form schema for this tab.</p>'; return; }
 
   if (isBatchMode) {
     const headers = schema.fields.filter(f=>!f.section).map(f=>f.key);
-    body.innerHTML = `
-      <div class="batch-area">
-        <p>Paste multiple rows — one per line, comma-separated in this order:</p>
-        <pre>${headers.join(', ')}</pre>
-        <p style="color:var(--muted);font-size:11px">Leave a field blank with an empty comma. First column (ID) can be left blank to auto-generate.</p>
-      </div>
-      <div class="form-group" style="margin-top:12px">
-        <label>Batch Data (CSV lines)</label>
-        <textarea class="form-input" name="batch" style="min-height:200px" placeholder="T-010,Fix login bug,HIGH,Chizaram,Ayo T. Joshua,Tech,2026-06-01,2026-06-10,Not Started,0,..."></textarea>
-      </div>`;
+    body.innerHTML = `<div class="batch-area"><p>Paste multiple rows — one per line, comma-separated:</p><pre>${headers.join(',\n')}</pre></div><div class="form-group" style="margin-top:12px"><label>Batch Data (CSV lines)</label><textarea class="form-input" name="batch" style="min-height:180px" placeholder="One row per line…"></textarea></div>`;
     return;
   }
 
-  // Find row data if editing
+  // Caller identity for RBAC
+  const callerName = localStorage.getItem('nexus_caller') || '';
+  const isManager = callerName && ['ayo','shina','darlington','chizaram','naruka','muyi'].some(m => callerName.toLowerCase().includes(m.toLowerCase()));
+  body.innerHTML += `<div style="background:rgba(91,82,240,0.07);border:1px solid rgba(91,82,240,0.15);border-radius:6px;padding:8px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <span style="font-size:9px;font-family:'Space Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Editing as:</span>
+    <input type="text" id="form-caller" value="${callerName}" placeholder="Your name…" style="background:transparent;border:none;outline:none;font-size:12px;font-family:'Syne',sans-serif;color:var(--text);flex:1;min-width:120px" oninput="localStorage.setItem('nexus_caller',this.value)">
+    <span style="font-size:9px;font-family:'Space Mono',monospace;color:${isManager?'var(--accent2)':'var(--muted)'}">${isManager?'✓ manager':'standard access'}</span>
+  </div>`;
+
   let rowData = null;
-  if (editingRowId) rowData = findRowById(currentTab, editingRowId);
+  if (editingRowId !== null) rowData = findRowById(currentTab, editingRowId);
+
+  // Determine if this user can edit deadline fields
+  const callerForCheck = callerName.toLowerCase();
+  const canEditDeadline = ['ayo','shina','darlington','chizaram','naruka','muyi'].some(m => callerForCheck.includes(m));
 
   schema.fields.forEach(field => {
-    if (field.section) {
-      body.innerHTML += `<div class="form-section-label">${field.section}</div>`;
+    if (field.section) { body.innerHTML += `<div class="form-section-label">${field.section}</div>`; return; }
+
+    // Hide deadline from non-managers (read-only display instead)
+    if (field.key === 'Deadline' && currentTab === '1. Master Tasks' && !canEditDeadline) {
+      const val = rowData ? (rowData[field.key] || '') : '';
+      body.innerHTML += `<div class="form-group"><label style="color:var(--muted)">Deadline <span style="font-size:8px;color:var(--muted)">(manager only)</span></label><div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:5px">${val||'—'}</div></div>`;
       return;
     }
-    const val = rowData ? (rowData[field.key] || '') : '';
-    const reqMark = field.required ? '<span class="required">*</span>' : '';
 
+    const val = rowData ? (rowData[field.key] !== undefined ? rowData[field.key] : '') : '';
+    const req = field.required ? '<span class="req">*</span>' : '';
     let input = '';
     if (field.type === 'select') {
-      const opts = field.options.map(o => `<option value="${o}" ${o===val?'selected':''}>${o}</option>`).join('');
+      const opts = field.options.map(o => `<option value="${o}" ${String(o)===String(val)?'selected':''}>${o}</option>`).join('');
       input = `<select class="form-input" name="${escAttr(field.key)}">${opts}</select>`;
     } else if (field.type === 'textarea') {
-      input = `<textarea class="form-input" name="${escAttr(field.key)}" placeholder="${field.placeholder||''}">${val}</textarea>`;
+      input = `<textarea class="form-input" name="${escAttr(field.key)}" placeholder="${field.placeholder||''}">${escAttr(String(val))}</textarea>`;
     } else {
-      input = `<input type="${field.type}" class="form-input" name="${escAttr(field.key)}" value="${escAttr(val)}" placeholder="${field.placeholder||''}">`;
+      input = `<input type="${field.type}" class="form-input" name="${escAttr(field.key)}" value="${escAttr(String(val))}" placeholder="${field.placeholder||''}">`;
     }
-    body.innerHTML += `<div class="form-group"><label>${field.label}${reqMark}</label>${input}</div>`;
+    body.innerHTML += `<div class="form-group"><label>${field.label}${req}</label>${input}</div>`;
   });
 }
 
 async function submitForm() {
   const body = document.getElementById('drawer-body');
-  const schema = FORM_SCHEMAS[currentTab];
+  const schema = SCHEMAS[currentTab];
+  if (!schema) return;
 
   try {
     if (isBatchMode) {
@@ -1158,42 +1380,51 @@ async function submitForm() {
         headers.forEach((h,i) => obj[h] = vals[i]||'');
         return obj;
       }).filter(r => Object.values(r).some(v=>v));
-
       if (!rows.length) { showToast('No data to submit', 'error'); return; }
-      const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'batchAppend', tabName: currentTab, rows }) });
+      const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'batchAppend', tabName:currentTab, rows }) });
       const r = await res.json();
       if (r.error) { showToast(r.error, 'error'); return; }
-      showToast(`Added ${r.count} rows`, 'success');
+      showToast(`Added ${r.count} rows ✓`, 'success');
     } else {
       const formData = {};
-      body.querySelectorAll('.form-input').forEach(el => { formData[el.name] = el.value; });
+      body.querySelectorAll('.form-input').forEach(el => { if (el.name) formData[el.name] = el.value; });
 
-      // Validate required
-      const missing = schema.fields.filter(f=>f.required && !formData[f.key]).map(f=>f.label);
+      // Attach caller identity for RBAC (deadline edits)
+      const callerFromForm = document.getElementById('form-caller')?.value || '';
+      const callerName = callerFromForm || localStorage.getItem('nexus_caller') || '';
+      if (callerName) { formData['_callerEmail'] = callerName; localStorage.setItem('nexus_caller', callerName); }
+
+      const missing = schema.fields.filter(f=>f.required&&!formData[f.key]).map(f=>f.label);
       if (missing.length) { showToast(`Required: ${missing.join(', ')}`, 'error'); return; }
 
       let payload;
-      if (editingRowId) {
-        payload = { action:'updateRow', tabName: currentTab, id: editingRowId, data: formData };
+      if (editingRowId !== null) {
+        payload = { action:'updateRow', tabName:currentTab, id:editingRowId, data:formData };
       } else {
-        payload = { action: schema.appendAction, tabName: currentTab, data: formData };
+        payload = { action:schema.appendAction, tabName:currentTab, data:formData };
       }
-      const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+
+      const btn = document.getElementById('btn-submit');
+      btn.disabled = true; btn.textContent = 'Saving…';
+      const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) });
       const r = await res.json();
-      if (r.error) { showToast(r.error, 'error'); return; }
-      showToast(editingRowId ? 'Updated ✓' : 'Added ✓', 'success');
+      btn.disabled = false; btn.textContent = 'Save';
+      if (r.error) { showToast('Error: ' + r.error, 'error'); return; }
+      showToast(editingRowId !== null ? 'Updated ✓' : 'Added ✓', 'success');
     }
     closeDrawer();
     await loadData();
   } catch(e) {
-    showToast('Error: ' + e.message, 'error');
+    document.getElementById('btn-submit').disabled = false;
+    document.getElementById('btn-submit').textContent = 'Save';
+    showToast('Network error: ' + e.message, 'error');
   }
 }
 
 function editRow(id, tab) { openDrawer(tab, id); }
 
 function findRowById(tab, id) {
-  const map = { '1. Master Tasks': ['tasks','ID'], '2. COS': ['cos','State'], '3. Partnerships': ['partners','Organisation'], '4. Org Database': ['orgs','Organisation Name'], '5. KPI Log': ['kpi','Date'], '6. Marketing': ['marketing','ID'] };
+  const map = { '1. Master Tasks':['tasks','ID'], '2. COS':['cos','State'], '3. Partnerships':['partners','Organisation'], '4. Org Database':['orgs','Organisation Name'], '5. KPI Log':['kpi','_rowIndex'], '6. Marketing':['marketing','ID'] };
   const [key, field] = map[tab] || [];
   if (!key) return null;
   return (appData[key]||[]).find(r => String(r[field]) === String(id)) || null;
@@ -1203,39 +1434,175 @@ function findRowById(tab, id) {
 //  EXPORT CSV
 // ══════════════════════════════════════════
 function exportCSV(view) {
-  const map = { tasks: appData.tasks, cos: appData.cos, partners: appData.partners, org: appData.orgs, kpi: appData.kpi, marketing: appData.marketing };
+  const map = { tasks:appData.tasks, cos:appData.cos, partners:appData.partners, org:appData.orgs, kpi:appData.kpi, marketing:appData.marketing };
   const rows = map[view];
-  if (!rows || !rows.length) { showToast('No data to export', 'error'); return; }
-  const headers = Object.keys(rows[0]);
+  if (!rows?.length) { showToast('No data to export', 'error'); return; }
+  const headers = Object.keys(rows[0]).filter(h=>h!=='_rowIndex');
   const csv = [headers.join(','), ...rows.map(r => headers.map(h=>`"${String(r[h]||'').replace(/"/g,'""')}"`).join(','))].join('\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-  a.download = `${view}_${new Date().toISOString().split('T')[0]}.csv`;
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = `nexus_${view}_${new Date().toISOString().split('T')[0]}.csv`;
   a.click();
+  showToast('CSV downloaded ✓', 'success');
 }
 
 // ══════════════════════════════════════════
-//  UTILITIES
+//  MY TASKS — Team Quick-Update Panel
 // ══════════════════════════════════════════
-function noDataRow(cols, msg) {
-  return `<tr><td colspan="${cols}" style="color:var(--muted);text-align:center;padding:24px;font-size:12px">${msg||'No data loaded. Press ↻ Sync.'}</td></tr>`;
+let _quTaskId = null;
+
+function openMyTasks() {
+  // Populate member dropdown
+  const sel = document.getElementById('mt-member');
+  if (sel.children.length <= 1) {
+    ALL_TEAM.forEach(m => {
+      const o = document.createElement('option');
+      o.value = m; o.textContent = m;
+      sel.appendChild(o);
+    });
+  }
+  // Restore last selection
+  const saved = localStorage.getItem('nexus_caller');
+  if (saved) { sel.value = saved; renderMyTasks(); }
+
+  document.getElementById('mytasks-overlay').style.display = 'block';
+  document.getElementById('mytasks-panel').style.transform = 'translateX(0)';
 }
-function escQ(s) { return String(s||'').replace(/'/g,"\\'"); }
-function escAttr(s) { return String(s||'').replace(/"/g,'&quot;'); }
+
+function closeMT() {
+  document.getElementById('mytasks-overlay').style.display = 'none';
+  document.getElementById('mytasks-panel').style.transform = 'translateX(100%)';
+}
+
+function renderMyTasks() {
+  const member = document.getElementById('mt-member').value;
+  if (!member) { document.getElementById('mt-tasks-list').innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:40px 0">Select your name above</p>'; return; }
+  localStorage.setItem('nexus_caller', member);
+
+  const myTasks = (appData.tasks || []).filter(t =>
+    t['Assigned To'] === member && !['Done','Cancelled'].includes(t.Status)
+  ).sort((a,b) => {
+    const order = { 'Blocked':0,'URGENT':1,'HIGH':2,'In Progress':3,'Not Started':4 };
+    return (order[a.Status]||9) - (order[b.Status]||9);
+  });
+
+  if (!myTasks.length) {
+    document.getElementById('mt-tasks-list').innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--muted)"><div style="font-size:24px;margin-bottom:8px">🎉</div><p style="font-size:12px">No active tasks assigned to ${member}</p></div>`;
+    return;
+  }
+
+  const html = myTasks.map(t => {
+    const stale = daysSince(t.Last_Updated);
+    const staleHtml = stale >= 2 ? staleTag(stale) : '';
+    const borderColor = t.Status === 'Blocked' ? 'rgba(240,80,96,0.3)' : stale >= 5 ? 'rgba(240,128,48,0.25)' : 'var(--border)';
+    return `<div style="background:var(--surface2);border:1px solid ${borderColor};border-radius:8px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px">
+        <div>
+          <div style="font-size:9px;font-family:'Space Mono',monospace;color:var(--muted);margin-bottom:2px">${t.ID} · ${t['Business / Dept']||'General'}</div>
+          <div style="font-size:13px;font-weight:700;line-height:1.3">${t['Task Description']}</div>
+        </div>
+        ${priorityBadge(t.Priority)}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        ${statusBadge(t.Status)}
+        ${deadlinePill(t.Deadline, t.Status)}
+        ${staleHtml}
+        ${progressBar(t['% Progress'])}
+      </div>
+      ${t.Notes ? `<div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:4px">${t.Notes}</div>` : ''}
+      ${t.Supervisor ? `<div style="font-size:10px;color:var(--muted);margin-bottom:8px">Supervisor: <span style="color:var(--text)">${t.Supervisor}</span></div>` : ''}
+      <button class="btn-sm success" onclick="openQUpdate('${escQ(t.ID)}','${escAttr(t['Task Description'])}')" style="width:100%;justify-content:center;display:flex;align-items:center;gap:4px;padding:6px">
+        ✏ Update Progress / Status
+      </button>
+    </div>`;
+  }).join('');
+
+  document.getElementById('mt-tasks-list').innerHTML = `
+    <div style="font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);margin-bottom:12px">${myTasks.length} active task${myTasks.length!==1?'s':''} assigned to ${member}</div>
+    ${html}`;
+}
+
+function openQUpdate(taskId, taskDesc) {
+  _quTaskId = taskId;
+  const task = findRowById('1. Master Tasks', taskId);
+  document.getElementById('qu-title').textContent = taskDesc.length > 48 ? taskDesc.slice(0,48)+'…' : taskDesc;
+  document.getElementById('qu-body').innerHTML = `
+    <div class="form-group">
+      <label>Status</label>
+      <select class="form-input" id="qu-status">
+        ${['Not Started','In Progress','Done','Cancelled','Blocked'].map(s=>`<option value="${s}" ${task&&task.Status===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>% Progress (0–100)</label>
+      <input type="number" class="form-input" id="qu-progress" min="0" max="100" value="${task?.['% Progress']||0}" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label>Notes / Update</label>
+      <textarea class="form-input" id="qu-notes" placeholder="Add a note about progress, blockers, or next steps…" style="min-height:90px">${task?.Notes||''}</textarea>
+    </div>
+    ${task?.Deadline?`<div style="font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);padding:8px;background:rgba(255,255,255,0.03);border-radius:4px">Deadline: ${task.Deadline}${task.Supervisor?' · Supervisor: '+task.Supervisor:''}</div>`:''}
+  `;
+  document.getElementById('qupdate-overlay').style.display = 'block';
+  const panel = document.getElementById('qupdate-panel');
+  panel.style.display = 'flex';
+  requestAnimationFrame(() => { panel.style.opacity = '1'; panel.style.transform = 'translate(-50%,-50%) scale(1)'; });
+}
+
+function closeQUpdate() {
+  const panel = document.getElementById('qupdate-panel');
+  panel.style.opacity = '0'; panel.style.transform = 'translate(-50%,-50%) scale(0.96)';
+  setTimeout(() => { panel.style.display = 'none'; document.getElementById('qupdate-overlay').style.display = 'none'; }, 200);
+  _quTaskId = null;
+}
+
+async function submitQUpdate() {
+  if (!_quTaskId) return;
+  const status   = document.getElementById('qu-status').value;
+  const progress = document.getElementById('qu-progress').value;
+  const notes    = document.getElementById('qu-notes').value;
+  const member   = document.getElementById('mt-member').value;
+
+  const btn = document.getElementById('qu-save');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    // Only send fields the team member is allowed to update — NO Deadline
+    const payload = {
+      action: 'updateRow',
+      tabName: '1. Master Tasks',
+      id: _quTaskId,
+      data: {
+        Status: status,
+        '% Progress': progress,
+        Notes: notes,
+        _callerEmail: member,
+      }
+    };
+    const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) });
+    const r = await res.json();
+    btn.disabled = false; btn.textContent = 'Save Update';
+    if (r.error) { showToast('Error: ' + r.error, 'error'); return; }
+    showToast('Updated ✓', 'success');
+    closeQUpdate();
+    await loadData();
+    renderMyTasks(); // refresh the panel
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Save Update';
+    showToast('Network error', 'error');
+  }
+}
 
 function updateTime() {
-  document.getElementById('topbar-time').textContent = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+  document.getElementById('topbar-time').textContent = new Date().toLocaleTimeString('en-NG',{hour:'numeric',minute:'2-digit',hour12:true});
 }
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-}
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
 function showToast(msg, type='') {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `show ${type}`;
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.classList.remove('show', 'success', 'error'); }, 3200);
+  t.textContent = msg; t.className = `show ${type}`;
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = '', 3200);
 }
 </script>
 </body>
