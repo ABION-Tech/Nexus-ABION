@@ -953,7 +953,7 @@ function getExpectedTodayMembers() {
 }
 
 // Leader-only fields on Master Tasks — non-leaders cannot edit these
-const LEADER_ONLY_FIELDS = ['Deadline','Assigned To','Assigned_To_Email','Priority','Supervisor','Business / Dept'];
+const LEADER_ONLY_FIELDS = ['Deadline','Assigned To','Assigned_To_Email','Priority','Support Person','Business / Dept'];
 
 // ============================================================
 //  FORM SCHEMAS
@@ -967,7 +967,7 @@ const FORM_SCHEMAS = {
       {section:'Assignment'},
       {key:'Assigned To',label:'Assigned To',type:'select',options:['','Ayo T. Joshua','Shina Samson','Israel Idowu','Darlington','Chizaram','Adetola','Titi','Naruka','Bukayo','Joshua (Content)','Seth','Nora','Rashidat','Muyi','Perpetual','Christiana','Mark','Nehemiah','Joshua Alex','Mr Sam','Joshua (Tech)'],required:true,leaderOnly:true},
       {key:'Assigned_To_Email',label:'Assignee Email',type:'email',placeholder:'name@rescuetap.org',leaderOnly:true},
-      {key:'Supervisor',label:'Supervisor',type:'select',options:['','Ayo T. Joshua','Shina Samson','Darlington','Oye Joldeo'],leaderOnly:true},
+      {key:'Support Person',label:'Support Person',type:'select',options:['','Ayo T. Joshua','Shina Samson','Darlington','Oye Joldeo'],leaderOnly:true},
       {key:'Business / Dept',label:'Department',type:'select',options:['','COS','Partnerships','Marketing','Tech','Operations','Finance','HR'],leaderOnly:true},
       {section:'Priority & Timing'},
       {key:'Priority',label:'Priority',type:'select',options:['URGENT','HIGH','MEDIUM','LOW'],required:true,leaderOnly:true},
@@ -977,52 +977,60 @@ const FORM_SCHEMAS = {
       {key:'Deadline',label:'Deadline',type:'date',leaderOnly:true},
       {section:'Notes'},
       {key:'Notes',label:'Notes',type:'textarea',placeholder:'Additional context...'},
-      {key:'Manual Trigger Required',label:'Manual Trigger Required',type:'select',options:['No','Yes']},
+      {key:'Proof Link',label:'Proof Link',type:'url',placeholder:'https://...'},
     ]
   },
   '2. COS':{label:'COS Entry',idKey:'State',appendAction:'appendCOS',fields:[
     {key:'State',label:'State',type:'text',placeholder:'e.g. Lagos',required:true},
     {key:'Admin Name',label:'Admin Name',type:'text',required:true},
-    {section:'Contact'},{key:'Phone',label:'Phone',type:'tel'},{key:'Email',label:'Email',type:'email'},
+    {section:'Contact'},{key:'Admin Phone',label:'Phone',type:'tel'},{key:'Admin Email',label:'Email',type:'email'},
     {section:'Status'},{key:'WhatsApp Group Created',label:'WhatsApp Group Created',type:'select',options:['No','Yes']},
     {key:'Members Count',label:'Members Count',type:'number'},{key:'Status',label:'Status',type:'select',options:['Pending','In Progress','Active']},
-    {key:'Date Launched',label:'Date Launched',type:'date'},{key:'Notes',label:'Notes',type:'textarea'},
+    {key:'Last Report Date',label:'Last Report Date',type:'date'},{key:'Notes',label:'Notes',type:'textarea'},
   ]},
   '3. Partnerships':{label:'Partnership',idKey:'Organisation',appendAction:'appendPartner',fields:[
     {key:'Organisation',label:'Organisation',type:'text',required:true},
     {key:'Assigned To',label:'Assigned To',type:'text',required:true},
     {section:'Contact'},{key:'Contact Name',label:'Contact Name',type:'text'},{key:'Contact Email',label:'Contact Email',type:'email'},
-    {section:'Classification'},{key:'Type',label:'Type',type:'select',options:['NGO','Government','Corporate','Individual','Academic','Media']},
-    {key:'Current Status',label:'Status',type:'select',options:['In Discussion','MoU Pending','Active','Cold','Declined']},
-    {key:'MoU Status',label:'MoU Status',type:'select',options:['Not Started','Draft Sent','Under Review','Signed','N/A']},
-    {section:'Dates'},{key:'Date Added',label:'Date Added',type:'date'},{key:'Follow-Up Date',label:'Follow-Up Date',type:'date'},
-    {key:'Notes',label:'Notes',type:'textarea'},{key:'Manual Trigger Required',label:'Manual Trigger',type:'select',options:['No','Yes']},
+    {section:'Classification'},{key:'Category',label:'Category',type:'select',options:['NGO','Government','Corporate','Individual','Academic','Media']},
+    {key:'Current Status',label:'Status',type:'select',options:['In Discussion','Active','Cold','Declined']},
+    {key:'Document Status',label:'Document Status',type:'select',options:['Not Started','Draft Sent','Under Review','Signed','N/A']},
+    {section:'Dates'},{key:'Last Contact Date',label:'Last Contact Date',type:'date'},{key:'Follow-Up Date',label:'Follow-Up Date',type:'date'},
+    {key:'Remarks',label:'Remarks',type:'textarea'},
   ]},
-  '4. Org Database':{label:'Organisation',idKey:'Organisation Name',appendAction:'appendOrg',fields:[
-    {key:'Organisation Name',label:'Organisation Name',type:'text',required:true},{key:'Industry',label:'Industry',type:'text'},
-    {section:'Location & Contact'},{key:'State',label:'State',type:'text'},{key:'Country',label:'Country',type:'text'},
-    {key:'Contact Person',label:'Contact Person',type:'text'},{key:'Email',label:'Email',type:'email'},{key:'Phone',label:'Phone',type:'tel'},
-    {section:'Onboarding'},{key:'Onboarding Status',label:'Status',type:'select',options:['Pending','In Progress','Active','Declined']},
-    {key:'Notes',label:'Notes',type:'textarea'},
+  '4. Org Database':{label:'Organisation',idKey:'Org ID',appendAction:'appendOrg',fields:[
+    {key:'Org ID',label:'Org ID',type:'text',placeholder:'e.g. ORG-001'},
+    {key:'Visitor Name',label:'Visitor Name',type:'text',required:true},
+    {key:'Position',label:'Position',type:'text'},
+    {key:'Company/Org',label:'Company / Org',type:'text',required:true},
+    {section:'Contact'},{key:'Email',label:'Email',type:'email'},{key:'Phone',label:'Phone',type:'tel'},
+    {key:'State',label:'State',type:'text'},
+    {section:'Details'},{key:'Staff Size',label:'Staff Size',type:'text'},{key:'Date Visited',label:'Date Visited',type:'date'},
+    {key:'Contact Owner',label:'Contact Owner',type:'text'},{key:'Letter Status',label:'Letter Status',type:'select',options:['','Not Sent','Sent','Acknowledged']},
+    {key:'Onboarding Status',label:'Onboarding Status',type:'select',options:['','Pending','In Progress','Active','Declined']},
+    {key:'WhatsApp Added',label:'WhatsApp Added',type:'select',options:['No','Yes']},
+    {key:'Follow-Up Date',label:'Follow-Up Date',type:'date'},{key:'Notes',label:'Notes',type:'textarea'},
   ]},
   '5. KPI Log':{label:'KPI Report',idKey:'Date',appendAction:'appendKPI',fields:[
     {key:'Date',label:'Date',type:'date',required:true},
     {key:'Day',label:'Day',type:'select',options:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],required:true},
-    {key:'Team Member',label:'Team Member',type:'text',required:true},{key:'Role/Dept',label:'Role / Dept',type:'text'},
+    {key:'Team Member',label:'Team Member',type:'text',required:true},{key:'Role',label:'Role',type:'text'},
     {section:'Report'},
     {key:'What I Completed (with proof)',label:'What I Completed',type:'textarea',required:true},
-    {key:'Key Achievement',label:'Key Achievement',type:'textarea'},{key:'Blockers',label:'Blockers',type:'textarea'},
-    {key:"Tomorrow's Plan",label:"Tomorrow's Plan",type:'textarea'},{key:'Submitted',label:'Submitted',type:'select',options:['Y','N']},
+    {key:'What I Moved Forward',label:'What I Moved Forward',type:'textarea'},
+    {key:'Blockers',label:'Blockers',type:'textarea'},
+    {key:"Tomorrow's Plan",label:"Tomorrow's Plan",type:'textarea'},
+    {key:'Report Submitted (Y/N)',label:'Submitted',type:'select',options:['Y','N']},
   ]},
   '6. Marketing':{label:'Marketing Content',idKey:'ID',appendAction:'appendMarketing',fields:[
     {key:'ID',label:'Content ID',type:'text',required:true},
-    {key:'Type',label:'Type',type:'select',options:['Reel','Post','Story','Thread','Article','Infographic','Video','Other']},
+    {key:'Content Type',label:'Content Type',type:'select',options:['Reel','Post','Story','Thread','Article','Infographic','Video','Other']},
     {key:'Topic / Caption',label:'Topic / Caption',type:'textarea',required:true},
     {section:'Details'},{key:'Platform',label:'Platform(s)',type:'text'},{key:'Assigned To',label:'Assigned To',type:'text'},
     {key:'Due Date',label:'Due Date',type:'date'},{key:'Status',label:'Status',type:'select',options:['Not Started','In Progress','In Review','Done','Cancelled']},
-    {key:'Link',label:'Link',type:'url'},{key:'Notes',label:'Notes',type:'textarea'},
+    {key:'Post Link',label:'Post Link',type:'url'},{key:'Notes',label:'Notes',type:'textarea'},
   ]},
-  '9. Meetings':{label:'Meeting',idKey:'Meeting_ID',appendAction:'appendMeeting',fields:[
+  '7. Meetings':{label:'Meeting',idKey:'Meeting_ID',appendAction:'appendMeeting',fields:[
     {key:'Meeting_ID',label:'Meeting ID',type:'text',readonly:true},
     {key:'Title',label:'Title',type:'text',required:true},
     {section:'When'},{key:'Date',label:'Date',type:'date',required:true},{key:'Time',label:'Time',type:'time'},{key:'Duration_Mins',label:'Duration (mins)',type:'number'},
@@ -1038,7 +1046,7 @@ const TEAM_EMAILS = {
   'Shina Samson'            : 'abionnexus@gmail.com',
   'Israel Idowu'            : 'israel@rescuetap.org',
   'Darlington'              : 'darlington@rescuetap.org',
-  'Chizaram'                : 'othnielemrys@gmail.com',
+  'Chizaram'                : 'chizaram@rescuetap.org',
   'Adetola'                 : 'adetola@rescuetap.org',
   'Titi'                    : 'titi@rescuetap.org',
   'Naruka'                  : 'naruka@rescuetap.org',
@@ -1070,7 +1078,7 @@ let leaderName  = sessionStorage.getItem('nexus_leader_name')  || null;
 const VIEW_TAB_MAP = {
   tasks:'1. Master Tasks', cos:'2. COS', partners:'3. Partnerships',
   org:'4. Org Database', kpi:'5. KPI Log', marketing:'6. Marketing',
-  meetings:'9. Meetings'
+  meetings:'7. Meetings'
 };
 const ADD_BTN_LABELS = {
   dashboard:'+ TASK', tasks:'+ TASK', cos:'+ COS', partners:'+ PARTNER',
@@ -1299,35 +1307,35 @@ function renderTasks() {
   document.getElementById('nav-badge-tasks').textContent = (appData.tasks||[]).filter(t=>!['Done','Cancelled'].includes(t.Status)).length;
   document.getElementById('tasks-tbody').innerHTML = tasks.map(t=>{
     const stale=taskStaleDays(t); const sw=stale>=2&&!['Done','Cancelled'].includes(t.Status)?'<span class="badge-pill badge-red" style="margin-left:4px">'+stale+'d</span>':'';
-    return '<tr><td style="font-family:Space Mono,monospace;font-size:11px">'+t.ID+'</td><td>'+t['Task Description']+sw+'</td><td>'+priorityBadge(t.Priority)+'</td><td>'+t['Assigned To']+'</td><td>'+(t.Supervisor||'--')+'</td><td>'+(t['Business / Dept']||'--')+'</td><td style="font-family:Space Mono,monospace;font-size:11px">'+(t.Deadline||'--')+'</td><td>'+statusBadge(t.Status)+'</td><td>'+progressBar(t['% Progress'])+'</td><td><button class="btn-sm" onclick="editRow(\''+escQ(t.ID)+'\',\'1. Master Tasks\')">Edit</button></td></tr>';
+    return '<tr><td style="font-family:Space Mono,monospace;font-size:11px">'+t.ID+'</td><td>'+t['Task Description']+sw+'</td><td>'+priorityBadge(t.Priority)+'</td><td>'+t['Assigned To']+'</td><td>'+(t['Support Person']||'--')+'</td><td>'+(t['Business / Dept']||'--')+'</td><td style="font-family:Space Mono,monospace;font-size:11px">'+(t.Deadline||'--')+'</td><td>'+statusBadge(t.Status)+'</td><td>'+progressBar(t['% Progress'])+'</td><td><button class="btn-sm" onclick="editRow(\''+escQ(t.ID)+'\',\'1. Master Tasks\')">Edit</button></td></tr>';
   }).join('')||noDataRow(10,'No tasks');
 }
 
 function renderCOS() {
   const cos=appData.cos||[];
-  document.getElementById('cos-tbody').innerHTML = cos.map(c=>'<tr><td>'+c.State+'</td><td>'+c['Admin Name']+'</td><td>'+(c.Phone||'--')+'</td><td>'+(c.Email||'--')+'</td><td>'+statusBadge(c['WhatsApp Group Created']==='Yes'?'Active':'Pending')+'</td><td>'+(c['Members Count']||0)+'</td><td>'+statusBadge(c.Status)+'</td><td style="font-family:Space Mono,monospace;font-size:11px">'+(c['Date Launched']||'--')+'</td><td><button class="btn-sm" onclick="editRow(\''+escQ(c.State)+'\',\'2. COS\')">Edit</button></td></tr>').join('')||noDataRow(9,'No COS data');
+  document.getElementById('cos-tbody').innerHTML = cos.map(c=>'<tr><td>'+c.State+'</td><td>'+c['Admin Name']+'</td><td>'+(c['Admin Phone']||'--')+'</td><td>'+(c['Admin Email']||'--')+'</td><td>'+statusBadge(c['WhatsApp Group Created']==='Yes'?'Active':'Pending')+'</td><td>'+(c['Members Count']||0)+'</td><td>'+statusBadge(c.Status)+'</td><td style="font-family:Space Mono,monospace;font-size:11px">'+(c['Last Report Date']||'--')+'</td><td><button class="btn-sm" onclick="editRow(\''+escQ(c.State)+'\',\'2. COS\')">Edit</button></td></tr>').join('')||noDataRow(9,'No COS data');
 }
 
 function renderPartners() {
   const p=appData.partners||[];
-  document.getElementById('partners-tbody').innerHTML = p.map(r=>'<tr><td>'+r['Assigned To']+'</td><td><strong>'+r.Organisation+'</strong></td><td>'+(r['Contact Name']||'--')+'</td><td><span class="badge-pill badge-gray">'+(r.Type||'--')+'</span></td><td>'+statusBadge(r['Current Status'])+'</td><td style="font-family:Space Mono,monospace;font-size:11px">'+(r['Follow-Up Date']||'--')+'</td><td>'+statusBadge(r['MoU Status'])+'</td><td><button class="btn-sm" onclick="editRow(\''+escQ(r.Organisation)+'\',\'3. Partnerships\')">Edit</button></td></tr>').join('')||noDataRow(8,'No partnerships');
+  document.getElementById('partners-tbody').innerHTML = p.map(r=>'<tr><td>'+r['Assigned To']+'</td><td><strong>'+r.Organisation+'</strong></td><td>'+(r['Contact Name']||'--')+'</td><td><span class="badge-pill badge-gray">'+(r.Category||'--')+'</span></td><td>'+statusBadge(r['Current Status'])+'</td><td style="font-family:Space Mono,monospace;font-size:11px">'+(r['Follow-Up Date']||'--')+'</td><td>'+statusBadge(r['Document Status'])+'</td><td><button class="btn-sm" onclick="editRow(\''+escQ(r.Organisation)+'\',\'3. Partnerships\')">Edit</button></td></tr>').join('')||noDataRow(8,'No partnerships');
 }
 
 function renderOrg() {
   const o=appData.orgs||[];
-  document.getElementById('org-tbody').innerHTML = o.map(r=>'<tr><td><strong>'+(r['Organisation Name']||'--')+'</strong></td><td>'+(r.Industry||'--')+'</td><td>'+(r.State||'--')+'</td><td>'+(r['Contact Person']||'--')+'</td><td>'+(r.Email||'--')+'</td><td>'+(r.Phone||'--')+'</td><td>'+statusBadge(r['Onboarding Status'])+'</td><td><button class="btn-sm" onclick="editRow(\''+escQ(r['Organisation Name'])+'\',\'4. Org Database\')">Edit</button></td></tr>').join('')||noDataRow(8,'No org data');
+  document.getElementById('org-tbody').innerHTML = o.map(r=>'<tr><td><strong>'+(r['Company/Org']||r['Visitor Name']||'--')+'</strong></td><td>'+(r['Position']||'--')+'</td><td>'+(r.State||'--')+'</td><td>'+(r['Visitor Name']||'--')+'</td><td>'+(r.Email||'--')+'</td><td>'+(r.Phone||'--')+'</td><td>'+statusBadge(r['Onboarding Status'])+'</td><td><button class="btn-sm" onclick="editRow(\''+escQ(r['Org ID']||r['Visitor Name'])+'\',\'4. Org Database\')">Edit</button></td></tr>').join('')||noDataRow(8,'No org data');
 }
 
 function renderKPI() {
   const kpi=appData.kpi||[]; const todayStr=new Date().toDateString();
   const missing=getExpectedTodayMembers().filter(m=>!kpi.some(k=>new Date(k.Date).toDateString()===todayStr&&k['Team Member']===m));
   document.getElementById('kpi-alerts').innerHTML = missing.length?'<div class="alert-banner warn"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg><div><h4>'+missing.length+' member(s) have not filed EOD today</h4><ul>'+missing.slice(0,8).map(m=>'<li>'+m+'</li>').join('')+'</ul></div></div>':'';
-  document.getElementById('kpi-tbody').innerHTML = [...kpi].reverse().map((k,i)=>'<tr><td style="font-family:Space Mono,monospace;font-size:11px">'+k.Date+'</td><td>'+(k.Day||'--')+'</td><td>'+k['Team Member']+'</td><td>'+(k['Role/Dept']||'--')+'</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(k['What I Completed (with proof)']||'--')+'</td><td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(k['Key Achievement']||'--')+'</td><td>'+(k.Blockers||'--')+'</td><td>'+statusBadge(k.Submitted)+'</td><td><button class="btn-sm" onclick="editRow(\''+(kpi.length-i)+'\',\'5. KPI Log\')">Edit</button></td></tr>').join('')||noDataRow(9,'No KPI data');
+  document.getElementById('kpi-tbody').innerHTML = [...kpi].reverse().map((k,i)=>'<tr><td style="font-family:Space Mono,monospace;font-size:11px">'+k.Date+'</td><td>'+(k.Day||'--')+'</td><td>'+k['Team Member']+'</td><td>'+(k['Role']||'--')+'</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(k['What I Completed (with proof)']||'--')+'</td><td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(k['What I Moved Forward']||'--')+'</td><td>'+(k.Blockers||'--')+'</td><td>'+statusBadge(k['Report Submitted (Y/N)'])+'</td><td><button class="btn-sm" onclick="editRow(\''+(kpi.length-i)+'\',\'5. KPI Log\')">Edit</button></td></tr>').join('')||noDataRow(9,'No KPI data');
 }
 
 function renderMarketing() {
   const m=appData.marketing||[];
-  document.getElementById('marketing-tbody').innerHTML = m.map(r=>'<tr><td style="font-family:Space Mono,monospace;font-size:11px">'+r.ID+'</td><td><span class="badge-pill badge-gray">'+(r.Type||'--')+'</span></td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(r['Topic / Caption']||'--')+'</td><td>'+(r.Platform||'--')+'</td><td>'+(r['Assigned To']||'--')+'</td><td style="font-family:Space Mono,monospace;font-size:11px">'+(r['Due Date']||'--')+'</td><td>'+statusBadge(r.Status)+'</td><td>'+(r.Link?'<a href="'+escAttr(r.Link)+'" target="_blank" class="btn-sm">Link</a>':'--')+'</td><td><button class="btn-sm" onclick="editRow(\''+escQ(r.ID)+'\',\'6. Marketing\')">Edit</button></td></tr>').join('')||noDataRow(9,'No marketing data');
+  document.getElementById('marketing-tbody').innerHTML = m.map(r=>'<tr><td style="font-family:Space Mono,monospace;font-size:11px">'+r.ID+'</td><td><span class="badge-pill badge-gray">'+(r['Content Type']||'--')+'</span></td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(r['Topic / Caption']||'--')+'</td><td>'+(r.Platform||'--')+'</td><td>'+(r['Assigned To']||'--')+'</td><td style="font-family:Space Mono,monospace;font-size:11px">'+(r['Due Date']||'--')+'</td><td>'+statusBadge(r.Status)+'</td><td>'+(r['Post Link']?'<a href="'+escAttr(r['Post Link'])+'" target="_blank" class="btn-sm">Link</a>':'--')+'</td><td><button class="btn-sm" onclick="editRow(\''+escQ(r.ID)+'\',\'6. Marketing\')">Edit</button></td></tr>').join('')||noDataRow(9,'No marketing data');
 }
 
 // ============================================================
@@ -1353,7 +1361,7 @@ async function submitEOD() {
   const completed=document.getElementById('eod-completed').value.trim();
   if(!completed){showToast('Fill in what you completed','error');return;}
   const today=new Date(); const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const data={'Date':todayISO(),'Day':days[today.getDay()],'Team Member':who,'Role/Dept':document.getElementById('eod-role').value.trim(),'What I Completed (with proof)':completed,'Key Achievement':document.getElementById('eod-achievement').value.trim(),'Blockers':document.getElementById('eod-blockers').value.trim(),"Tomorrow's Plan":document.getElementById('eod-tomorrow').value.trim(),'Submitted':'Y'};
+  const data={'Date':todayISO(),'Day':days[today.getDay()],'Team Member':who,'Role':document.getElementById('eod-role').value.trim(),'What I Completed (with proof)':completed,'What I Moved Forward':document.getElementById('eod-achievement').value.trim(),'Blockers':document.getElementById('eod-blockers').value.trim(),"Tomorrow's Plan":document.getElementById('eod-tomorrow').value.trim(),'Report Submitted (Y/N)':'Y'};
   const btn=document.getElementById('eod-submit-btn');
   const orig=btn.textContent;
   btn.disabled=true; btn.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .7s linear infinite"></span>Submitting…</span>';
@@ -1511,7 +1519,7 @@ function renderFailsafe() {
   const filed=new Set(kpi.filter(k=>new Date(k.Date).toDateString()===todayStr).map(k=>k['Team Member']));
   const missingEOD=getExpectedTodayMembers().filter(m=>!filed.has(m));
   document.getElementById('failsafe-eod-date').textContent=today.toLocaleDateString('en-NG',{weekday:'long',day:'numeric',month:'short'});
-  document.getElementById('failsafe-eod-tbody').innerHTML=missingEOD.map(m=>{ const last=kpi.filter(k=>k['Team Member']===m).sort((a,b)=>new Date(b.Date)-new Date(a.Date))[0]; return '<tr><td>'+m+'</td><td style="color:var(--muted)">'+(last?.['Role/Dept']||'--')+'</td><td><span class="badge-pill badge-red">'+(last?daysSince(last.Date)+'d':'Never')+'</span></td><td style="font-family:Space Mono,monospace;font-size:11px">'+(last?.Date||'--')+'</td></tr>'; }).join('')||noDataRow(4,'All filed today!');
+  document.getElementById('failsafe-eod-tbody').innerHTML=missingEOD.map(m=>{ const last=kpi.filter(k=>k['Team Member']===m).sort((a,b)=>new Date(b.Date)-new Date(a.Date))[0]; return '<tr><td>'+m+'</td><td style="color:var(--muted)">'+(last?.['Role']||'--')+'</td><td><span class="badge-pill badge-red">'+(last?daysSince(last.Date)+'d':'Never')+'</span></td><td style="font-family:Space Mono,monospace;font-size:11px">'+(last?.Date||'--')+'</td></tr>'; }).join('')||noDataRow(4,'All filed today!');
   const blocked=tasks.filter(t=>t.Status==='Blocked');
   document.getElementById('failsafe-blocked-tbody').innerHTML=blocked.map(t=>'<tr><td>'+t['Task Description']+'</td><td>'+t['Assigned To']+'</td><td><span class="badge-pill badge-red">'+taskStaleDays(t)+'d</span></td><td><button class="btn-sm danger" onclick="editRow(\''+escQ(t.ID)+'\',\'1. Master Tasks\')">Resolve</button></td></tr>').join('')||noDataRow(4,'No blocked tasks');
   const overDead=tasks.filter(t=>t.Deadline&&!['Done','Cancelled'].includes(t.Status)&&new Date(t.Deadline)<today);
@@ -1597,11 +1605,11 @@ function renderMyTasks() {
   try { const eodSel=document.getElementById('eod-who-select'); if(eodSel && eodSel.options.length>1) eodSel.value=who; } catch(e){}
 
   if (!appData || !appData.tasks) {
-    body.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">No data yet — tap Sync first.</p>';
+    body.innerHTML = '<div style="text-align:center;padding:30px 0"><p style="color:var(--muted);font-size:12px;margin-bottom:12px">No data loaded yet.</p><button class="btn-primary" onclick="syncData().then(()=>renderMyTasks())" style="font-size:12px;padding:8px 18px">↻ Sync Now</button></div>';
     return;
   }
 
-  let tasks = (appData.tasks || []).filter(t => (t['Assigned To'] || '').toLowerCase() === who.toLowerCase());
+  let tasks = (appData.tasks || []).filter(t => (t['Assigned To'] || '').trim().toLowerCase() === who.trim().toLowerCase());
 
   if (myTasksFilter === 'active')  tasks = tasks.filter(t => !['Done','Cancelled'].includes(t.Status));
   if (myTasksFilter === 'urgent')  tasks = tasks.filter(t => ['URGENT','HIGH'].includes(t.Priority) && !['Done','Cancelled'].includes(t.Status));
@@ -1615,7 +1623,8 @@ function renderMyTasks() {
   else if(msort==='az')      tasks.sort((a,b)=>(a['Task Description']||'').localeCompare(b['Task Description']||''));
 
   if (!tasks.length) {
-    body.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">No tasks found for this filter.</p>';
+    const total = (appData.tasks||[]).length;
+    body.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">No tasks found for <strong>'+who+'</strong>.<br><span style="font-size:10px">('+total+' total tasks loaded — check name matches sheet exactly)</span></p>';
     return;
   }
 
@@ -1742,44 +1751,54 @@ function generateForm() {
   schema.fields.forEach(field=>{
     if(field.section){body.innerHTML+='<div class="form-section-label">'+field.section+'</div>';return;}
     const val=rowData?(rowData[field.key]!==undefined?rowData[field.key]:''):'';
+    // Pre-populate email from map if this is the email field and val is blank
     const locked=field.leaderOnly&&!isLeader();
+    let resolvedVal = val;
+    if(field.key==='Assigned_To_Email' && !resolvedVal && !locked) {
+      const assignedTo = rowData ? (rowData['Assigned To']||'') : '';
+      resolvedVal = TEAM_EMAILS[assignedTo] || '';
+    }
     const req=field.required?'<span style="color:var(--danger)">*</span>':'';
     let input='';
     const dis=locked?' disabled':'';
     const ro=field.readonly?' readonly style="opacity:0.5;cursor:not-allowed"':'';
     if(field.type==='select'){
-      const opts=field.options.map(o=>'<option value="'+o+'" '+(o==val?'selected':'')+'>'+o+'</option>').join('');
+      const opts=field.options.map(o=>'<option value="'+o+'" '+(o==resolvedVal?'selected':'')+'>'+o+'</option>').join('');
       const onChange = field.key==='Assigned To' ? ' onchange="autoFillEmail(this.value)"' : '';
       input='<select class="form-input" name="'+escAttr(field.key)+'"'+dis+onChange+'>'+opts+'</select>';
     } else if(field.type==='textarea'){
-      input='<textarea class="form-input" name="'+escAttr(field.key)+'" placeholder="'+(field.placeholder||'')+'"'+dis+ro+'>'+val+'</textarea>';
+      input='<textarea class="form-input" name="'+escAttr(field.key)+'" placeholder="'+(field.placeholder||'')+'"'+dis+ro+'>'+resolvedVal+'</textarea>';
     } else if(field.type==='date'){
       const dpId='dp-'+escAttr(field.key).replace(/[\s/]/g,'_');
       input='<div class="datepicker-wrap" id="'+dpId+'">'
         +'<div class="datepicker-display'+(locked?' field-locked':'')+'"'+(locked?' style="opacity:.5;pointer-events:none"':'')+' tabindex="0">'
-        +'<span class="dp-val">'+(val||'Select date')+'</span>'
+        +'<span class="dp-val">'+(resolvedVal||'Select date')+'</span>'
         +'<span class="dp-icon">📅</span>'
         +'</div>'
-        +'<input type="hidden" name="'+escAttr(field.key)+'" value="'+escAttr(val)+'"'+(locked?' disabled':'')+'>'
+        +'<input type="hidden" name="'+escAttr(field.key)+'" value="'+escAttr(resolvedVal)+'"'+(locked?' disabled':'')+'>'
         +'</div>';
     } else {
-      input='<input type="'+field.type+'" class="form-input" name="'+escAttr(field.key)+'" value="'+escAttr(val)+'" placeholder="'+(field.placeholder||'')+'"'+dis+ro+'>';
+      input='<input type="'+field.type+'" class="form-input" name="'+escAttr(field.key)+'" value="'+escAttr(resolvedVal)+'" placeholder="'+(field.placeholder||'')+'"'+dis+ro+'>';
     }
     body.innerHTML+='<div class="form-group'+(locked?' field-locked':'')+'"><label>'+field.label+(locked?' (locked)':'')+req+'</label>'+input+'</div>';
   });
   // Init all date pickers after DOM is updated
   body.querySelectorAll('.datepicker-wrap').forEach(w=>initDatePicker(w));
+  // Auto-fill email if Assigned To already has a value (e.g. editing existing row)
+  const assignedToEl = body.querySelector('.form-input[name="Assigned To"]');
+  if(assignedToEl && assignedToEl.value) autoFillEmail(assignedToEl.value);
 }
 
 function autoFillEmail(name) {
   const emailField = document.querySelector('.form-input[name="Assigned_To_Email"]');
-  if (!emailField) return;
-  const email = TEAM_EMAILS[name];
-  // Auto-fill if field is empty OR if it contains a known team email (i.e. was auto-set before)
+  if (!emailField || emailField.disabled) return;
+  const mapped = TEAM_EMAILS[name] || '';
   const currentVal = emailField.value.trim();
   const isKnownEmail = Object.values(TEAM_EMAILS).includes(currentVal);
+  // Always overwrite if: field is empty, OR current value is a known mapped email (wasn't custom-typed)
+  // Preserve only if user typed a custom email not in the map
   if (!currentVal || isKnownEmail) {
-    if (email) emailField.value = email;
+    emailField.value = mapped; // sets to email or clears if name blank
   }
 }
 
@@ -1871,10 +1890,10 @@ function findRowById(tab,id){
     '1. Master Tasks' :['tasks','ID'],
     '2. COS'          :['cos','State'],
     '3. Partnerships' :['partners','Organisation'],
-    '4. Org Database' :['orgs','Organisation Name'],
+    '4. Org Database' :['orgs','Org ID'],
     '5. KPI Log'      :['kpi','_rowIndex'],
     '6. Marketing'    :['marketing','ID'],
-    '9. Meetings'     :['meetings','Meeting_ID'],
+    '7. Meetings'     :['meetings','Meeting_ID'],
   };
   const[key,field]=map[tab]||[]; if(!key) return null;
   // KPI uses _rowIndex (1-based row number stored as string id)
