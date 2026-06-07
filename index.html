@@ -859,7 +859,7 @@ if (SCRIPT_URL.includes('YOUR_SCRIPT_ID_HERE')) {
 }
 
 const ALL_TEAM_MEMBERS = [
-  'Ayo T. Joshua','Shina Samson','Israel Idowu','Darlington','Chizaram',
+  'Ayo T. Joshua','Daniel Bowman','Shina Samson','Israel Idowu','Darlington','Chizaram',
   'Adetola','Titi','Naruka','Bukayo','Joshua (Content)','Seth','Nora',
   'Rashidat','Muyi','Perpetual','Christiana','Mark','Nehemiah','Joshua Alex',
   'Mr Sam','Joshua (Tech Outreach)'
@@ -878,9 +878,9 @@ const FORM_SCHEMAS = {
       {key:'ID',label:'Task ID',type:'text',placeholder:'e.g. T-001',required:true},
       {key:'Task Description',label:'Task Description',type:'text',placeholder:'What needs to be done?',required:true},
       {section:'Assignment'},
-      {key:'Assigned To',label:'Assigned To',type:'select',options:['','Ayo T. Joshua','Shina Samson','Israel Idowu','Darlington','Chizaram','Adetola','Titi','Naruka','Bukayo','Joshua (Content)','Seth','Nora','Rashidat','Muyi','Perpetual','Christiana','Mark','Nehemiah','Joshua Alex','Mr Sam','Joshua (Tech Outreach)'],required:true,leaderOnly:true},
+      {key:'Assigned To',label:'Assigned To',type:'select',options:['','Ayo T. Joshua','Daniel Bowman','Shina Samson','Israel Idowu','Darlington','Chizaram','Adetola','Titi','Naruka','Bukayo','Joshua (Content)','Seth','Nora','Rashidat','Muyi','Perpetual','Christiana','Mark','Nehemiah','Joshua Alex','Mr Sam','Joshua (Tech Outreach)'],required:true,leaderOnly:true},
       {key:'Assigned_To_Email',label:'Assignee Email',type:'email',placeholder:'name@rescuetap.org',leaderOnly:true},
-      {key:'Supervisor',label:'Supervisor',type:'select',options:['','Ayo T. Joshua','Shina Samson','Darlington','Oye Joldeo'],leaderOnly:true},
+      {key:'Supervisor',label:'Supervisor',type:'select',options:['','Ayo T. Joshua','Shina Samson','Daniel Bowman','Oye Joldeo'],leaderOnly:true},
       {key:'Business / Dept',label:'Department',type:'select',options:['','COS','Partnerships','Marketing','Tech','Operations','Finance','HR'],leaderOnly:true},
       {section:'Priority & Timing'},
       {key:'Priority',label:'Priority',type:'select',options:['URGENT','HIGH','MEDIUM','LOW'],required:true,leaderOnly:true},
@@ -948,6 +948,7 @@ const FORM_SCHEMAS = {
 // Name → email map — update emails here to match your team
 const TEAM_EMAILS = {
   'Ayo T. Joshua'           : 'othnielemry@gmail.com',
+  'Daniel Bowman'           : 'daniel.bowman@rescuetap.org',
   'Shina Samson'            : 'abionnexus@gmail.com',
   'Israel Idowu'            : 'israel@rescuetap.org',
   'Darlington'              : 'darlington@rescuetap.org',
