@@ -936,7 +936,7 @@ const ALL_TEAM_MEMBERS = [
   'Ayo T. Joshua','Shina Samson','Israel Idowu','Darlington','Chizaram',
   'Adetola','Titi','Naruka','Bukayo','Joshua (Content)','Seth','Nora',
   'Rashidat','Muyi','Perpetual','Christiana','Mark','Nehemiah','Joshua Alex',
-  'Mr Sam','Joshua (Tech)'
+  'Mr Sam','Joshua (Tech Outreach)'
 ];
 // EOD attendance schedule: 0=Sun,1=Mon,...,5=Fri,6=Sat. Default = Mon-Fri for all others.
 const EOD_SCHEDULE_JS = {
@@ -965,7 +965,7 @@ const FORM_SCHEMAS = {
       {key:'ID',label:'Task ID',type:'text',placeholder:'e.g. T-001',required:true},
       {key:'Task Description',label:'Task Description',type:'text',placeholder:'What needs to be done?',required:true},
       {section:'Assignment'},
-      {key:'Assigned To',label:'Assigned To',type:'select',options:['','Ayo T. Joshua','Shina Samson','Israel Idowu','Darlington','Chizaram','Adetola','Titi','Naruka','Bukayo','Joshua (Content)','Seth','Nora','Rashidat','Muyi','Perpetual','Christiana','Mark','Nehemiah','Joshua Alex','Mr Sam','Joshua (Tech)'],required:true,leaderOnly:true},
+      {key:'Assigned To',label:'Assigned To',type:'select',options:['','Ayo T. Joshua','Shina Samson','Israel Idowu','Darlington','Chizaram','Adetola','Titi','Naruka','Bukayo','Joshua (Content)','Seth','Nora','Rashidat','Muyi','Perpetual','Christiana','Mark','Nehemiah','Joshua Alex','Mr Sam','Joshua (Tech Outreach)'],required:true,leaderOnly:true},
       {key:'Assigned_To_Email',label:'Assignee Email',type:'email',placeholder:'name@rescuetap.org',leaderOnly:true},
       {key:'Supervisor',label:'Supervisor',type:'select',options:['','Ayo T. Joshua','Shina Samson','Darlington','Oye Joldeo'],leaderOnly:true},
       {key:'Business / Dept',label:'Department',type:'select',options:['','COS','Partnerships','Marketing','Tech','Operations','Finance','HR'],leaderOnly:true},
@@ -1038,7 +1038,7 @@ const TEAM_EMAILS = {
   'Shina Samson'            : 'abionnexus@gmail.com',
   'Israel Idowu'            : 'israel@rescuetap.org',
   'Darlington'              : 'darlington@rescuetap.org',
-  'Chizaram'                : 'othnielemrys@gmail.com',
+  'Chizaram'                : 'chizaram@rescuetap.org',
   'Adetola'                 : 'adetola@rescuetap.org',
   'Titi'                    : 'titi@rescuetap.org',
   'Naruka'                  : 'naruka@rescuetap.org',
@@ -1054,7 +1054,7 @@ const TEAM_EMAILS = {
   'Nehemiah'                : 'nehemiah@rescuetap.org',
   'Joshua Alex'             : 'joshuaalex@rescuetap.org',
   'Mr Sam'                  : 'sam@rescuetap.org',
-  'Joshua (Tech)'           : 'joshua.tech@rescuetap.org',
+  'Joshua (Tech Outreach)'  : 'joshua.tech@rescuetap.org',
 };
 let currentView = 'dashboard';
 let currentTab  = '1. Master Tasks';
@@ -1561,15 +1561,16 @@ function updateNavBadges() {
 let myTasksFilter = 'all';
 
 function openMyTasks() {
+  // Populate name selector from ALL_TEAM_MEMBERS if not already done
   const sel = document.getElementById('mytasks-who');
   if (sel.options.length <= 1) {
     ALL_TEAM_MEMBERS.forEach(m => {
       const o = document.createElement('option'); o.value = m; o.textContent = m; sel.appendChild(o);
     });
+    // Restore saved name
+    const saved = localStorage.getItem('nexus_eod_who');
+    if (saved) sel.value = saved;
   }
-  // Always restore saved name (re-apply on every open)
-  const saved = localStorage.getItem('nexus_eod_who');
-  if (saved) sel.value = saved;
   document.getElementById('mytasks-overlay').style.display = 'block';
   document.getElementById('mytasks-panel').style.transform = 'translateX(0)';
   renderMyTasks();
@@ -1592,14 +1593,9 @@ function renderMyTasks() {
   const body = document.getElementById('mytasks-body');
   if (!who) { body.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">Select your name above to see your tasks.</p>'; return; }
 
-  // Remember choice + sync eod selector if it exists and is populated
+  // Remember choice
   localStorage.setItem('nexus_eod_who', who);
-  try { const eodSel=document.getElementById('eod-who-select'); if(eodSel && eodSel.options.length>1) eodSel.value=who; } catch(e){}
-
-  if (!appData || !appData.tasks) {
-    body.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">No data yet — tap Sync first.</p>';
-    return;
-  }
+  document.getElementById('eod-who-select').value = who;
 
   let tasks = (appData.tasks || []).filter(t => (t['Assigned To'] || '').toLowerCase() === who.toLowerCase());
 
@@ -1773,14 +1769,9 @@ function generateForm() {
 
 function autoFillEmail(name) {
   const emailField = document.querySelector('.form-input[name="Assigned_To_Email"]');
-  if (!emailField) return;
+  if (!emailField || emailField.value) return;
   const email = TEAM_EMAILS[name];
-  // Auto-fill if field is empty OR if it contains a known team email (i.e. was auto-set before)
-  const currentVal = emailField.value.trim();
-  const isKnownEmail = Object.values(TEAM_EMAILS).includes(currentVal);
-  if (!currentVal || isKnownEmail) {
-    if (email) emailField.value = email;
-  }
+  if (email) emailField.value = email;
 }
 
 async function submitForm() {
@@ -1798,15 +1789,15 @@ async function submitForm() {
       const r=await res.json(); if(r.error){showToast(r.error,'error');return;} showToast('Added '+r.count+' rows','success');
     } else {
       const formData={}; body.querySelectorAll('.form-input:not([disabled])').forEach(el=>{if(el.name) formData[el.name]=el.value;});
-      // For Master Tasks: read Assigned To even if disabled (leaderOnly), resolve email
+      // For email: also read disabled fields to get Assigned To name, then auto-map email
       if(currentTab==='1. Master Tasks') {
         const assignedToEl=body.querySelector('.form-input[name="Assigned To"]');
         const assignedTo=assignedToEl?assignedToEl.value:(formData['Assigned To']||'');
-        if(assignedTo) formData['Assigned To']=assignedTo;
-        // Always resolve email — from form field, or from map, or from disabled field
-        const emailEl=body.querySelector('.form-input[name="Assigned_To_Email"]');
-        const emailVal=(emailEl?emailEl.value:'')||(formData['Assigned_To_Email']||'');
-        formData['Assigned_To_Email'] = emailVal || TEAM_EMAILS[assignedTo] || '';
+        if(assignedTo && !formData['Assigned_To_Email']) {
+          const autoEmail=TEAM_EMAILS[assignedTo];
+          if(autoEmail) formData['Assigned_To_Email']=autoEmail;
+        }
+        if(assignedTo && !formData['Assigned To']) formData['Assigned To']=assignedTo;
       }
       const missing=schema.fields.filter(f=>f.required&&!f.leaderOnly&&!formData[f.key]).map(f=>f.label);
       if(missing.length){showToast('Required: '+missing.join(', '),'error');return;}
