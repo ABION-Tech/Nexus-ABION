@@ -75,7 +75,7 @@
     .btn-cal { background: rgba(0,212,160,0.1); border-color: rgba(0,212,160,0.25); color: var(--accent2); }
     .btn-add { background: var(--accent); border-color: var(--accent); color: white; }
 
-    #content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 20px; position: relative; }
+    #content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 20px 20px 80px; position: relative; }
     .view { display: none; animation: fadeIn 0.3s ease; }
     .view.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -487,8 +487,8 @@
   <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;align-items:center">
     <button class="btn-sm mytasks-filter active" data-filter="all" onclick="setMyTaskFilter('all',this)">All</button>
     <button class="btn-sm mytasks-filter" data-filter="active" onclick="setMyTaskFilter('active',this)">Active</button>
-    <button class="btn-sm mytasks-filter" data-filter="urgent" onclick="setMyTaskFilter('urgent',this)" style="color:var(--danger)">Urgent</button>
-    <button class="btn-sm mytasks-filter" data-filter="done" onclick="setMyTaskFilter('done',this)" style="color:var(--accent2)">Done</button>
+    <button class="btn-sm mytasks-filter" data-filter="urgent" onclick="setMyTaskFilter('urgent',this)">🔴 Urgent</button>
+    <button class="btn-sm mytasks-filter" data-filter="done" onclick="setMyTaskFilter('done',this)">✓ Done</button>
     <select id="mytasks-sort" class="filter-input" onchange="renderMyTasks()" style="font-size:10px;padding:3px 18px 3px 6px;margin-left:auto" title="Sort">
       <option value="newest">Newest</option>
       <option value="deadline">Deadline</option>
@@ -520,8 +520,8 @@
   <aside id="sidebar">
     <div class="sidebar-logo">
       <div class="wordmark">NEX<span>US</span></div>
-      <p>RESCUETAP · OPS CONSOLE</p>
-      <span class="version-pill">v3.2</span>
+      <p>OPS CONSOLE</p>
+      <span class="version-pill">RESCUETAP</span>
     </div>
     <nav>
       <div class="nav-section">Overview</div>
@@ -615,6 +615,7 @@
       <button class="top-btn" id="btn-theme" onclick="toggleTheme()" title="Toggle light/dark theme" style="font-size:14px;padding:0 8px">☀</button>
       <button class="top-btn" style="background:rgba(91,82,240,0.1);border-color:rgba(91,82,240,0.25);color:#8880ff" onclick="openLoginModal()" id="btn-login">Login</button>
       <button class="top-btn" id="btn-install-pwa" onclick="triggerPWAInstall()" title="Install NEXUS as app" style="display:none;background:rgba(0,212,160,0.1);border-color:rgba(0,212,160,0.25);color:var(--accent2)">⬇ Install</button>
+      <button class="top-btn" id="btn-download-html" onclick="downloadNexusHTML()" title="Download NEXUS" style="background:rgba(0,212,160,0.1);border-color:rgba(0,212,160,0.25);color:var(--accent2)">⬇ Save</button>
       <button class="top-btn btn-add" id="add-btn" onclick="openDrawer()">+ NEW</button>
     </header>
 
@@ -667,6 +668,29 @@
 
       <!-- TASKS -->
       <div id="view-tasks" class="view">
+        <div class="filter-bar">
+          <label>Status</label>
+          <select id="task-filter-status" class="filter-input" onchange="renderTasks()">
+            <option value="">All</option>
+            <option value="Not Started">Not Started</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Blocked">Blocked</option>
+            <option value="Done">Done</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+          <label>Assignee</label>
+          <input id="task-filter-owner" class="filter-input" placeholder="name…" oninput="renderTasks()" style="width:110px">
+          <label>Priority</label>
+          <select id="task-filter-priority" class="filter-input" onchange="renderTasks()">
+            <option value="">All</option>
+            <option value="URGENT">URGENT</option>
+            <option value="HIGH">HIGH</option>
+            <option value="MEDIUM">MEDIUM</option>
+            <option value="LOW">LOW</option>
+          </select>
+          <button class="filter-clear" onclick="clearTaskFilters()">✕ Clear</button>
+          <span class="filter-count" id="tasks-filter-count"></span>
+        </div>
         <div class="card">
           <div class="card-head"><h3>Master Tasks</h3><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
             <select id="task-sort" class="filter-input" onchange="renderTasks()" title="Sort tasks" style="font-size:10px;padding:4px 22px 4px 8px">
@@ -1248,8 +1272,22 @@ function renderDashboard() {
 // ============================================================
 //  TABLE RENDERS
 // ============================================================
+function clearTaskFilters() {
+  const s=document.getElementById('task-filter-status'); if(s) s.value='';
+  const o=document.getElementById('task-filter-owner');  if(o) o.value='';
+  const p=document.getElementById('task-filter-priority');if(p) p.value='';
+  renderTasks();
+}
 function renderTasks() {
   let tasks=[...(appData.tasks||[])];
+  const fStatus  =(document.getElementById('task-filter-status')  ||{}).value||'';
+  const fOwner   =(document.getElementById('task-filter-owner')   ||{}).value||'';
+  const fPriority=(document.getElementById('task-filter-priority')||{}).value||'';
+  if(fStatus)   tasks=tasks.filter(t=>t.Status===fStatus);
+  if(fOwner)    tasks=tasks.filter(t=>(t['Assigned To']||'').toLowerCase().includes(fOwner.toLowerCase()));
+  if(fPriority) tasks=tasks.filter(t=>t.Priority===fPriority);
+  const fc=document.getElementById('tasks-filter-count');
+  if(fc) fc.textContent=(fStatus||fOwner||fPriority)?tasks.length+' shown':'';
   const sort=(document.getElementById('task-sort')||{}).value||'newest';
   const priOrd={URGENT:0,HIGH:1,MEDIUM:2,LOW:3};
   if(sort==='newest')       tasks.sort((a,b)=>(b.Last_Updated||b.ID||'').localeCompare(a.Last_Updated||a.ID||''));
@@ -1654,7 +1692,7 @@ function updateLeaderUI() {
   document.getElementById('topbar-leader-pill').classList.toggle('show',show);
   if(show) document.getElementById('lb-name-text').textContent=leaderName;
   const lb=document.getElementById('btn-login');
-  if(lb) { lb.textContent=show?('⚡ '+leaderName.split(' ')[0]):'Login'; lb.style.color=show?'var(--accent2)':''; }
+  if(lb) { lb.textContent=show?('⚡ '+leaderName.split(' ')[0]):'Login'; lb.style.color=show?'var(--accent2)':'#8880ff'; }
   const slb=document.getElementById('su-login-btn');
   if(slb) { slb.textContent=show?('⚡ '+leaderName.split(' ')[0]):'Login'; slb.classList.toggle('green',show); }
   const stb=document.getElementById('su-theme-btn');
@@ -2095,6 +2133,17 @@ window.addEventListener('appinstalled', () => {
   if (btn) btn.style.display = 'none';
   showToast('NEXUS installed ✓', 'success');
 });
+function downloadNexusHTML() {
+  const html = '<!DOCTYPE html>' + document.documentElement.outerHTML;
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'NEXUS-v3.2.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Downloading NEXUS-v3.2.html…', 'success');
+}
+
 function triggerPWAInstall() {
   if (_deferredInstallPrompt) {
     _deferredInstallPrompt.prompt();
