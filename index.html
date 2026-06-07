@@ -106,6 +106,10 @@
     .table-wrap::-webkit-scrollbar { height: 3px; }
     .table-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
     .data-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 520px; }
+    /* Give the Task description column more breathing room */
+    #view-tasks .data-table { min-width: 860px; }
+    #view-tasks .data-table th:nth-child(2),
+    #view-tasks .data-table td:nth-child(2) { min-width: 280px; white-space: normal; line-height: 1.45; }
     .data-table th { padding: 9px 14px; text-align: left; font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; border-bottom: 1px solid var(--border); font-weight: 400; white-space: nowrap; }
     .data-table td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text); vertical-align: middle; }
     .data-table tbody tr { transition: background 0.15s; cursor: pointer; }
@@ -613,7 +617,7 @@
       <button class="top-btn btn-mytasks" style="background:rgba(0,212,160,0.1);border-color:rgba(0,212,160,0.25);color:var(--accent2)" onclick="openMyTasks()" title="Team member quick-update view">👤 My Tasks</button>
       <button class="top-btn btn-sync" id="btn-sync" onclick="syncData()">↻ Sync</button>
       <button class="top-btn" id="btn-theme" onclick="toggleTheme()" title="Toggle light/dark theme" style="font-size:14px;padding:0 8px">☀</button>
-      <button class="top-btn" style="background:rgba(91,82,240,0.1);border-color:rgba(91,82,240,0.25);color:var(--muted)" onclick="openLoginModal()" id="btn-login">Login</button>
+      <button class="top-btn" style="background:rgba(91,82,240,0.1);border-color:rgba(91,82,240,0.25);color:#8880ff" onclick="openLoginModal()" id="btn-login">Login</button>
       <button class="top-btn btn-add" id="add-btn" onclick="openDrawer()">+ NEW</button>
     </header>
 
@@ -2083,7 +2087,7 @@ document.addEventListener('click', e => {
 // ── PWA service worker registration ──────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(reg => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(reg => {
       console.log('SW registered:', reg.scope);
     }).catch(err => console.warn('SW registration failed:', err));
   });
