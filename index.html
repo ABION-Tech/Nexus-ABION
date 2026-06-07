@@ -960,7 +960,7 @@ const LEADER_ONLY_FIELDS = ['Deadline','Assigned To','Assigned_To_Email','Priori
 // ============================================================
 const FORM_SCHEMAS = {
   '1. Master Tasks': {
-    label:'Master Tasks', idKey:'ID', appendAction:'appendTask',
+    label:'Master Tasks', idKey:'ID', appendAction:'appendTask', updateAction:'updateTask',
     fields:[
       {key:'ID',label:'Task ID',type:'text',placeholder:'e.g. T-001',required:true},
       {key:'Task Description',label:'Task Description',type:'text',placeholder:'What needs to be done?',required:true},
@@ -973,7 +973,7 @@ const FORM_SCHEMAS = {
       {key:'Priority',label:'Priority',type:'select',options:['URGENT','HIGH','MEDIUM','LOW'],required:true,leaderOnly:true},
       {key:'Status',label:'Status',type:'select',options:['Not Started','In Progress','Done','Cancelled','Blocked','In Review'],required:true},
       {key:'% Progress',label:'% Progress (auto-set from status)',type:'number',placeholder:'Auto',readonly:true},
-      {key:'Start Date',label:'Start Date',type:'date'},
+      {key:'Start Date',label:'Start Date',type:'date',immutableOnEdit:true},
       {key:'Deadline',label:'Deadline',type:'date',leaderOnly:true},
       {section:'Notes'},
       {key:'Notes',label:'Notes',type:'textarea',placeholder:'Additional context...'},
@@ -1580,7 +1580,8 @@ function openMyTasks() {
   if (saved) sel.value = saved;
   document.getElementById('mytasks-overlay').style.display = 'block';
   document.getElementById('mytasks-panel').style.transform = 'translateX(0)';
-  renderMyTasks();
+  // Use setTimeout to ensure select value is committed before rendering
+  setTimeout(renderMyTasks, 0);
 }
 
 function closeMyTasks() {
@@ -1624,7 +1625,8 @@ function renderMyTasks() {
 
   if (!tasks.length) {
     const total = (appData.tasks||[]).length;
-    body.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">No tasks found for <strong>'+who+'</strong>.<br><span style="font-size:10px">('+total+' total tasks loaded — check name matches sheet exactly)</span></p>';
+    const allNames = [...new Set((appData.tasks||[]).map(t=>(t['Assigned To']||'').trim()))].slice(0,5).join(', ');
+    body.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">No '+(myTasksFilter!=='all'?myTasksFilter+' ':'')+'tasks found for <strong>'+who+'</strong>.<br><span style="font-size:10px">('+total+' total tasks loaded — sample assignees: '+allNames+')</span></p>';
     return;
   }
 
@@ -1753,6 +1755,7 @@ function generateForm() {
     const val=rowData?(rowData[field.key]!==undefined?rowData[field.key]:''):'';
     // Pre-populate email from map if this is the email field and val is blank
     const locked=field.leaderOnly&&!isLeader();
+    const immutable = field.immutableOnEdit && !!editingRowId; // Start Date locked on edit for everyone
     let resolvedVal = val;
     if(field.key==='Assigned_To_Email' && !resolvedVal && !locked) {
       const assignedTo = rowData ? (rowData['Assigned To']||'') : '';
@@ -1760,7 +1763,7 @@ function generateForm() {
     }
     const req=field.required?'<span style="color:var(--danger)">*</span>':'';
     let input='';
-    const dis=locked?' disabled':'';
+    const dis=(locked||immutable)?' disabled':'';
     const ro=field.readonly?' readonly style="opacity:0.5;cursor:not-allowed"':'';
     if(field.type==='select'){
       const opts=field.options.map(o=>'<option value="'+o+'" '+(o==resolvedVal?'selected':'')+'>'+o+'</option>').join('');
@@ -1770,17 +1773,19 @@ function generateForm() {
       input='<textarea class="form-input" name="'+escAttr(field.key)+'" placeholder="'+(field.placeholder||'')+'"'+dis+ro+'>'+resolvedVal+'</textarea>';
     } else if(field.type==='date'){
       const dpId='dp-'+escAttr(field.key).replace(/[\s/]/g,'_');
+      const dpLocked = locked||immutable;
       input='<div class="datepicker-wrap" id="'+dpId+'">'
-        +'<div class="datepicker-display'+(locked?' field-locked':'')+'"'+(locked?' style="opacity:.5;pointer-events:none"':'')+' tabindex="0">'
+        +'<div class="datepicker-display'+(dpLocked?' field-locked':'')+'"'+(dpLocked?' style="opacity:.5;pointer-events:none"':'')+' tabindex="0">'
         +'<span class="dp-val">'+(resolvedVal||'Select date')+'</span>'
         +'<span class="dp-icon">📅</span>'
         +'</div>'
-        +'<input type="hidden" name="'+escAttr(field.key)+'" value="'+escAttr(resolvedVal)+'"'+(locked?' disabled':'')+'>'
+        +'<input type="hidden" name="'+escAttr(field.key)+'" value="'+escAttr(resolvedVal)+'"'+(dpLocked?' disabled':'')+'>'
         +'</div>';
     } else {
       input='<input type="'+field.type+'" class="form-input" name="'+escAttr(field.key)+'" value="'+escAttr(resolvedVal)+'" placeholder="'+(field.placeholder||'')+'"'+dis+ro+'>';
     }
-    body.innerHTML+='<div class="form-group'+(locked?' field-locked':'')+'"><label>'+field.label+(locked?' (locked)':'')+req+'</label>'+input+'</div>';
+    const lockLabel = immutable ? ' (fixed)' : locked ? ' (locked)' : '';
+    body.innerHTML+='<div class="form-group'+((locked||immutable)?' field-locked':'')+'"><label>'+field.label+lockLabel+req+'</label>'+input+'</div>';
   });
   // Init all date pickers after DOM is updated
   body.querySelectorAll('.datepicker-wrap').forEach(w=>initDatePicker(w));
@@ -1829,7 +1834,11 @@ async function submitForm() {
       }
       const missing=schema.fields.filter(f=>f.required&&!f.leaderOnly&&!formData[f.key]).map(f=>f.label);
       if(missing.length){showToast('Required: '+missing.join(', '),'error');return;}
-      const payload=editingRowId?{action:'updateRow',tabName:currentTab,id:editingRowId,data:formData,token:leaderToken||''}:{action:schema.appendAction,data:formData};
+      const isNewTask = !editingRowId && currentTab==='1. Master Tasks';
+      const payload=editingRowId
+        ?{action:(schema.updateAction||'updateRow'),tabName:currentTab,id:editingRowId,data:formData,token:leaderToken||''}
+        :{action:schema.appendAction,data:formData,...(isNewTask?{sendEmail:true}:{})};
+
       const res=await fetch(SCRIPT_URL,{method:'POST',redirect:'follow',body:JSON.stringify(payload)});
       const r=await res.json(); if(r.error){showToast(r.error,'error');return;} showToast(editingRowId?'Updated!':'Added!','success');
     }
