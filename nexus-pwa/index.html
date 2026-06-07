@@ -16,6 +16,14 @@
       --danger: #f05060; --warn: #f0c040; --info: #4090f0;
       --text: #e2e2ee; --muted: #5a5a7a; --sidebar-w: 244px; --topbar-h: 54px;
     }
+    [data-theme="light"] {
+      --bg: #f0f0f8; --surface: #ffffff; --surface2: #e8e8f4; --surface3: #ddddf0;
+      --border: rgba(0,0,0,0.1); --border2: rgba(0,0,0,0.15);
+      --text: #0f0f1c; --muted: #6060a0;
+    }
+    [data-theme="light"] input[type="date"].form-input { color-scheme: light; }
+    [data-theme="light"] .data-table tbody tr:hover { background: rgba(0,0,0,0.04); }
+    [data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); }
     html, body { height: 100%; background: var(--bg); color: var(--text); font-family: "Syne", sans-serif; overflow: hidden; }
     .shell { display: flex; height: 100vh; }
 
@@ -390,6 +398,13 @@
     @media (max-width: 860px) { .stats-grid { grid-template-columns: repeat(2,1fr); } .followup-grid, .failsafe-grid { grid-template-columns: 1fr; } }
     #sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 49; background: transparent; }
     #sidebar-overlay.open { display: block; }
+    /* sidebar utility strip — hidden on desktop, shown on mobile */
+    #sidebar-utils { display: none; padding: 10px 12px; border-top: 1px solid var(--border); gap: 6px; flex-direction: column; }
+    #sidebar-utils .su-row { display: flex; gap: 6px; }
+    #sidebar-utils .su-btn { flex: 1; background: var(--surface2); border: 1px solid var(--border2); color: var(--text); border-radius: 7px; padding: 9px 10px; font-size: 11px; font-family: 'Space Mono', monospace; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.15s; white-space: nowrap; }
+    #sidebar-utils .su-btn:hover { background: var(--surface3); }
+    #sidebar-utils .su-btn.accent { color: var(--accent); border-color: rgba(91,82,240,0.3); background: rgba(91,82,240,0.08); }
+    #sidebar-utils .su-btn.green  { color: var(--accent2); border-color: rgba(0,212,160,0.3); background: rgba(0,212,160,0.08); }
     @media (max-width: 700px) {
       #sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); z-index: 50; }
       #sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
@@ -399,8 +414,14 @@
       #drawer { width: 100%; }
       .form-row { grid-template-columns: 1fr; }
       .launch-btns-grid { grid-template-columns: 1fr; }
+      /* topbar stripped to 4 items only */
+      #topbar { padding: 0 8px; gap: 6px; }
       #topbar-time { display: none; }
-      .btn-cal, .btn-mytasks { display: none; }
+      .btn-cal, .btn-sync, #btn-theme, #btn-login { display: none !important; }
+      /* My Tasks always visible */
+      .btn-mytasks { display: inline-flex !important; }
+      /* show sidebar utils */
+      #sidebar-utils { display: flex; }
     }
     .btn-sm.active { background:rgba(91,82,240,0.25);border-color:rgba(91,82,240,0.5);color:#8880ff; }
     @media(max-width:700px){#mytasks-panel{width:100%;}}
@@ -463,11 +484,17 @@
       <option value="">-- Select your name --</option>
     </select>
   </div>
-  <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap">
+  <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;align-items:center">
     <button class="btn-sm mytasks-filter active" data-filter="all" onclick="setMyTaskFilter('all',this)">All</button>
     <button class="btn-sm mytasks-filter" data-filter="active" onclick="setMyTaskFilter('active',this)">Active</button>
     <button class="btn-sm mytasks-filter" data-filter="urgent" onclick="setMyTaskFilter('urgent',this)" style="color:var(--danger)">Urgent</button>
     <button class="btn-sm mytasks-filter" data-filter="done" onclick="setMyTaskFilter('done',this)" style="color:var(--accent2)">Done</button>
+    <select id="mytasks-sort" class="filter-input" onchange="renderMyTasks()" style="font-size:10px;padding:3px 18px 3px 6px;margin-left:auto" title="Sort">
+      <option value="newest">Newest</option>
+      <option value="deadline">Deadline</option>
+      <option value="priority">Priority</option>
+      <option value="az">A→Z</option>
+    </select>
   </div>
   <div id="mytasks-body" style="flex:1;overflow-y:auto;padding:14px 18px"></div>
 </div>
@@ -558,6 +585,17 @@
       <div class="lb-role">Session Active</div>
       <span class="lb-logout" onclick="logoutLeader()">Sign out x</span>
     </div>
+    <!-- Mobile-only utility strip in sidebar -->
+    <div id="sidebar-utils">
+      <div class="su-row">
+        <button class="su-btn accent" onclick="syncData();toggleSidebar()">↻ Sync</button>
+        <button class="su-btn" id="su-theme-btn" onclick="toggleTheme()" title="Toggle theme">☀ Theme</button>
+      </div>
+      <div class="su-row">
+        <button class="su-btn" onclick="loadView('meetings');setTimeout(()=>switchMtgTab('calendar'),80);toggleSidebar()">⊕ Calendar</button>
+        <button class="su-btn accent" id="su-login-btn" onclick="openLoginModal();toggleSidebar()">Login</button>
+      </div>
+    </div>
     <div class="sidebar-footer"><p>© 2026 RescueTap · NEXUS v3.2</p></div>
   </aside>
 
@@ -574,7 +612,8 @@
       <button class="top-btn btn-cal" onclick="loadView('meetings');setTimeout(()=>switchMtgTab('calendar'),80);" title="View task deadlines calendar">⊕ Calendar</button>
       <button class="top-btn btn-mytasks" style="background:rgba(0,212,160,0.1);border-color:rgba(0,212,160,0.25);color:var(--accent2)" onclick="openMyTasks()" title="Team member quick-update view">👤 My Tasks</button>
       <button class="top-btn btn-sync" id="btn-sync" onclick="syncData()">↻ Sync</button>
-      <button class="top-btn" style="background:rgba(91,82,240,0.1);border-color:rgba(91,82,240,0.25);color:var(--muted)" onclick="openLoginModal()">Login</button>
+      <button class="top-btn" id="btn-theme" onclick="toggleTheme()" title="Toggle light/dark theme" style="font-size:14px;padding:0 8px">☀</button>
+      <button class="top-btn" style="background:rgba(91,82,240,0.1);border-color:rgba(91,82,240,0.25);color:var(--muted)" onclick="openLoginModal()" id="btn-login">Login</button>
       <button class="top-btn btn-add" id="add-btn" onclick="openDrawer()">+ NEW</button>
     </header>
 
@@ -628,7 +667,17 @@
       <!-- TASKS -->
       <div id="view-tasks" class="view">
         <div class="card">
-          <div class="card-head"><h3>Master Tasks</h3><button class="btn-sm" onclick="exportCSV('tasks')">Export CSV</button></div>
+          <div class="card-head"><h3>Master Tasks</h3><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <select id="task-sort" class="filter-input" onchange="renderTasks()" title="Sort tasks" style="font-size:10px;padding:4px 22px 4px 8px">
+              <option value="newest">Newest Added</option>
+              <option value="oldest">Oldest Added</option>
+              <option value="az">Name A→Z</option>
+              <option value="za">Name Z→A</option>
+              <option value="deadline">Deadline ↑</option>
+              <option value="priority">Priority ↑</option>
+            </select>
+            <button class="btn-sm" onclick="exportCSV('tasks')">Export CSV</button>
+          </div></div>
           <div class="table-wrap"><table class="data-table"><thead><tr><th>ID</th><th>Task</th><th>Priority</th><th>Assigned To</th><th>Supervisor</th><th>Dept</th><th>Deadline</th><th>Status</th><th>Progress</th><th></th></tr></thead><tbody id="tasks-tbody"></tbody></table></div>
         </div>
       </div>
@@ -864,6 +913,19 @@ const ALL_TEAM_MEMBERS = [
   'Rashidat','Muyi','Perpetual','Christiana','Mark','Nehemiah','Joshua Alex',
   'Mr Sam','Joshua (Tech Outreach)'
 ];
+// EOD attendance schedule: 0=Sun,1=Mon,...,5=Fri,6=Sat. Default = Mon-Fri for all others.
+const EOD_SCHEDULE_JS = {
+  'Shina Samson'  : [1,2,3,4,5],
+  'Ayo T. Joshua' : [1,2,4,5],
+};
+function getExpectedTodayMembers() {
+  const d = new Date().getDay();
+  if(d===0||d===6) return [];
+  return ALL_TEAM_MEMBERS.filter(m => {
+    const s = EOD_SCHEDULE_JS[m];
+    return s ? s.includes(d) : true;
+  });
+}
 
 // Leader-only fields on Master Tasks — non-leaders cannot edit these
 const LEADER_ONLY_FIELDS = ['Deadline','Assigned To','Assigned_To_Email','Priority','Supervisor','Business / Dept'];
@@ -1148,6 +1210,15 @@ function noDataRow(cols,msg) { return '<tr><td colspan="'+cols+'" style="color:v
 function escQ(s) { return String(s||'').replace(/'/g,'&#39;'); }
 function escAttr(s) { return String(s||'').replace(/"/g,'&quot;'); }
 function updateTime() { document.getElementById('topbar-time').textContent = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}); }
+function toggleTheme() {
+  const isLight = document.documentElement.getAttribute('data-theme')==='light';
+  document.documentElement.setAttribute('data-theme', isLight?'dark':'light');
+  const icon = isLight?'☀':'🌙';
+  document.getElementById('btn-theme').textContent = icon;
+  const stb=document.getElementById('su-theme-btn'); if(stb) stb.textContent=icon+' Theme';
+  localStorage.setItem('nexus_theme', isLight?'dark':'light');
+}
+(function(){ const t=localStorage.getItem('nexus_theme')||'dark'; document.documentElement.setAttribute('data-theme',t); })();
 function toggleSidebar() { const s=document.getElementById('sidebar'); const o=document.getElementById('sidebar-overlay'); s.classList.toggle('open'); o.classList.toggle('open', s.classList.contains('open')); }
 function showToast(msg,type='') { const t=document.getElementById('toast'); t.textContent=msg; t.className='show '+(type||''); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show','success','error'),3200); }
 
@@ -1159,7 +1230,7 @@ function renderDashboard() {
   const todayStr = new Date().toDateString();
   const active  = tasks.filter(t=>!['Done','Cancelled'].includes(t.Status)).length;
   const overdue = tasks.filter(t=>!['Done','Cancelled'].includes(t.Status)&&taskStaleDays(t)>=2).length;
-  const missing = ALL_TEAM_MEMBERS.filter(m=>!kpi.some(k=>new Date(k.Date).toDateString()===todayStr&&k['Team Member']===m)).length;
+  const missing = getExpectedTodayMembers().filter(m=>!kpi.some(k=>new Date(k.Date).toDateString()===todayStr&&k['Team Member']===m)).length;
   const blocked = tasks.filter(t=>t.Status==='Blocked').length;
   document.getElementById('stat-tasks').textContent    = active;
   document.getElementById('stat-partners').textContent = partners.length;
@@ -1177,8 +1248,16 @@ function renderDashboard() {
 //  TABLE RENDERS
 // ============================================================
 function renderTasks() {
-  const tasks=appData.tasks||[];
-  document.getElementById('nav-badge-tasks').textContent = tasks.filter(t=>!['Done','Cancelled'].includes(t.Status)).length;
+  let tasks=[...(appData.tasks||[])];
+  const sort=(document.getElementById('task-sort')||{}).value||'newest';
+  const priOrd={URGENT:0,HIGH:1,MEDIUM:2,LOW:3};
+  if(sort==='newest')       tasks.sort((a,b)=>(b.Last_Updated||b.ID||'').localeCompare(a.Last_Updated||a.ID||''));
+  else if(sort==='oldest')  tasks.sort((a,b)=>(a.Last_Updated||a.ID||'').localeCompare(b.Last_Updated||b.ID||''));
+  else if(sort==='az')      tasks.sort((a,b)=>(a['Task Description']||'').localeCompare(b['Task Description']||''));
+  else if(sort==='za')      tasks.sort((a,b)=>(b['Task Description']||'').localeCompare(a['Task Description']||''));
+  else if(sort==='deadline')tasks.sort((a,b)=>{const da=a.Deadline?new Date(a.Deadline):new Date('9999');const db=b.Deadline?new Date(b.Deadline):new Date('9999');return da-db;});
+  else if(sort==='priority')tasks.sort((a,b)=>(priOrd[a.Priority]??9)-(priOrd[b.Priority]??9));
+  document.getElementById('nav-badge-tasks').textContent = (appData.tasks||[]).filter(t=>!['Done','Cancelled'].includes(t.Status)).length;
   document.getElementById('tasks-tbody').innerHTML = tasks.map(t=>{
     const stale=taskStaleDays(t); const sw=stale>=2&&!['Done','Cancelled'].includes(t.Status)?'<span class="badge-pill badge-red" style="margin-left:4px">'+stale+'d</span>':'';
     return '<tr><td style="font-family:Space Mono,monospace;font-size:11px">'+t.ID+'</td><td>'+t['Task Description']+sw+'</td><td>'+priorityBadge(t.Priority)+'</td><td>'+t['Assigned To']+'</td><td>'+(t.Supervisor||'--')+'</td><td>'+(t['Business / Dept']||'--')+'</td><td style="font-family:Space Mono,monospace;font-size:11px">'+(t.Deadline||'--')+'</td><td>'+statusBadge(t.Status)+'</td><td>'+progressBar(t['% Progress'])+'</td><td><button class="btn-sm" onclick="editRow(\''+escQ(t.ID)+'\',\'1. Master Tasks\')">Edit</button></td></tr>';
@@ -1202,7 +1281,7 @@ function renderOrg() {
 
 function renderKPI() {
   const kpi=appData.kpi||[]; const todayStr=new Date().toDateString();
-  const missing=ALL_TEAM_MEMBERS.filter(m=>!kpi.some(k=>new Date(k.Date).toDateString()===todayStr&&k['Team Member']===m));
+  const missing=getExpectedTodayMembers().filter(m=>!kpi.some(k=>new Date(k.Date).toDateString()===todayStr&&k['Team Member']===m));
   document.getElementById('kpi-alerts').innerHTML = missing.length?'<div class="alert-banner warn"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg><div><h4>'+missing.length+' member(s) have not filed EOD today</h4><ul>'+missing.slice(0,8).map(m=>'<li>'+m+'</li>').join('')+'</ul></div></div>':'';
   document.getElementById('kpi-tbody').innerHTML = [...kpi].reverse().map((k,i)=>'<tr><td style="font-family:Space Mono,monospace;font-size:11px">'+k.Date+'</td><td>'+(k.Day||'--')+'</td><td>'+k['Team Member']+'</td><td>'+(k['Role/Dept']||'--')+'</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(k['What I Completed (with proof)']||'--')+'</td><td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(k['Key Achievement']||'--')+'</td><td>'+(k.Blockers||'--')+'</td><td>'+statusBadge(k.Submitted)+'</td><td><button class="btn-sm" onclick="editRow(\''+(kpi.length-i)+'\',\'5. KPI Log\')">Edit</button></td></tr>').join('')||noDataRow(9,'No KPI data');
 }
@@ -1391,7 +1470,7 @@ function renderFollowup() {
 function renderFailsafe() {
   const tasks=appData.tasks||[], kpi=appData.kpi||[], partners=appData.partners||[], today=new Date(), todayStr=today.toDateString();
   const filed=new Set(kpi.filter(k=>new Date(k.Date).toDateString()===todayStr).map(k=>k['Team Member']));
-  const missingEOD=ALL_TEAM_MEMBERS.filter(m=>!filed.has(m));
+  const missingEOD=getExpectedTodayMembers().filter(m=>!filed.has(m));
   document.getElementById('failsafe-eod-date').textContent=today.toLocaleDateString('en-NG',{weekday:'long',day:'numeric',month:'short'});
   document.getElementById('failsafe-eod-tbody').innerHTML=missingEOD.map(m=>{ const last=kpi.filter(k=>k['Team Member']===m).sort((a,b)=>new Date(b.Date)-new Date(a.Date))[0]; return '<tr><td>'+m+'</td><td style="color:var(--muted)">'+(last?.['Role/Dept']||'--')+'</td><td><span class="badge-pill badge-red">'+(last?daysSince(last.Date)+'d':'Never')+'</span></td><td style="font-family:Space Mono,monospace;font-size:11px">'+(last?.Date||'--')+'</td></tr>'; }).join('')||noDataRow(4,'All filed today!');
   const blocked=tasks.filter(t=>t.Status==='Blocked');
@@ -1428,7 +1507,7 @@ function updateNavBadges() {
   const opdP=partners.filter(p=>p['Follow-Up Date']&&new Date(p['Follow-Up Date'])<today&&!['Active','Declined'].includes(p['Current Status'])).length;
   document.getElementById('nav-badge-followup').textContent=stale+opdP;
   const filed=new Set(kpi.filter(k=>new Date(k.Date).toDateString()===todayStr).map(k=>k['Team Member']));
-  const mis=ALL_TEAM_MEMBERS.filter(m=>!filed.has(m)).length;
+  const mis=getExpectedTodayMembers().filter(m=>!filed.has(m)).length;
   const blk=tasks.filter(t=>t.Status==='Blocked').length;
   const ovd=tasks.filter(t=>t.Deadline&&!['Done','Cancelled'].includes(t.Status)&&new Date(t.Deadline)<today).length;
   const stp=partners.filter(p=>p['Follow-Up Date']&&daysSince(p['Follow-Up Date'])>=7&&!['Active','Declined'].includes(p['Current Status'])).length;
@@ -1484,6 +1563,13 @@ function renderMyTasks() {
   if (myTasksFilter === 'active')  tasks = tasks.filter(t => !['Done','Cancelled'].includes(t.Status));
   if (myTasksFilter === 'urgent')  tasks = tasks.filter(t => ['URGENT','HIGH'].includes(t.Priority) && !['Done','Cancelled'].includes(t.Status));
   if (myTasksFilter === 'done')    tasks = tasks.filter(t => t.Status === 'Done');
+
+  const msort=(document.getElementById('mytasks-sort')||{}).value||'newest';
+  const priOrd2={URGENT:0,HIGH:1,MEDIUM:2,LOW:3};
+  if(msort==='newest')       tasks.sort((a,b)=>(b.Last_Updated||b.ID||'').localeCompare(a.Last_Updated||a.ID||''));
+  else if(msort==='deadline')tasks.sort((a,b)=>{const da=a.Deadline?new Date(a.Deadline):new Date('9999');const db=b.Deadline?new Date(b.Deadline):new Date('9999');return da-db;});
+  else if(msort==='priority')tasks.sort((a,b)=>(priOrd2[a.Priority]??9)-(priOrd2[b.Priority]??9));
+  else if(msort==='az')      tasks.sort((a,b)=>(a['Task Description']||'').localeCompare(b['Task Description']||''));
 
   if (!tasks.length) {
     body.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">No tasks found for this filter.</p>';
@@ -1566,6 +1652,12 @@ function updateLeaderUI() {
   document.getElementById('leader-badge').classList.toggle('show',show);
   document.getElementById('topbar-leader-pill').classList.toggle('show',show);
   if(show) document.getElementById('lb-name-text').textContent=leaderName;
+  const lb=document.getElementById('btn-login');
+  if(lb) { lb.textContent=show?('⚡ '+leaderName.split(' ')[0]):'Login'; lb.style.color=show?'var(--accent2)':''; }
+  const slb=document.getElementById('su-login-btn');
+  if(slb) { slb.textContent=show?('⚡ '+leaderName.split(' ')[0]):'Login'; slb.classList.toggle('green',show); }
+  const stb=document.getElementById('su-theme-btn');
+  if(stb) stb.textContent=(document.documentElement.getAttribute('data-theme')==='light'?'🌙':'☀')+' Theme';
 }
 
 // ============================================================
@@ -1987,6 +2079,23 @@ document.addEventListener('click', e => {
     pop.style.display = 'none';
   }
 });
+
+// ── PWA service worker registration ──────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      console.log('SW registered:', reg.scope);
+    }).catch(err => console.warn('SW registration failed:', err));
+  });
+}
+
+// ── Apply saved theme on load ─────────────────────────────────
+(function(){
+  const t = localStorage.getItem('nexus_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  const btn = document.getElementById('btn-theme');
+  if (btn) btn.textContent = t === 'light' ? '🌙' : '☀';
+})();
 </script>
 </body>
 </html>
