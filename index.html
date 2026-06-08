@@ -64,7 +64,7 @@
     #topbar::-webkit-scrollbar { display: none; }
     #menu-btn { display: none; background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; }
     #menu-btn svg { width: 20px; height: 20px; }
-    #topbar-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    #topbar-title { font-size: 16px; font-weight: 700; color: var(--text); }
     #topbar-sub { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); margin-left: 4px; }
     .top-gap { flex: 1; }
     #topbar-time { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); padding-right: 10px; border-right: 1px solid var(--border); white-space: nowrap; flex-shrink: 0; }
@@ -105,9 +105,10 @@
     .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .table-wrap::-webkit-scrollbar { height: 3px; }
     .table-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
-    .data-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 520px; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 700px; }
+    #tasks-tbody td:nth-child(2) { min-width: 200px; }
     .data-table th { padding: 9px 14px; text-align: left; font-size: 9px; font-family: 'Space Mono', monospace; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; border-bottom: 1px solid var(--border); font-weight: 400; white-space: nowrap; }
-    .data-table td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text); vertical-align: middle; }
+    .data-table td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text); vertical-align: top; }
     .data-table tbody tr { transition: background 0.15s; cursor: pointer; }
     .data-table tbody tr:hover td { background: rgba(91,82,240,0.05) !important; }
     .data-table tbody tr.row-overdue td { background: rgba(240,80,96,0.03); }
@@ -415,16 +416,18 @@
       .form-row { grid-template-columns: 1fr; }
       .launch-btns-grid { grid-template-columns: 1fr; }
       /* topbar stripped to 4 items only */
-      #topbar { padding: 0 8px; gap: 6px; }
+      #topbar { padding: 0 8px; gap: 4px; }
       #topbar-time { display: none; }
       .btn-cal, .btn-sync, #btn-theme, #btn-login { display: none !important; }
+      #topbar-title { font-size: 14px; }
+      .top-btn { padding: 5px 8px; }
       /* My Tasks always visible */
       .btn-mytasks { display: inline-flex !important; }
       /* show sidebar utils */
       #sidebar-utils { display: flex; }
     }
     .btn-sm.active { background:rgba(91,82,240,0.25);border-color:rgba(91,82,240,0.5);color:#8880ff; }
-    @media(max-width:700px){#mytasks-panel{width:100%;}}
+    @media(max-width:700px){#mytasks-panel{width:100%;left:0;right:auto;}}
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
     .pb-10 { padding-bottom: 40px; }
@@ -470,7 +473,7 @@
 
 <!-- MY TASKS PANEL -->
 <div id="mytasks-overlay" onclick="closeMyTasks()" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:60;display:none;backdrop-filter:blur(2px)"></div>
-<div id="mytasks-panel" style="position:fixed;top:0;right:0;bottom:0;width:500px;background:var(--surface);border-left:1px solid var(--border);z-index:70;transform:translateX(100%);transition:transform 0.3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column">
+<div id="mytasks-panel" style="position:fixed;top:0;right:0;bottom:0;width:min(500px,100%);background:var(--surface);border-left:1px solid var(--border);z-index:70;transform:translateX(100%);transition:transform 0.3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column">
   <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
     <div>
       <h3 style="font-size:16px;font-weight:700">👤 My Tasks</h3>
@@ -527,7 +530,7 @@
       <div class="nav-section">Overview</div>
       <a class="nav-item active" data-view="dashboard">
         <svg fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/></svg>
-        Dashboard
+        KPI Dashboard
       </a>
       <a class="nav-item" data-view="tasks">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
@@ -548,7 +551,7 @@
       </a>
       <a class="nav-item" data-view="kpi">
         <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
-        KPI Log
+        Activity Log
       </a>
       <a class="nav-item" data-view="marketing">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
@@ -739,7 +742,7 @@
       <div id="view-kpi" class="view">
         <div id="kpi-alerts"></div>
         <div class="card">
-          <div class="card-head"><h3>KPI Log</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-sm" onclick="loadView('eod')">+ Submit EOD</button><button class="btn-sm" onclick="exportCSV('kpi')">Export CSV</button></div></div>
+          <div class="card-head"><h3>Activity Log</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-sm" onclick="loadView('eod')">+ Submit EOD</button><button class="btn-sm" onclick="exportCSV('kpi')">Export CSV</button></div></div>
           <div class="table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>Day</th><th>Member</th><th>Role</th><th>Completed</th><th>Achievement</th><th>Blockers</th><th>Filed</th><th></th></tr></thead><tbody id="kpi-tbody"></tbody></table></div>
         </div>
       </div>
@@ -1017,7 +1020,7 @@ const FORM_SCHEMAS = {
     {key:'WhatsApp Added',label:'WhatsApp Added',type:'select',options:['No','Yes']},
     {key:'Follow-Up Date',label:'Follow-Up Date',type:'date'},{key:'Notes',label:'Notes',type:'textarea'},
   ]},
-  '5. KPI Log':{label:'KPI Report',idKey:'Date',appendAction:'appendKPI',fields:[
+  '5. KPI Log':{label:'Activity Log',idKey:'Date',appendAction:'appendKPI',fields:[
     {key:'Date',label:'Date',type:'date',required:true},
     {key:'Day',label:'Day',type:'select',options:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],required:true},
     {key:'Team Member',label:'Team Member',type:'text',required:true},{key:'Role',label:'Role',type:'text'},
@@ -1091,7 +1094,7 @@ const VIEW_TAB_MAP = {
 };
 const ADD_BTN_LABELS = {
   dashboard:'+ TASK', tasks:'+ TASK', cos:'+ COS', partners:'+ PARTNER',
-  org:'+ ORG', kpi:'+ KPI', marketing:'+ CONTENT'
+  org:'+ ORG', kpi:'+ NEW', marketing:'+ CONTENT'
 };
 
 // ============================================================
@@ -1141,7 +1144,7 @@ function loadView(name) {
   currentView = name;
   document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.view===name));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id===('view-'+name)));
-  const titles = {dashboard:'Dashboard',tasks:'Master Tasks',cos:'COS',partners:'Partnerships',org:'Org Database',kpi:'KPI Log',marketing:'Marketing',eod:'EOD Report',meetings:'Meetings',followup:'Follow-Up Tracker',failsafe:'Failsafe Alerts',automation:'Automation'};
+  const titles = {dashboard:'KPI Dashboard',tasks:'Master Tasks',cos:'COS',partners:'Partnerships',org:'Org Database',kpi:'Activity Log',marketing:'Marketing',eod:'EOD Report',meetings:'Meetings',followup:'Follow-Up Tracker',failsafe:'Failsafe Alerts',automation:'Automation'};
   document.getElementById('topbar-title').textContent = titles[name]||name;
   const lbl = ADD_BTN_LABELS[name];
   const addBtn = document.getElementById('add-btn');
@@ -1340,7 +1343,7 @@ function renderTasks() {
   const fOwner   =(ownerSel||{}).value||'';
   const fPriority=(document.getElementById('task-filter-priority')||{}).value||'';
   if(fStatus)   tasks=tasks.filter(t=>t.Status===fStatus);
-  if(fOwner)    tasks=tasks.filter(t=>String(t['Assigned To']??'').trim().toLowerCase()===fOwner.trim().toLowerCase()); // case-insensitive match to handle backend casing inconsistencies
+  if(fOwner)    tasks=tasks.filter(t=>String(t['Assigned To']??'').split(/[,\/&+]+/).map(n=>n.trim().toLowerCase()).includes(fOwner.trim().toLowerCase())); // split multi-assignee field and check if selected name is one of them
   if(fPriority) tasks=tasks.filter(t=>t.Priority===fPriority);
   const fc=document.getElementById('tasks-filter-count');
   if(fc) fc.textContent=(fStatus||fOwner||fPriority)?tasks.length+' shown':'';
@@ -1378,7 +1381,7 @@ function renderKPI() {
   const kpi=appData.kpi||[]; const todayStr=new Date().toDateString();
   const missing=getExpectedTodayMembers().filter(m=>!kpi.some(k=>new Date(k.Date).toDateString()===todayStr&&k['Team Member']===m));
   document.getElementById('kpi-alerts').innerHTML = missing.length?'<div class="alert-banner warn"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg><div><h4>'+missing.length+' member(s) have not filed EOD today</h4><ul>'+missing.slice(0,8).map(m=>'<li>'+m+'</li>').join('')+'</ul></div></div>':'';
-  document.getElementById('kpi-tbody').innerHTML = [...kpi].reverse().map((k,i)=>'<tr><td style="font-family:Space Mono,monospace;font-size:11px">'+k.Date+'</td><td>'+(k.Day||'--')+'</td><td>'+k['Team Member']+'</td><td>'+(k['Role']||'--')+'</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(k['What I Completed (with proof)']||'--')+'</td><td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(k['What I Moved Forward']||'--')+'</td><td>'+(k.Blockers||'--')+'</td><td>'+statusBadge(k['Report Submitted (Y/N)'])+'</td><td><button class="btn-sm" onclick="editRow(\''+(kpi.length-i)+'\',\'5. KPI Log\')">Edit</button></td></tr>').join('')||noDataRow(9,'No KPI data');
+  document.getElementById('kpi-tbody').innerHTML = [...kpi].reverse().map((k,i)=>'<tr><td style="font-family:Space Mono,monospace;font-size:11px">'+k.Date+'</td><td>'+(k.Day||'--')+'</td><td>'+k['Team Member']+'</td><td>'+(k['Role']||'--')+'</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(k['What I Completed (with proof)']||'--')+'</td><td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(k['What I Moved Forward']||'--')+'</td><td>'+(k.Blockers||'--')+'</td><td>'+statusBadge(k['Report Submitted (Y/N)'])+'</td><td><button class="btn-sm" onclick="editRow(\''+(kpi.length-i)+'\',\'5. KPI Log\')">Edit</button></td></tr>').join('')||noDataRow(9,'No activity data');
 }
 
 function renderMarketing() {
@@ -1583,7 +1586,7 @@ function renderFailsafe() {
 // ============================================================
 function renderAutomation() {
   const autos=appData.automations||[]; const canToggle=isLeader();
-  document.getElementById('automation-grid').innerHTML=autos.map(a=>'<div class="auto-card '+(a.Enabled?'enabled':'disabled')+'"><div class="toggle-wrap"><div><h4>'+a.Label+'</h4><p>'+a.Description+'</p></div><label class="toggle"><input type="checkbox" '+(a.Enabled?'checked':'')+' '+(canToggle?'':'disabled')+' onchange="toggleAutomation(\''+a.Key+'\',this.checked)"><span class="slider"></span></label></div>'+(canToggle?'':'<div style="font-size:10px;color:var(--warn);font-family:Space Mono,monospace;margin-top:6px">Leader login required</div>')+'<div class="auto-meta">Last toggled: '+(a.LastToggled||'Never')+' by '+(a.ToggledBy||'--')+'</div></div>').join('');
+  document.getElementById('automation-grid').innerHTML=autos.map(a=>'<div class="auto-card '+(a.Enabled?'enabled':'disabled')+'"><div class="toggle-wrap"><div><h4>'+a.Label+'</h4><p>'+a.Description+'</p></div><label class="toggle"><input type="checkbox" '+(a.Enabled?'checked':'')+' '+(canToggle?'':'disabled')+' onchange="toggleAutomation(\''+a.Key+'\',this.checked)"><span class="slider"></span></label></div>'+(canToggle?'':'<div style="font-size:10px;color:var(--warn);font-family:Space Mono,monospace;margin-top:6px">Leader login required</div>')+'<div class="auto-meta ac-meta">Toggled: '+(a.LastToggled?(()=>{const d=new Date(a.LastToggled);return isNaN(d)?a.LastToggled:d.toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:false});})():'Never')+' by '+(a.ToggledBy||'--')+'</div></div>').join('');
   document.getElementById('automation-tbody').innerHTML=autos.map(a=>'<tr><td style="font-family:Space Mono,monospace;font-size:11px">'+a.Key+'</td><td>'+a.Label+'</td><td><span class="badge-pill '+(a.Enabled?'badge-green':'badge-gray')+'">'+(a.Enabled?'ON':'OFF')+'</span></td><td style="font-family:Space Mono,monospace;font-size:11px">'+(a.LastToggled||'--')+'</td><td>'+(a.ToggledBy||'--')+'</td></tr>').join('');
 }
 
@@ -1665,9 +1668,8 @@ function renderMyTasks() {
   }
 
   let tasks = (appData.tasks || []).filter(t => {
-    const a = String(t['Assigned To'] ?? '').trim().toLowerCase();
     const w = who.trim().toLowerCase();
-    return a === w || a.includes(w) || w.includes(a);
+    return String(t['Assigned To'] ?? '').split(/[,\/&+]+/).map(n => n.trim().toLowerCase()).includes(w);
   });
 
   if (myTasksFilter === 'active')  tasks = tasks.filter(t => !['Done','Cancelled'].includes(t.Status));
@@ -1681,10 +1683,9 @@ function renderMyTasks() {
   else if(msort==='priority')tasks.sort((a,b)=>(priOrd2[a.Priority]??9)-(priOrd2[b.Priority]??9));
   else if(msort==='az')      tasks.sort((a,b)=>(a['Task Description']||'').localeCompare(b['Task Description']||''));
 
+
   if (!tasks.length) {
-    const total = (appData.tasks||[]).length;
-    const allNames = [...new Set((appData.tasks||[]).map(t=>String(t['Assigned To']??'').trim()))].slice(0,5).join(', ');
-    body.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">No '+(myTasksFilter!=='all'?myTasksFilter+' ':'')+'tasks found for <strong>'+who+'</strong>.<br><span style="font-size:10px">('+total+' total tasks loaded — sample assignees: '+allNames+')</span></p>';
+    body.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">No '+(myTasksFilter!=='all'?myTasksFilter+' ':'')+' tasks found for <strong>'+who+'</strong>.</p>';
     return;
   }
 
@@ -1694,7 +1695,7 @@ function renderMyTasks() {
     const pct = parseInt(t['% Progress']) || 0;
     return '<div style="background:var(--surface2);border:1px solid var(--border'+(isOverdue?'2':'')+')'+(isOverdue?';border-left:3px solid var(--danger)':'')+';border-radius:10px;padding:14px;margin-bottom:10px">'
       + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px">'
-      +   '<div style="font-size:13px;font-weight:700;line-height:1.4">' + t['Task Description'] + '</div>'
+      +   '<div style="font-size:13px;font-weight:700;line-height:1.4;word-break:break-word;flex:1">' + t['Task Description'] + '</div>'
       +   '<div style="display:flex;gap:4px;flex-shrink:0">' + priorityBadge(t.Priority) + '</div>'
       + '</div>'
       + '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px">'
@@ -1711,6 +1712,10 @@ function renderMyTasks() {
       +     ['Not Started','In Progress','Done','Blocked','Cancelled'].map(s=>'<option value="'+s+'"'+(s===t.Status?' selected':'')+'>'+s+'</option>').join('')
       +   '</select>'
       +   '<button class="btn-sm" onclick="editRow(\''+escQ(t.ID)+'\',\'1. Master Tasks\')">Edit</button>'
+      + '</div>'
+      + '<div style="margin-top:10px">'
+      +   '<label style="font-size:10px;font-family:Space Mono,monospace;color:var(--muted);display:block;margin-bottom:4px;text-transform:uppercase">Proof / What was done</label>'
+      +   '<textarea rows="2" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;padding:7px 9px;resize:vertical;font-family:inherit" placeholder="Paste link or summary here..." onblur="updateTaskNotes(\''+escQ(t.ID)+'\',this.value,this)">' + (t.Notes||'') + '</textarea>'
       + '</div>'
       + '</div>';
   }).join('');
@@ -1733,6 +1738,17 @@ async function quickStatusUpdate(taskId, newStatus, who, selectEl) {
     showToast(isCORS ? 'Save failed — CORS (redeploy Apps Script)' : 'Error: '+e.message, 'error');
     selectEl.disabled=false;
   }
+}
+async function updateTaskNotes(taskId, value, el) {
+  const prev = (appData.tasks||[]).find(t=>String(t.ID)===String(taskId));
+  if (!prev || prev.Notes === value) return; // no change
+  el.disabled = true;
+  try {
+    const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({action:'updateTask', id:taskId, data:{...prev, Notes:value}, token:leaderToken||''})});
+    const r = await res.json();
+    if (r.error) { showToast(r.error, 'error'); } else { prev.Notes = value; showToast('Notes saved', 'success'); }
+  } catch(e) { showToast('Save failed: '+e.message, 'error'); }
+  el.disabled = false;
 }
 function openLoginModal() { if(isLeader()){showToast('Already logged in as '+leaderName,'success');return;} document.getElementById('login-modal').classList.add('show'); document.getElementById('login-error').textContent=''; }
 function closeLoginModal() { document.getElementById('login-modal').classList.remove('show'); }
