@@ -929,7 +929,7 @@
 //  CONFIG
 //  Replace SCRIPT_URL with your deployed Apps Script web app URL
 // ============================================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdMI8Ztnjkza8lc883cIfS_e6uypTwHw1NnqNvoEkD-IiTX2Zh61CGX0y7SKpfhBs6/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyGn-a-r0aGM7JJ514X_lRnA2h5mozt4TZ7WE89S6y1a8sdmPcRYayQsIi9CW_abjd-/exec';
 
 // Guard: warn if SCRIPT_URL has not been configured
 if (SCRIPT_URL.includes('YOUR_SCRIPT_ID_HERE')) {
@@ -1273,7 +1273,7 @@ function taskStaleDays(t) { const ref=t['Last_Updated']||t['Start Date']; const 
 function statusBadge(s) { const m={'Not Started':'badge-gray','In Progress':'badge-blue','Done':'badge-green','Cancelled':'badge-gray','Blocked':'badge-red','Active':'badge-green','Pending':'badge-yellow','MoU Pending':'badge-yellow','In Discussion':'badge-blue','Cold':'badge-gray','Draft Sent':'badge-orange','Signed':'badge-green','Declined':'badge-red','In Review':'badge-yellow','Scheduled':'badge-teal','Y':'badge-green','N':'badge-red'}; return '<span class="badge-pill '+(m[s]||'badge-gray')+'">'+( s||'--')+'</span>'; }
 function priorityBadge(p) { const m={'URGENT':'badge-red','HIGH':'badge-red','MEDIUM':'badge-yellow','LOW':'badge-green'}; return '<span class="badge-pill '+(m[p]||'badge-gray')+'">'+(p||'--')+'</span>'; }
 function progressBar(pct) { const n=parseInt(pct)||0; return n+'%<span class="progress-track"><span class="progress-fill'+(n>=100?' complete':'')+'" style="width:'+Math.min(n,100)+'%"></span></span>'; }
-function isLeader() { return !!leaderToken; }
+function isLeader() { const t=sessionStorage.getItem('nexus_leader_token'); return !!(t && t !== 'null'); }
 function noDataRow(cols,msg) { return '<tr><td colspan="'+cols+'" style="color:var(--muted);text-align:center;padding:22px;font-size:12px">'+(msg||'No data. Press Sync.')+'</td></tr>'; }
 function escQ(s) { return String(s||'').replace(/'/g,'&#39;'); }
 function escAttr(s) { return String(s||'').replace(/"/g,'&quot;'); }
@@ -1340,7 +1340,7 @@ function renderTasks() {
   const fOwner   =(ownerSel||{}).value||'';
   const fPriority=(document.getElementById('task-filter-priority')||{}).value||'';
   if(fStatus)   tasks=tasks.filter(t=>t.Status===fStatus);
-  if(fOwner)    tasks=tasks.filter(t=>String(t['Assigned To']??'').trim()===fOwner); // exact match — select guarantees exact name
+  if(fOwner)    tasks=tasks.filter(t=>String(t['Assigned To']??'').trim().toLowerCase()===fOwner.trim().toLowerCase()); // case-insensitive match to handle backend casing inconsistencies
   if(fPriority) tasks=tasks.filter(t=>t.Priority===fPriority);
   const fc=document.getElementById('tasks-filter-count');
   if(fc) fc.textContent=(fStatus||fOwner||fPriority)?tasks.length+' shown':'';
