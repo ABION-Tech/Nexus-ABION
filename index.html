@@ -674,12 +674,16 @@
             <option value="">All</option>
             <option value="Not Started">Not Started</option>
             <option value="In Progress">In Progress</option>
+            <option value="In Review">In Review</option>
             <option value="Blocked">Blocked</option>
             <option value="Done">Done</option>
             <option value="Cancelled">Cancelled</option>
           </select>
           <label>Assignee</label>
-          <input id="task-filter-owner" class="filter-input" placeholder="name…" oninput="renderTasks()" style="width:110px">
+          <select id="task-filter-owner" class="filter-input" onchange="_taskFilterShowAll=false;renderTasks()" style="max-width:130px">
+            <option value="">— My Tasks —</option>
+          </select>
+          <button class="filter-clear" style="background:rgba(0,212,160,0.1);border-color:rgba(0,212,160,0.2);color:var(--accent2);font-size:10px" onclick="clearOwnerFilter()" title="See all team tasks">👁 All</button>
           <label>Priority</label>
           <select id="task-filter-priority" class="filter-input" onchange="renderTasks()">
             <option value="">All</option>
@@ -978,6 +982,8 @@ const FORM_SCHEMAS = {
       {section:'Notes'},
       {key:'Notes',label:'Notes',type:'textarea',placeholder:'Additional context...'},
       {key:'Proof Link',label:'Proof Link',type:'url',placeholder:'https://...'},
+      {section:'Follow-Up'},
+      {key:'Follow_Up_Hours',label:'Hourly Follow-Up Interval',type:'number',placeholder:'e.g. 1 or 2 (leave blank = off)',leaderOnly:true},
     ]
   },
   '2. COS':{label:'COS Entry',idKey:'State',appendAction:'appendCOS',fields:[
@@ -1072,8 +1078,11 @@ let appData = {};
 
 // Leader session — sessionStorage only (cleared on tab close)
 // SESSION_HOURS is set server-side in Code.gs (currently 24h)
-let leaderToken = sessionStorage.getItem('nexus_leader_token') || null;
-let leaderName  = sessionStorage.getItem('nexus_leader_name')  || null;
+// Sanitize: sessionStorage.setItem(key, null) stores the string "null" — treat it as absent
+const _lt = sessionStorage.getItem('nexus_leader_token');
+const _ln = sessionStorage.getItem('nexus_leader_name');
+let leaderToken = (_lt && _lt !== 'null') ? _lt : null;
+let leaderName  = (_ln && _ln !== 'null') ? _ln : null;
 
 const VIEW_TAB_MAP = {
   tasks:'1. Master Tasks', cos:'2. COS', partners:'3. Partnerships',
@@ -1100,6 +1109,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const eodSel = document.getElementById('eod-who-select');
   const blankOpt = document.createElement('option'); blankOpt.value=''; blankOpt.textContent='-- Select your name --'; eodSel.appendChild(blankOpt);
   ALL_TEAM_MEMBERS.forEach(m => { const o=document.createElement('option'); o.value=m; o.textContent=m; eodSel.appendChild(o); });
+
+  // Populate task owner filter select
+  const ownerSel = document.getElementById('task-filter-owner');
+  ALL_TEAM_MEMBERS.forEach(m => { const o=document.createElement('option'); o.value=m; o.textContent=m; ownerSel.appendChild(o); });
   const savedWho = localStorage.getItem('nexus_eod_who');
   if (savedWho) eodSel.value = savedWho;
 
@@ -1176,18 +1189,18 @@ function showCORSBanner(type) {
     document.body.appendChild(existing);
   }
   if (type === 'cors') {
+    const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
+    const fixMsg = isLocalhost
+      ? `You're on a local dev server (<code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:3px">${location.host||'file://'}</code>). Google Apps Script blocks requests from localhost.<br><strong style="color:var(--text)">Fix:</strong> Open this file directly in Chrome (<code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:3px">File → Open File</code>) or deploy it to your hosting.`
+      : `Apps Script is blocking requests from <strong>${location.host}</strong>.<br><strong style="color:var(--text)">Fix:</strong> In Apps Script → Deploy → Manage Deployments → Edit → set <em>Who has access: Anyone</em> → create a <em>new version</em> → copy the new URL into <code>SCRIPT_URL</code> in the HTML.`;
     existing.innerHTML = `
       <span style="color:var(--danger);font-size:18px;flex-shrink:0">⚠</span>
       <div style="flex:1">
-        <strong style="color:var(--danger);font-size:13px">CORS blocked — not loading live data</strong><br>
-        <span style="color:var(--muted);font-size:11px">
-          You're opening the file from <code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:3px">127.0.0.1:5500</code> (VS Code Live Server).
-          Google Apps Script blocks requests from localhost.<br>
-          <strong style="color:var(--text)">Fix:</strong> Open this HTML file directly in Chrome (<code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:3px">File → Open File</code>), or 
-          host it at your deployed Apps Script URL — the app works fine when opened without a local dev server.
-        </span>
+        <strong style="color:var(--danger);font-size:13px">CORS / network error — data not loading</strong><br>
+        <span style="color:var(--muted);font-size:11px">${fixMsg}</span>
         <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
           <button onclick="loadData()" style="background:rgba(240,80,96,0.2);border:1px solid rgba(240,80,96,0.4);color:var(--danger);border-radius:4px;padding:4px 12px;cursor:pointer;font-family:Space Mono,monospace;font-size:10px">↻ Retry</button>
+          <button onclick="testScriptURL()" style="background:rgba(91,82,240,0.15);border:1px solid rgba(91,82,240,0.3);color:#8880ff;border-radius:4px;padding:4px 12px;cursor:pointer;font-family:Space Mono,monospace;font-size:10px">🔍 Test URL</button>
           <button onclick="hideCORSBanner()" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:4px 12px;cursor:pointer;font-family:Space Mono,monospace;font-size:10px">× Dismiss</button>
         </div>
       </div>`;
@@ -1198,6 +1211,22 @@ function showCORSBanner(type) {
 function hideCORSBanner() {
   const b = document.getElementById('cors-banner');
   if (b) b.remove();
+}
+
+async function testScriptURL() {
+  showToast('Testing connection…','');
+  try {
+    const res = await fetch(SCRIPT_URL+'?action=read&_='+Date.now(), {redirect:'follow',cache:'no-store'});
+    if(res.ok) {
+      const d = await res.json();
+      if(d.error) showToast('Connected but sheet error: '+d.error,'error');
+      else { hideCORSBanner(); showToast('Connection OK! Reloading data…','success'); loadData(); }
+    } else {
+      showToast('HTTP '+res.status+' — check SCRIPT_URL or redeploy','error');
+    }
+  } catch(e) {
+    showToast('Cannot reach SCRIPT_URL: '+e.message,'error');
+  }
 }
 
 async function syncData() {
@@ -1232,7 +1261,13 @@ function renderView(name) {
 // ============================================================
 //  HELPERS
 // ============================================================
-function todayISO() { return new Date().toISOString().split('T')[0]; }
+// Returns YYYY-MM-DD in LOCAL timezone (not UTC — UTC causes wrong date after 11pm in Nigeria UTC+1)
+function todayISO() {
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
+}
 function daysSince(ds) { if(!ds) return null; const d=new Date(ds); return isNaN(d)?null:Math.floor((Date.now()-d.getTime())/86400000); }
 function taskStaleDays(t) { const ref=t['Last_Updated']||t['Start Date']; const d=daysSince(ref); return d===null?999:d; }
 function statusBadge(s) { const m={'Not Started':'badge-gray','In Progress':'badge-blue','Done':'badge-green','Cancelled':'badge-gray','Blocked':'badge-red','Active':'badge-green','Pending':'badge-yellow','MoU Pending':'badge-yellow','In Discussion':'badge-blue','Cold':'badge-gray','Draft Sent':'badge-orange','Signed':'badge-green','Declined':'badge-red','In Review':'badge-yellow','Scheduled':'badge-teal','Y':'badge-green','N':'badge-red'}; return '<span class="badge-pill '+(m[s]||'badge-gray')+'">'+( s||'--')+'</span>'; }
@@ -1280,19 +1315,32 @@ function renderDashboard() {
 // ============================================================
 //  TABLE RENDERS
 // ============================================================
+let _taskFilterShowAll = false;
 function clearTaskFilters() {
+  _taskFilterShowAll = false; // re-lock to personal filter
   const s=document.getElementById('task-filter-status'); if(s) s.value='';
-  const o=document.getElementById('task-filter-owner');  if(o) o.value='';
+  const o=document.getElementById('task-filter-owner');
+  if(o) o.value = localStorage.getItem('nexus_eod_who') || '';
   const p=document.getElementById('task-filter-priority');if(p) p.value='';
   renderTasks();
 }
+function clearOwnerFilter() {
+  _taskFilterShowAll = true;
+  const o=document.getElementById('task-filter-owner'); if(o) o.value='';
+  renderTasks();
+}
 function renderTasks() {
+  const savedWho = localStorage.getItem('nexus_eod_who') || '';
+  const ownerSel = document.getElementById('task-filter-owner');
+  // Sync select to saved identity unless user explicitly chose View All
+  if(ownerSel && !_taskFilterShowAll && savedWho) ownerSel.value = savedWho;
+
   let tasks=[...(appData.tasks||[])];
   const fStatus  =(document.getElementById('task-filter-status')  ||{}).value||'';
-  const fOwner   =(document.getElementById('task-filter-owner')   ||{}).value||'';
+  const fOwner   =(ownerSel||{}).value||'';
   const fPriority=(document.getElementById('task-filter-priority')||{}).value||'';
   if(fStatus)   tasks=tasks.filter(t=>t.Status===fStatus);
-  if(fOwner)    tasks=tasks.filter(t=>(t['Assigned To']||'').toLowerCase().includes(fOwner.toLowerCase()));
+  if(fOwner)    tasks=tasks.filter(t=>String(t['Assigned To']??'').trim()===fOwner); // exact match — select guarantees exact name
   if(fPriority) tasks=tasks.filter(t=>t.Priority===fPriority);
   const fc=document.getElementById('tasks-filter-count');
   if(fc) fc.textContent=(fStatus||fOwner||fPriority)?tasks.length+' shown':'';
@@ -1341,7 +1389,7 @@ function renderMarketing() {
 // ============================================================
 //  EOD
 // ============================================================
-function saveEODWho(val) { localStorage.setItem('nexus_eod_who',val); renderEOD(); }
+function saveEODWho(val) { localStorage.setItem('nexus_eod_who',val); _taskFilterShowAll = false; renderEOD(); }
 
 function renderEOD() {
   const today=new Date(); const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -1575,12 +1623,18 @@ function openMyTasks() {
       const o = document.createElement('option'); o.value = m; o.textContent = m; sel.appendChild(o);
     });
   }
-  // Always restore saved name (re-apply on every open)
+  // Restore saved name — verify it actually matched an option
   const saved = localStorage.getItem('nexus_eod_who');
-  if (saved) sel.value = saved;
+  if (saved) {
+    sel.value = saved;
+    // If no exact match, try case-insensitive
+    if (!sel.value) {
+      const match = ALL_TEAM_MEMBERS.find(m => m.toLowerCase() === saved.toLowerCase());
+      if (match) sel.value = match;
+    }
+  }
   document.getElementById('mytasks-overlay').style.display = 'block';
   document.getElementById('mytasks-panel').style.transform = 'translateX(0)';
-  // Use setTimeout to ensure select value is committed before rendering
   setTimeout(renderMyTasks, 0);
 }
 
@@ -1610,7 +1664,11 @@ function renderMyTasks() {
     return;
   }
 
-  let tasks = (appData.tasks || []).filter(t => (t['Assigned To'] || '').trim().toLowerCase() === who.trim().toLowerCase());
+  let tasks = (appData.tasks || []).filter(t => {
+    const a = String(t['Assigned To'] ?? '').trim().toLowerCase();
+    const w = who.trim().toLowerCase();
+    return a === w || a.includes(w) || w.includes(a);
+  });
 
   if (myTasksFilter === 'active')  tasks = tasks.filter(t => !['Done','Cancelled'].includes(t.Status));
   if (myTasksFilter === 'urgent')  tasks = tasks.filter(t => ['URGENT','HIGH'].includes(t.Priority) && !['Done','Cancelled'].includes(t.Status));
@@ -1625,7 +1683,7 @@ function renderMyTasks() {
 
   if (!tasks.length) {
     const total = (appData.tasks||[]).length;
-    const allNames = [...new Set((appData.tasks||[]).map(t=>(t['Assigned To']||'').trim()))].slice(0,5).join(', ');
+    const allNames = [...new Set((appData.tasks||[]).map(t=>String(t['Assigned To']??'').trim()))].slice(0,5).join(', ');
     body.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">No '+(myTasksFilter!=='all'?myTasksFilter+' ':'')+'tasks found for <strong>'+who+'</strong>.<br><span style="font-size:10px">('+total+' total tasks loaded — sample assignees: '+allNames+')</span></p>';
     return;
   }
@@ -1664,10 +1722,17 @@ async function quickStatusUpdate(taskId, newStatus, who, selectEl) {
     const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({action:'updateTaskStatus', id:taskId, status:newStatus, user:who})});
     const r = await res.json();
     if (r.error) { showToast(r.error, 'error'); selectEl.disabled=false; return; }
-    showToast('Status updated to '+newStatus, 'success');
-    await loadData();
+    showToast('Status → '+newStatus, 'success');
+    // Optimistically update local data so My Tasks re-renders immediately
+    const task = (appData.tasks||[]).find(t=>String(t.ID)===String(taskId));
+    if(task) { task.Status=newStatus; task.Last_Updated=new Date().toISOString(); }
     renderMyTasks();
-  } catch(e) { showToast('Network error', 'error'); selectEl.disabled=false; }
+    loadData(); // background reload for full sync
+  } catch(e) {
+    const isCORS = (e.message||'').includes('Failed to fetch') || (e.message||'').includes('NetworkError');
+    showToast(isCORS ? 'Save failed — CORS (redeploy Apps Script)' : 'Error: '+e.message, 'error');
+    selectEl.disabled=false;
+  }
 }
 function openLoginModal() { if(isLeader()){showToast('Already logged in as '+leaderName,'success');return;} document.getElementById('login-modal').classList.add('show'); document.getElementById('login-error').textContent=''; }
 function closeLoginModal() { document.getElementById('login-modal').classList.remove('show'); }
@@ -1757,9 +1822,12 @@ function generateForm() {
     const locked=field.leaderOnly&&!isLeader();
     const immutable = field.immutableOnEdit && !!editingRowId; // Start Date locked on edit for everyone
     let resolvedVal = val;
-    if(field.key==='Assigned_To_Email' && !resolvedVal && !locked) {
-      const assignedTo = rowData ? (rowData['Assigned To']||'') : '';
-      resolvedVal = TEAM_EMAILS[assignedTo] || '';
+    if(field.key==='Assigned_To_Email') {
+      // Always resolve from map if blank — even when locked — so disabled field has the value in HTML
+      if(!resolvedVal) {
+        const assignedTo = rowData ? (rowData['Assigned To']||'') : '';
+        resolvedVal = TEAM_EMAILS[assignedTo] || '';
+      }
     }
     const req=field.required?'<span style="color:var(--danger)">*</span>':'';
     let input='';
@@ -1822,14 +1890,14 @@ async function submitForm() {
       const r=await res.json(); if(r.error){showToast(r.error,'error');return;} showToast('Added '+r.count+' rows','success');
     } else {
       const formData={}; body.querySelectorAll('.form-input:not([disabled])').forEach(el=>{if(el.name) formData[el.name]=el.value;});
-      // For Master Tasks: read Assigned To even if disabled (leaderOnly), resolve email
+      // For Master Tasks: read Assigned To + email regardless of disabled state, then resolve email
       if(currentTab==='1. Master Tasks') {
         const assignedToEl=body.querySelector('.form-input[name="Assigned To"]');
         const assignedTo=assignedToEl?assignedToEl.value:(formData['Assigned To']||'');
         if(assignedTo) formData['Assigned To']=assignedTo;
-        // Always resolve email — from form field, or from map, or from disabled field
-        const emailEl=body.querySelector('.form-input[name="Assigned_To_Email"]');
-        const emailVal=(emailEl?emailEl.value:'')||(formData['Assigned_To_Email']||'');
+        // Read email from DOM directly (works even if disabled), fall back to map
+        const emailEl=body.querySelector('[name="Assigned_To_Email"]');  // no :not([disabled])
+        const emailVal=(emailEl?emailEl.value.trim():'')||(formData['Assigned_To_Email']||'');
         formData['Assigned_To_Email'] = emailVal || TEAM_EMAILS[assignedTo] || '';
       }
       const missing=schema.fields.filter(f=>f.required&&!f.leaderOnly&&!formData[f.key]).map(f=>f.label);
@@ -1844,8 +1912,10 @@ async function submitForm() {
     }
     closeDrawer(); loadData(); // non-blocking reload
   } catch(e){
-    const isCORS = e.message.includes('Failed to fetch') || e.message.includes('NetworkError');
-    showToast(isCORS ? 'CORS blocked — open this file directly (not via Live Server)' : 'Error: '+e.message,'error');
+    const msg = e.message||String(e);
+    const isCORS = msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('CORS');
+    if(isCORS) showCORSBanner('cors');
+    showToast(isCORS ? 'Save failed — CORS error (see banner for fix)' : 'Error: '+msg,'error');
   }
   btn.disabled=false; btn.textContent=origText;
 }
