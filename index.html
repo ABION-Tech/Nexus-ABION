@@ -1003,7 +1003,9 @@ const FORM_SCHEMAS = {
   ],
   required:true,
   leaderOnly:true
-} {key:'Assigned_To_Email',label:'Assignee Email',type:'email',placeholder:'name@rescuetap.org',leaderOnly:true},
+},  // ← fix: added missing comma
+
+{key:'Assigned_To_Email',label:'Assignee Email',type:'email',placeholder:'name@rescuetap.org',leaderOnly:true},
     {
   key:'Assigned To',
   label:'Assigned To',
@@ -1026,7 +1028,9 @@ const FORM_SCHEMAS = {
   ],
   required:true,
   leaderOnly:true
-}    {key:'Business / Dept',label:'Department',type:'select',options:['','COS','Partnerships','Marketing','Tech','Operations','Finance','HR'],leaderOnly:true},
+},  // ← fix: added missing comma
+
+{key:'Business / Dept',label:'Department',type:'select',options:['','COS','Partnerships','Marketing','Tech','Operations','Finance','HR'],leaderOnly:true},
       {section:'Priority & Timing'},
       {key:'Priority',label:'Priority',type:'select',options:['URGENT','HIGH','MEDIUM','LOW'],required:true,leaderOnly:true},
       {key:'Status',label:'Status',type:'select',options:['Not Started','In Progress','Done','Cancelled','Blocked','In Review'],required:true},
