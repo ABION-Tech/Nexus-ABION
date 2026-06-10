@@ -444,11 +444,11 @@
       <label>Your Name</label>
       <select class="form-input" id="login-name">
         <option value="">— Select —</option>
-        <option value="AYO">Ayo T. Joshua</option>
-        <option value="SHINA">Shina Samson</option>
-        <option value="DAN">Darlington</option>
-        <option value="PAMELA">Pamela</option>
-        <option value="OYE">Oyewole Joldeo</option>
+        <option value="Ayo T. Joshua">Ayo T. Joshua</option>
+<option value="Bolu">Bolu</option>
+<option value="Nife">Nife</option>
+<option value="Mark (Tech)">Mark (Tech)</option>
+<option value="Chinedu">Chinedu</option>
       </select>
     </div>
     <div class="form-group">
@@ -940,14 +940,23 @@ if (SCRIPT_URL.includes('YOUR_SCRIPT_ID_HERE')) {
 }
 
 const ALL_TEAM_MEMBERS = [
-  'Ayo T. Joshua','Shina Samson','Israel Idowu','Darlington','Chizaram',
-  'Adetola','Titi','Naruka','Bukayo','Joshua (Content)','Seth','Nora',
-  'Rashidat','Muyi','Perpetual','Christiana','Mark','Nehemiah','Joshua Alex',
-  'Mr Sam','Joshua (Tech)'
+  'Ayo T. Joshua',
+  'Chinedu',
+  'Mark (Tech)',
+  'Nife',
+  'Bolu',
+  'Bolu Adeyemi',
+  'Micheal Williams',
+  'John Musa',
+  'David Okonkwo',
+  'Adetola',
+  'Dr. Chukwu',
+  'Mrs. Adeyemi',
+  'Nora'
 ];
 // EOD attendance schedule: 0=Sun,1=Mon,...,5=Fri,6=Sat. Default = Mon-Fri for all others.
 const EOD_SCHEDULE_JS = {
-  'Shina Samson'  : [1,2,3,4,5],
+  'Bolu'  : [1,2,3,4,5],
   'Ayo T. Joshua' : [1,2,4,5],
 };
 function getExpectedTodayMembers() {
@@ -972,10 +981,52 @@ const FORM_SCHEMAS = {
       {key:'ID',label:'Task ID',type:'text',placeholder:'e.g. T-001',required:true},
       {key:'Task Description',label:'Task Description',type:'text',placeholder:'What needs to be done?',required:true},
       {section:'Assignment'},
-      {key:'Assigned To',label:'Assigned To',type:'select',options:['','Ayo T. Joshua','Shina Samson','Israel Idowu','Darlington','Chizaram','Adetola','Titi','Naruka','Bukayo','Joshua (Content)','Seth','Nora','Rashidat','Muyi','Perpetual','Christiana','Mark','Nehemiah','Joshua Alex','Mr Sam','Joshua (Tech)'],required:true,leaderOnly:true},
-      {key:'Assigned_To_Email',label:'Assignee Email',type:'email',placeholder:'name@rescuetap.org',leaderOnly:true},
-      {key:'Support Person',label:'Support Person',type:'select',options:['','Ayo T. Joshua','Shina Samson','Darlington','Oye Joldeo'],leaderOnly:true},
-      {key:'Business / Dept',label:'Department',type:'select',options:['','COS','Partnerships','Marketing','Tech','Operations','Finance','HR'],leaderOnly:true},
+      {
+  key:'Assigned To',
+  label:'Assigned To',
+  type:'select',
+  options:[
+    '',
+    'Ayo T. Joshua',
+    'Chinedu',
+    'Mark (Tech)',
+    'Nife',
+    'Bolu',
+    'Bolu Adeyemi',
+    'Micheal Williams',
+    'John Musa',
+    'David Okonkwo',
+    'Adetola',
+    'Dr. Chukwu',
+    'Mrs. Adeyemi',
+    'Nora'
+  ],
+  required:true,
+  leaderOnly:true
+} {key:'Assigned_To_Email',label:'Assignee Email',type:'email',placeholder:'name@rescuetap.org',leaderOnly:true},
+    {
+  key:'Assigned To',
+  label:'Assigned To',
+  type:'select',
+  options:[
+    '',
+    'Ayo T. Joshua',
+    'Chinedu',
+    'Mark (Tech)',
+    'Nife',
+    'Bolu',
+    'Bolu Adeyemi',
+    'Micheal Williams',
+    'John Musa',
+    'David Okonkwo',
+    'Adetola',
+    'Dr. Chukwu',
+    'Mrs. Adeyemi',
+    'Nora'
+  ],
+  required:true,
+  leaderOnly:true
+}    {key:'Business / Dept',label:'Department',type:'select',options:['','COS','Partnerships','Marketing','Tech','Operations','Finance','HR'],leaderOnly:true},
       {section:'Priority & Timing'},
       {key:'Priority',label:'Priority',type:'select',options:['URGENT','HIGH','MEDIUM','LOW'],required:true,leaderOnly:true},
       {key:'Status',label:'Status',type:'select',options:['Not Started','In Progress','Done','Cancelled','Blocked','In Review'],required:true},
@@ -1051,27 +1102,19 @@ const FORM_SCHEMAS = {
 
 // Name → email map — update emails here to match your team
 const TEAM_EMAILS = {
-  'Ayo T. Joshua'           : 'othnielemry@gmail.com',
-  'Shina Samson'            : 'abionnexus@gmail.com',
-  'Israel Idowu'            : 'israel@rescuetap.org',
-  'Darlington'              : 'darlington@rescuetap.org',
-  'Chizaram'                : 'chizaram@rescuetap.org',
-  'Adetola'                 : 'adetola@rescuetap.org',
-  'Titi'                    : 'titi@rescuetap.org',
-  'Naruka'                  : 'naruka@rescuetap.org',
-  'Bukayo'                  : 'bukayo@rescuetap.org',
-  'Joshua (Content)'        : 'joshua.content@rescuetap.org',
-  'Seth'                    : 'seth@rescuetap.org',
-  'Nora'                    : 'nora@rescuetap.org',
-  'Rashidat'                : 'rashidat@rescuetap.org',
-  'Muyi'                    : 'muyi@rescuetap.org',
-  'Perpetual'               : 'perpetual@rescuetap.org',
-  'Christiana'              : 'christiana@rescuetap.org',
-  'Mark'                    : 'mark@rescuetap.org',
-  'Nehemiah'                : 'nehemiah@rescuetap.org',
-  'Joshua Alex'             : 'joshuaalex@rescuetap.org',
-  'Mr Sam'                  : 'sam@rescuetap.org',
-  'Joshua (Tech)'           : 'joshua.tech@rescuetap.org',
+  'Ayo T. Joshua'     : 'othnielemry@gmail.com',
+  'Chinedu'           : 'chinedu@abion.co',
+  'Mark (Tech)'       : 'mark@abion.co',
+  'Nife'              : 'nife@abion.co',
+  'Bolu'              : 'bolu@abion.co',
+  'Bolu Adeyemi'      : 'bolu.adeyemi@abion.co',
+  'Micheal Williams'  : 'micheal.williams@abion.co',
+  'John Musa'         : 'john.musa@abion.co',
+  'David Okonkwo'     : 'david.okonkwo@abion.co',
+  'Adetola'           : 'adetola@abion.co',
+  'Dr. Chukwu'        : 'chukwu@andela.com',
+  'Mrs. Adeyemi'      : 'adeyemi@lasgov.ng',
+  'Nora'              : 'nora@abion.co'
 };
 let currentView = 'dashboard';
 let currentTab  = '1. Master Tasks';
