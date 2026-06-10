@@ -2282,14 +2282,26 @@ window.addEventListener('appinstalled', () => {
   showToast('NEXUS installed ✓', 'success');
 });
 function downloadNexusHTML() {
-  const html = '<!DOCTYPE html>' + document.documentElement.outerHTML;
-  const blob = new Blob([html], { type: 'text/html' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'NEXUS.html';
-  a.click();
-  URL.revokeObjectURL(a.href);
-  showToast('Downloading NEXUS.html…', 'success');
+  // On Vercel (and most hosted environments), Blob/createObjectURL downloads are
+  // blocked by Content-Security-Policy headers. Fetching the source file directly
+  // and piping it through a Blob is reliable across all contexts.
+  fetch(location.href)
+    .then(r => r.blob())
+    .then(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'NEXUS.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      showToast('Downloading NEXUS.html…', 'success');
+    })
+    .catch(() => {
+      // Last-resort fallback: open in new tab so user can Ctrl+S
+      window.open(location.href, '_blank');
+      showToast('Opened in new tab — press Ctrl+S to save', '');
+    });
 }
 
 function triggerPWAInstall() {
