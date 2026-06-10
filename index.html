@@ -346,7 +346,7 @@
     .launch-btns-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
 
     /* VISUAL CALENDAR */
-    .cal-wrap { max-width: 720px; }
+    .cal-wrap { width: 100%; }
     .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
     .cal-nav { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; width: 34px; height: 34px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
     .cal-nav:hover { background: var(--surface3); border-color: var(--accent); color: var(--accent); }
@@ -355,7 +355,7 @@
     .cal-grid-head { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 4px; }
     .cal-grid-head span { text-align: center; font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); padding: 4px 0; }
     .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
-    .cal-cell { min-height: 72px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px; cursor: pointer; transition: border-color 0.15s, background 0.15s; position: relative; overflow: hidden; }
+    .cal-cell { min-height: 100px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px; cursor: pointer; transition: border-color 0.15s, background 0.15s; position: relative; overflow: hidden; }
     .cal-cell:hover { border-color: rgba(108,99,255,0.4); background: var(--surface2); }
     .cal-cell.today { border-color: rgba(108,99,255,0.5); background: rgba(108,99,255,0.07); }
     .cal-cell.today .cal-day-num { color: var(--accent); font-weight: 700; }
@@ -538,8 +538,8 @@
         <span class="badge" id="nav-badge-tasks">0</span>
       </a>
       <a class="nav-item" data-view="cos">
-        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/></svg>
-        COS
+        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
+        Clients
       </a>
       <a class="nav-item" data-view="partners">
         <svg fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>
@@ -717,8 +717,8 @@
       <!-- COS -->
       <div id="view-cos" class="view">
         <div class="card">
-          <div class="card-head"><h3>COS Database</h3><button class="btn-sm" onclick="exportCSV('cos')">Export CSV</button></div>
-          <div class="table-wrap"><table class="data-table"><thead><tr><th>State</th><th>Admin</th><th>Phone</th><th>Email</th><th>WhatsApp</th><th>Members</th><th>Status</th><th>Launched</th><th></th></tr></thead><tbody id="cos-tbody"></tbody></table></div>
+          <div class="card-head"><h3>Client Database</h3><button class="btn-sm" onclick="exportCSV('cos')">Export CSV</button></div>
+          <div class="table-wrap"><table class="data-table"><thead><tr><th>Company</th><th>Contact</th><th>Email</th><th>Phone</th><th>Source</th><th>Stage</th><th>Value</th><th>Next Action</th><th></th></tr></thead><tbody id="cos-tbody"></tbody></table></div>
         </div>
       </div>
 
@@ -1044,13 +1044,15 @@ const FORM_SCHEMAS = {
       {key:'Follow_Up_Hours',label:'Hourly Follow-Up Interval',type:'number',placeholder:'e.g. 1 or 2 (leave blank = off)',leaderOnly:true},
     ]
   },
-  '2. COS':{label:'COS Entry',idKey:'State',appendAction:'appendCOS',fields:[
-    {key:'State',label:'State',type:'text',placeholder:'e.g. Lagos',required:true},
-    {key:'Admin Name',label:'Admin Name',type:'text',required:true},
-    {section:'Contact'},{key:'Admin Phone',label:'Phone',type:'tel'},{key:'Admin Email',label:'Email',type:'email'},
-    {section:'Status'},{key:'WhatsApp Group Created',label:'WhatsApp Group Created',type:'select',options:['No','Yes']},
-    {key:'Members Count',label:'Members Count',type:'number'},{key:'Status',label:'Status',type:'select',options:['Pending','In Progress','Active']},
-    {key:'Last Report Date',label:'Last Report Date',type:'date'},{key:'Notes',label:'Notes',type:'textarea'},
+  '2. COS':{label:'Client Entry',idKey:'Company',appendAction:'appendCOS',fields:[
+    {key:'Company',label:'Company / Client Name',type:'text',placeholder:'e.g. Acme Ltd',required:true},
+    {key:'Contact Name',label:'Contact Person',type:'text',required:true},
+    {section:'Contact'},{key:'Email',label:'Email',type:'email'},{key:'Phone',label:'Phone',type:'tel'},
+    {section:'Pipeline'},{key:'Source',label:'Lead Source',type:'select',options:['','Referral','Outreach','Inbound','Event','Social Media','Other']},
+    {key:'Stage',label:'Stage',type:'select',options:['Lead','Qualified','Proposal Sent','Negotiation','Won','Lost','On Hold']},
+    {key:'Deal Value',label:'Deal Value (₦)',type:'number',placeholder:'e.g. 500000'},
+    {section:'Follow-Up'},{key:'Next Action',label:'Next Action',type:'text',placeholder:'e.g. Send proposal'},{key:'Follow-Up Date',label:'Follow-Up Date',type:'date'},
+    {key:'Assigned To',label:'Assigned To',type:'text'},{key:'Notes',label:'Notes',type:'textarea'},
   ]},
   '3. Partnerships':{label:'Partnership',idKey:'Organisation',appendAction:'appendPartner',fields:[
     {key:'Organisation',label:'Organisation',type:'text',required:true},
@@ -1140,7 +1142,7 @@ const VIEW_TAB_MAP = {
   meetings:'7. Meetings'
 };
 const ADD_BTN_LABELS = {
-  dashboard:'+ TASK', tasks:'+ TASK', cos:'+ COS', partners:'+ PARTNER',
+  dashboard:'+ TASK', tasks:'+ TASK', cos:'+ CLIENT', partners:'+ PARTNER',
   org:'+ ORG', kpi:'+ NEW', marketing:'+ CONTENT'
 };
 
@@ -1191,7 +1193,7 @@ function loadView(name) {
   currentView = name;
   document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.view===name));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id===('view-'+name)));
-  const titles = {dashboard:'KPI Dashboard',tasks:'Master Tasks',cos:'COS',partners:'Partnerships',org:'Org Database',kpi:'Activity Log',marketing:'Marketing',eod:'EOD Report',meetings:'Meetings',followup:'Follow-Up Tracker',failsafe:'Failsafe Alerts',automation:'Automation'};
+  const titles = {dashboard:'KPI Dashboard',tasks:'Master Tasks',cos:'Clients',partners:'Partnerships',org:'Org Database',kpi:'Activity Log',marketing:'Marketing',eod:'EOD Report',meetings:'Meetings',followup:'Follow-Up Tracker',failsafe:'Failsafe Alerts',automation:'Automation'};
   document.getElementById('topbar-title').textContent = titles[name]||name;
   const lbl = ADD_BTN_LABELS[name];
   const addBtn = document.getElementById('add-btn');
@@ -1411,7 +1413,7 @@ function renderTasks() {
 
 function renderCOS() {
   const cos=appData.cos||[];
-  document.getElementById('cos-tbody').innerHTML = cos.map(c=>'<tr><td>'+c.State+'</td><td>'+c['Admin Name']+'</td><td>'+(c['Admin Phone']||'--')+'</td><td>'+(c['Admin Email']||'--')+'</td><td>'+statusBadge(c['WhatsApp Group Created']==='Yes'?'Active':'Pending')+'</td><td>'+(c['Members Count']||0)+'</td><td>'+statusBadge(c.Status)+'</td><td style="font-family:Space Mono,monospace;font-size:11px">'+(c['Last Report Date']||'--')+'</td><td><button class="btn-sm" onclick="editRow(\''+escQ(c.State)+'\',\'2. COS\')">Edit</button></td></tr>').join('')||noDataRow(9,'No COS data');
+  document.getElementById('cos-tbody').innerHTML = cos.map(c=>'<tr><td><strong>'+(c['Company']||'--')+'</strong></td><td>'+(c['Contact Name']||'--')+'</td><td>'+(c['Email']||'--')+'</td><td>'+(c['Phone']||'--')+'</td><td><span class="badge-pill badge-gray">'+(c['Source']||'--')+'</span></td><td>'+statusBadge(c['Stage'])+'</td><td style="font-family:Space Mono,monospace;font-size:11px">'+(c['Deal Value']?'\u20a6'+Number(c['Deal Value']).toLocaleString():'--')+'</td><td style="font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(c['Next Action']||'--')+'</td><td><button class="btn-sm" onclick="editRow('"+escQ(c['Company'])+"','2. COS')">Edit</button></td></tr>').join('')||noDataRow(9,'No clients yet');
 }
 
 function renderPartners() {
