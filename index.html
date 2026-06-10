@@ -1003,34 +1003,10 @@ const FORM_SCHEMAS = {
   ],
   required:true,
   leaderOnly:true
-},  // ← fix: added missing comma
-
-{key:'Assigned_To_Email',label:'Assignee Email',type:'email',placeholder:'name@abion.co',leaderOnly:true},
-    {
-  key:'Assigned To',
-  label:'Assigned To',
-  type:'select',
-  options:[
-    '',
-    'Ayo T. Joshua',
-    'Chinedu',
-    'Mark (Tech)',
-    'Nife',
-    'Bolu',
-    'Bolu Adeyemi',
-    'Micheal Williams',
-    'John Musa',
-    'David Okonkwo',
-    'Adetola',
-    'Dr. Chukwu',
-    'Mrs. Adeyemi',
-    'Nora'
-  ],
-  required:true,
-  leaderOnly:true
-},  // ← fix: added missing comma
-
-{key:'Business / Dept',label:'Department',type:'select',options:['','COS','Partnerships','Marketing','Tech','Operations','Finance','HR'],leaderOnly:true},
+},
+      {key:'Assigned_To_Email',label:'Assignee Email',type:'email',placeholder:'name@abion.co',leaderOnly:true},
+      {key:'Support Person',label:'Support Person',type:'select',options:['','Ayo T. Joshua','Chinedu','Mark (Tech)','Nife','Bolu','Bolu Adeyemi','Micheal Williams','John Musa','David Okonkwo','Adetola','Dr. Chukwu','Mrs. Adeyemi','Nora'],leaderOnly:true},
+      {key:'Business / Dept',label:'Department',type:'select',options:['','COS','Partnerships','Marketing','Tech','Operations','Finance','HR'],leaderOnly:true},
       {section:'Priority & Timing'},
       {key:'Priority',label:'Priority',type:'select',options:['URGENT','HIGH','MEDIUM','LOW'],required:true,leaderOnly:true},
       {key:'Status',label:'Status',type:'select',options:['Not Started','In Progress','Done','Cancelled','Blocked','In Review'],required:true},
@@ -1413,7 +1389,7 @@ function renderTasks() {
 
 function renderCOS() {
   const cos=appData.cos||[];
-  document.getElementById('cos-tbody').innerHTML = cos.map(c=>'<tr><td><strong>'+(c['Company']||'--')+'</strong></td><td>'+(c['Contact Name']||'--')+'</td><td>'+(c['Email']||'--')+'</td><td>'+(c['Phone']||'--')+'</td><td><span class="badge-pill badge-gray">'+(c['Source']||'--')+'</span></td><td>'+statusBadge(c['Stage'])+'</td><td style="font-family:Space Mono,monospace;font-size:11px">'+(c['Deal Value']?'\u20a6'+Number(c['Deal Value']).toLocaleString():'--')+'</td><td style="font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(c['Next Action']||'--')+'</td><td><button class="btn-sm" onclick="editRow('"+escQ(c['Company'])+"','2. COS')">Edit</button></td></tr>').join('')||noDataRow(9,'No clients yet');
+  document.getElementById('cos-tbody').innerHTML = cos.map(c=>'<tr><td><strong>'+(c['Company']||'--')+'</strong></td><td>'+(c['Contact Name']||'--')+'</td><td>'+(c['Email']||'--')+'</td><td>'+(c['Phone']||'--')+'</td><td><span class="badge-pill badge-gray">'+(c['Source']||'--')+'</span></td><td>'+statusBadge(c['Stage'])+'</td><td style="font-family:Space Mono,monospace;font-size:11px">'+(c['Deal Value']?'\u20a6'+Number(c['Deal Value']).toLocaleString():'--')+'</td><td style="font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(c['Next Action']||'--')+'</td><td><button class="btn-sm" onclick="editRow(\''+escQ(c['Company'])+'\',\'2. COS\')">Edit</button></td></tr>').join('')||noDataRow(9,'No clients yet');
 }
 
 function renderPartners() {
