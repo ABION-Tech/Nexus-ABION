@@ -1,0 +1,7 @@
+{
+  "name": "nexus-abion-push",
+  "private": true,
+  "dependencies": {
+    "web-push": "^3.6.7"
+  }
+}
