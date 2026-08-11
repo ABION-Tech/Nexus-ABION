@@ -534,6 +534,18 @@
     .profile-actions { display: flex; flex-direction: column; gap: 8px; }
     #add-member-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 210; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
     #add-member-modal.show { display: flex; }
+    #goal-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 210; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    #goal-modal.show { display: flex; }
+    #goal-input { min-height: 110px; resize: vertical; font-family: "Syne", sans-serif; }
+    .goal-card { padding: 16px; margin-bottom: 12px; }
+    .goal-card-desc { font-size: 13px; font-weight: 700; line-height: 1.5; margin-bottom: 8px; }
+    .goal-progress-row { display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--muted); font-family: "Space Mono", monospace; }
+    .goal-progress-row .progress-track { flex: 1; }
+    .goal-child-list { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: none; }
+    .goal-child-list.open { display: block; }
+    .goal-child-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; font-size: 12px; border-bottom: 1px solid var(--border); }
+    .goal-child-row:last-child { border-bottom: none; }
+    .goal-dep-tag { font-size: 9px; font-family: "Space Mono", monospace; color: var(--info); background: rgba(64,144,240,0.12); border-radius: 10px; padding: 2px 7px; margin-left: 6px; white-space: nowrap; }
     #attach-help-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 220; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
     #attach-help-modal.show { display: flex; }
     #link-task-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 220; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
@@ -846,6 +858,23 @@
   </div>
 </div>
 
+<!-- DESCRIBE A GOAL MODAL (leader-only) — text goes to NIM, which breaks it
+     into multiple proposed tasks landing in the Review Queue tagged with
+     this goal, grouped together, for you to edit/assign/approve. -->
+<div id="goal-modal">
+  <div class="login-box">
+    <h2>Describe a Goal</h2>
+    <p>Describe what you're trying to achieve — NEXUS AI will break it into a set of concrete tasks for your review. Nothing is created in Master Tasks until you approve each one.</p>
+    <div class="form-group">
+      <label>Goal</label>
+      <textarea class="form-input" id="goal-input" placeholder="e.g. Get our Q3 partner report finalized and sent to the board by end of month" autocomplete="off"></textarea>
+    </div>
+    <div id="goal-error"></div>
+    <button class="btn-primary" id="goal-btn" style="width:100%;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="submitGoal()">Break Down Into Tasks</button>
+    <button class="btn-secondary" style="width:100%;font-size:12px" onclick="closeGoalModal()">Cancel</button>
+  </div>
+</div>
+
 <!-- SHARE-A-FILE HELP MODAL — NEXUS doesn't store files itself, so this
      walks people through sharing a Drive link and drops it into the chat
      input looking like a proper attachment (📎 file chip), instead of a
@@ -1084,6 +1113,10 @@
         Review Queue
         <span class="badge" id="nav-badge-review">0</span>
       </a>
+      <a class="nav-item" id="nav-goals-item" data-view="goals" style="display:none">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12zm0-2a4 4 0 100-8 4 4 0 000 8zm0-2a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+        Goals
+      </a>
       <a class="nav-item" id="nav-aianalyst-item" data-view="aianalyst" style="display:none">
         <svg fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 10-2 0v1.07A7.002 7.002 0 003 11a7 7 0 007 7 7 7 0 007-7 7.002 7.002 0 00-6-6.93V3zM8.5 10a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z"/><path fill-rule="evenodd" d="M9 11a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
         AI Analyst
@@ -1140,6 +1173,7 @@
       <button class="top-btn" style="background:rgba(91,82,240,0.1);border-color:rgba(91,82,240,0.25);color:#8880ff" onclick="openLoginModal()" id="btn-login">Login</button>
       <button class="top-btn" id="btn-install-pwa" onclick="triggerPWAInstall()" title="Install NEXUS as app" style="display:none;background:rgba(0,212,160,0.1);border-color:rgba(0,212,160,0.25);color:var(--accent2)">⬇ Install</button>
   <!--  <button class="top-btn" id="btn-download-html" onclick="downloadNexusHTML()" title="Download NEXUS" style="background:rgba(0,212,160,0.1);border-color:rgba(0,212,160,0.25);color:var(--accent2)">⬇ Save</button>-->  
+      <button class="top-btn" id="btn-add-goal" onclick="openGoalModal()" title="Describe a goal — AI breaks it into tasks for review" style="display:none;background:rgba(0,212,160,0.1);border-color:rgba(0,212,160,0.25);color:var(--accent2)">+ Goal</button>
       <button class="top-btn btn-add" id="add-btn" onclick="openDrawer()">+ NEW</button>
     </header>
 
@@ -1440,6 +1474,17 @@
         <div id="review-list" style="display:flex;flex-direction:column;gap:10px"></div>
       </div>
 
+      <!-- GOALS — outcomes described in plain English, decomposed by AI into
+           tasks (via the Review Queue above), tracked here until every
+           child task is Done. -->
+      <div id="view-goals" class="view">
+        <div class="card-head" style="padding:0 0 16px">
+          <h3>Goals</h3>
+          <span class="sub">Describe an outcome — AI breaks it into tasks in the Review Queue. Progress here tracks automatically as those tasks get done.</span>
+        </div>
+        <div id="goals-list" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+
       <!-- AI ANALYST — three modes, triggered by buttons, not a chat interface.
            Same NIM engine as @AI in chat (see callNIMApi_ / callNIMApiReport_
            in code.gs), different aggregation + prompt per mode. -->
@@ -1480,13 +1525,13 @@
             <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
               <span style="font-size:9px;font-family:'Space Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px">Follow-Up Chat</span>
-              <span style="font-size:9px;font-family:'Space Mono',monospace;color:var(--muted);margin-left:4px">· Ctrl+Enter to send</span>
+              <span style="font-size:9px;font-family:'Space Mono',monospace;color:var(--muted);margin-left:4px">· Ctrl+Enter to send · start with /task to queue a task</span>
               <button class="btn-sm" onclick="clearAIAnalystChat()" style="margin-left:auto;color:var(--muted)">Clear</button>
             </div>
             <div id="ai-analyst-chat-history" style="display:flex;flex-direction:column;gap:12px;margin-bottom:14px;max-height:400px;overflow-y:auto;scroll-behavior:smooth"></div>
             <div style="display:flex;gap:8px;align-items:flex-end">
               <textarea id="ai-analyst-chat-input"
-                placeholder="Ask a follow-up question about this analysis…"
+                placeholder="Ask a follow-up question — or start with /task to queue a task, e.g. /task Follow up with Ade on the Lagos contract"
                 rows="2"
                 style="flex:1;resize:vertical;min-height:58px;max-height:160px;background:var(--bg);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;padding:10px 13px;outline:none;transition:border-color 0.2s;line-height:1.5"
                 onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor=''"
@@ -1952,7 +1997,7 @@ function loadView(name) {
   currentView = name;
   document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.view===name));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id===('view-'+name)));
-  const titles = {dashboard:'KPI Dashboard',tasks:'Master Tasks',cos:'Network',partners:'Partnerships',org:'Org Database',kpi:'Activity Log',marketing:'Marketing',eod:'EOD Report',meetings:'Calendar',followup:'Follow-Up Tracker',failsafe:'Failsafe Alerts',automation:'Automation',team:'Team Directory',review:'Review Queue',aianalyst:'AI Analyst'};
+  const titles = {dashboard:'KPI Dashboard',tasks:'Master Tasks',cos:'Network',partners:'Partnerships',org:'Org Database',kpi:'Activity Log',marketing:'Marketing',eod:'EOD Report',meetings:'Calendar',followup:'Follow-Up Tracker',failsafe:'Failsafe Alerts',automation:'Automation',team:'Team Directory',review:'Review Queue',aianalyst:'AI Analyst',goals:'Goals'};
   document.getElementById('topbar-title').textContent = titles[name]||name;
   const lbl = ADD_BTN_LABELS[name];
   const addBtn = document.getElementById('add-btn');
@@ -2188,6 +2233,7 @@ function renderView(name) {
     case 'automation': renderAutomation(); break;
     case 'team':       renderTeam(); break;
     case 'review':     loadReviewQueue(); break;
+    case 'goals':      loadGoals(); break;
   }
 }
 
@@ -2298,6 +2344,7 @@ const ICON_PATHS = {
   search:      '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
   bot:         '<rect x="3" y="9" width="18" height="11" rx="2"/><circle cx="8.5" cy="14.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="15.5" cy="14.5" r="1.2" fill="currentColor" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="3.5" r="1.2" fill="currentColor" stroke="none"/><path d="M3 13H1v4h2M23 13h-2v4h2"/>',
   clipboard:   '<path d="M9 2h6a1 1 0 0 1 1 1v2H8V3a1 1 0 0 1 1-1z"/><rect x="5" y="4" width="14" height="18" rx="2"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="15" y2="15"/>',
+  target:      '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
   'trending-up': '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
   moon:        '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
   sun:         '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
@@ -3030,8 +3077,22 @@ async function sendAIAnalystChat() {
   const inp    = document.getElementById('ai-analyst-chat-input');
   const sendBtn= document.getElementById('ai-analyst-chat-send');
   const histEl = document.getElementById('ai-analyst-chat-history');
-  const question = inp ? inp.value.trim() : '';
-  if (!question) return;
+  const raw = inp ? inp.value.trim() : '';
+  if (!raw) return;
+
+  // "/task <description>" is a lightweight escape hatch, mirroring the
+  // existing "@AI" convention in task chat: instead of asking the AI a
+  // question about the current report, it hands the message straight to
+  // createTaskFromChat, which extracts ONE task and queues it in the
+  // Review Queue — same "propose → land in Pending AI Tasks → leader
+  // approves" pipeline as Goal Decomposition and Fireflies, just a
+  // single-task door in from an ongoing chat. Works regardless of which
+  // AI Analyst mode is active (or even if none is yet) since it never
+  // touches that mode's report data.
+  const taskMatch = /^\/task\s+(.+)/is.exec(raw);
+  if (taskMatch) { sendAIAnalystTaskCommand(raw, taskMatch[1].trim()); return; }
+
+  const question = raw;
   if (!aiAnalystCurrentMode) { showToast('No mode active — generate a report first', 'error'); return; }
 
   inp.value = '';
@@ -3092,6 +3153,61 @@ async function sendAIAnalystChat() {
   }
 }
 
+// Handles a "/task <description>" message from the AI Analyst chat input —
+// see the prefix check at the top of sendAIAnalystChat(). Renders the same
+// user/AI bubble pair as a normal follow-up turn, but hits createTaskFromChat
+// instead of queryAIAnalystFollowup, and doesn't push into _aiChatHistory
+// since it isn't part of the grounded report Q&A thread.
+async function sendAIAnalystTaskCommand(originalText, taskText) {
+  const inp    = document.getElementById('ai-analyst-chat-input');
+  const sendBtn= document.getElementById('ai-analyst-chat-send');
+  const histEl = document.getElementById('ai-analyst-chat-history');
+  if (!histEl) return;
+
+  inp.value = '';
+  inp.disabled = true;
+  sendBtn.disabled = true;
+  sendBtn.style.opacity = '0.5';
+
+  // The follow-up chat panel only shows once a mode has been generated —
+  // /task should work even before that, so make sure the panel is visible.
+  const chatPanel = document.getElementById('ai-analyst-chat');
+  if (chatPanel) chatPanel.style.display = '';
+
+  histEl.appendChild(_makeChatUserBubble(originalText));
+  const typing = _makeChatTypingBubble();
+  histEl.appendChild(typing);
+  histEl.scrollTop = histEl.scrollHeight;
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ action: 'createTaskFromChat', token: getIdentityToken() || '', message: taskText }),
+      redirect: 'follow',
+      cache  : 'no-store'
+    });
+    const r = await res.json();
+    typing.remove();
+
+    if (r.error) {
+      histEl.appendChild(_makeChatAIBubble('⚠ ' + r.error));
+    } else {
+      histEl.appendChild(_makeChatAIBubble(r.confirmMsg || 'Task queued for review.'));
+      loadReviewQueue(); // refreshes the nav badge count even if the leader isn't on that tab
+    }
+  } catch (err) {
+    typing.remove();
+    histEl.appendChild(_makeChatAIBubble('⚠ Network error — ' + escHtml(err.message)));
+  } finally {
+    inp.disabled = false;
+    sendBtn.disabled = false;
+    sendBtn.style.opacity = '';
+    histEl.scrollTop = histEl.scrollHeight;
+    inp.focus();
+  }
+}
+
 // Small "3 mins ago" / "2 hours ago" helper for the AI Analyst meta line.
 function timeAgoLabel(ts) {
   const diffMs = Date.now() - ts;
@@ -3112,6 +3228,7 @@ async function loadReviewQueue() {
     const res = await fetch(SCRIPT_URL + '?action=getPendingAITasks&token=' + encodeURIComponent(getIdentityToken()||'') + '&_=' + Date.now(), { redirect:'follow', cache:'no-store' });
     const r = await res.json();
     if (r.error) { listEl.innerHTML = '<div class="sub">'+r.error+'</div>'; return; }
+    window._lastReviewItems = r.items || [];
     renderReviewQueue(r.items || []);
   } catch(e) {
     listEl.innerHTML = '<div class="sub">Failed to load — '+e.message+'</div>';
@@ -3125,44 +3242,86 @@ function renderReviewQueue(items) {
 
   const names = getTeamNames();
 
-  // Group by meeting so each Fireflies ingest shows as one block: the raw
-  // meeting summary up top, and the task items the AI calculated from it
-  // underneath. Falls back gracefully across a few possible field names
-  // since the ingest payload shape lives server-side (code.gs).
+  // Group by Goal_ID first (goal decomposition), falling back to Meeting_ID
+  // (Fireflies ingest) — same "batch of AI-proposed tasks share one review
+  // block" pattern either way, just a different header/source per group.
   const groups = {};
   const order = [];
   items.forEach(it => {
-    const mid = it['Meeting_ID'] || '—unassigned—';
-    if (!groups[mid]) { groups[mid] = []; order.push(mid); }
-    groups[mid].push(it);
+    // AI Analyst chat-created tasks (/task) are always standalone — never
+    // batched under a Goal, and with no Meeting_ID to share, so each gets
+    // its own group keyed by its own row ID rather than falling into a
+    // shared "—unassigned—" meeting-ingest bucket with unrelated rows.
+    const gid = it['Goal_ID'] ? ('goal:'+it['Goal_ID'])
+      : (it['Source'] === 'AI Analyst' ? ('chat:'+it['ID']) : ('mtg:'+(it['Meeting_ID'] || '—unassigned—')));
+    if (!groups[gid]) { groups[gid] = []; order.push(gid); }
+    groups[gid].push(it);
   });
 
-  listEl.innerHTML = order.map(mid => {
-    const groupItems = groups[mid];
+  listEl.innerHTML = order.map(gid => {
+    const groupItems = groups[gid];
     const first = groupItems[0];
-    const summary = first['Meeting_Summary'] || first['Summary'] || first['Meeting Summary'] || first['Full_Summary'] || first['Notes'] || '';
-    const meetingDate = first['Created_At'] ? new Date(first['Created_At']).toLocaleDateString() : '';
-    const summaryId = 'rv-summary-' + escAttr(mid).replace(/[^a-zA-Z0-9]/g,'');
+    const isGoal = gid.indexOf('goal:') === 0;
 
-    const summaryPanel = '<div class="card" style="padding:14px;margin-bottom:8px;background:var(--surface2)">'
-      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
-      +   '<div style="font-size:11px;font-family:\'Space Mono\',monospace;color:var(--text);display:flex;align-items:center;gap:6px">'+icon('clipboard',13)+' Meeting Ingest · '+escHtml(mid)+(meetingDate?' · '+meetingDate:'')+'</div>'
-      +   (summary ? '<button class="btn-sm" onclick="toggleReviewSummary(\''+summaryId+'\',this)">Show summary</button>' : '<span style="font-size:10px;color:var(--muted);font-family:\'Space Mono\',monospace">No summary text on this ingest</span>')
-      + '</div>'
-      + (summary ? '<div id="'+summaryId+'" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;line-height:1.6;white-space:pre-wrap;color:var(--text)">'+escHtml(summary)+'</div>' : '')
-      + '<div style="font-size:10px;color:var(--muted);font-family:\'Space Mono\',monospace;margin-top:8px">'+groupItems.length+' task'+(groupItems.length===1?'':'s')+' calculated from this meeting — review each below</div>'
-      + '</div>';
+    let headerPanel;
+    if (isGoal) {
+      const goalId = first['Goal_ID'];
+      headerPanel = '<div class="card" style="padding:14px;margin-bottom:8px;background:var(--surface2)">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
+        +   '<div style="font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px">'+icon('target',13)+' Goal · '+escHtml(first['Meeting_Summary']||'')+'</div>'
+        +   '<button class="btn-primary" style="font-size:11px;padding:6px 12px" onclick="approveAllGoalItems(\''+escQ(goalId)+'\')">'+icon('check',12)+' Approve all ('+groupItems.length+')</button>'
+        +   '<button class="btn-sm" style="font-size:11px;padding:6px 12px" onclick="regenerateGoalUI(\''+escQ(goalId)+'\')">'+icon('refresh',12)+' Regenerate</button>'
+        + '</div>'
+        + '<div style="font-size:10px;color:var(--muted);font-family:\'Space Mono\',monospace;margin-top:8px">'+groupItems.length+' task'+(groupItems.length===1?'':'s')+' proposed for this goal — review, edit, and assign each below</div>'
+        + '</div>';
+    } else if (first['Source'] === 'AI Analyst') {
+      // AI Analyst chat-driven task creation (/task in the AI Analyst chat)
+      // — always a standalone row, never grouped, so this "group" is
+      // always exactly one item. No Meeting_ID / summary to show, so this
+      // header is deliberately lighter than the meeting-ingest one below.
+      headerPanel = '<div class="card" style="padding:14px;margin-bottom:8px;background:var(--surface2)">'
+        + '<div style="font-size:11px;font-family:\'Space Mono\',monospace;color:var(--text);display:flex;align-items:center;gap:6px">'+icon('message',13)+' From AI Analyst chat</div>'
+        + '</div>';
+    } else {
+      const mid = first['Meeting_ID'] || '—unassigned—';
+      const summary = first['Meeting_Summary'] || first['Summary'] || first['Meeting Summary'] || first['Full_Summary'] || first['Notes'] || '';
+      const meetingDate = first['Created_At'] ? new Date(first['Created_At']).toLocaleDateString() : '';
+      const summaryId = 'rv-summary-' + escAttr(mid).replace(/[^a-zA-Z0-9]/g,'');
+      headerPanel = '<div class="card" style="padding:14px;margin-bottom:8px;background:var(--surface2)">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
+        +   '<div style="font-size:11px;font-family:\'Space Mono\',monospace;color:var(--text);display:flex;align-items:center;gap:6px">'+icon('clipboard',13)+' Meeting Ingest · '+escHtml(mid)+(meetingDate?' · '+meetingDate:'')+'</div>'
+        +   (summary ? '<button class="btn-sm" onclick="toggleReviewSummary(\''+summaryId+'\',this)">Show summary</button>' : '<span style="font-size:10px;color:var(--muted);font-family:\'Space Mono\',monospace">No summary text on this ingest</span>')
+        + '</div>'
+        + (summary ? '<div id="'+summaryId+'" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;line-height:1.6;white-space:pre-wrap;color:var(--text)">'+escHtml(summary)+'</div>' : '')
+        + '<div style="font-size:10px;color:var(--muted);font-family:\'Space Mono\',monospace;margin-top:8px">'+groupItems.length+' task'+(groupItems.length===1?'':'s')+' calculated from this meeting — review each below</div>'
+        + '</div>';
+    }
 
-    const taskCards = groupItems.map(it => {
+    const taskCards = groupItems.map((it, idx) => {
       const id = it.ID;
       const matched = it['Matched Assignee'] || '';
       const assigneeOptions = ['<option value="">— choose assignee —</option>']
         .concat(names.map(n => '<option value="'+escQ(n)+'"'+(n===matched?' selected':'')+'>'+n+'</option>'))
         .join('');
       const warn = matched ? '' : '<div style="font-size:11px;color:var(--danger);margin-top:4px;display:flex;align-items:center;gap:5px">'+icon('alert-triangle',12)+' Could not match "'+(it['Suggested Assignee']||'unknown')+'" to a roster name — pick one before approving.</div>';
+      // Dependency tag — Depends_On_Index (set only on goal-decomposition
+      // rows) points at another item's position within THIS SAME group, in
+      // the order NIM proposed them, not a real task ID yet (that only
+      // exists once the dependency target is itself approved).
+      const depIdx = it['Depends_On_Index'];
+      let depTag = '';
+      if (isGoal && depIdx !== '' && depIdx !== undefined && depIdx !== null && groupItems[depIdx]) {
+        const depDesc = String(groupItems[depIdx]['Task Description']||'').substring(0,40);
+        depTag = '<span class="goal-dep-tag">depends on: '+escHtml(depDesc)+(depDesc.length>=40?'…':'')+'</span>';
+      }
+      const sourceLine = isGoal
+        ? ('AI suggested'+(matched?' · '+escHtml(matched):'')+depTag)
+        : (it['Source'] === 'AI Analyst')
+        ? ('AI Analyst suggested: '+(it['Suggested Assignee']||'—'))
+        : ('Fireflies suggested: '+(it['Suggested Assignee']||'—'));
       return '<div class="card" style="padding:14px;margin-bottom:8px" id="rv-card-'+id+'">'
-        + '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">'
-        +   'Fireflies suggested: '+(it['Suggested Assignee']||'—')
+        + '<div style="font-size:11px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;flex-wrap:wrap">'
+        +   sourceLine
         + '</div>'
         + '<textarea class="form-input" id="rv-desc-'+id+'" rows="2" style="width:100%;margin-bottom:8px">'+(it['Task Description']||'')+'</textarea>'
         + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">'
@@ -3180,8 +3339,59 @@ function renderReviewQueue(items) {
         + '</div>';
     }).join('');
 
-    return '<div style="margin-bottom:18px">' + summaryPanel + taskCards + '</div>';
+    return '<div style="margin-bottom:18px">' + headerPanel + taskCards + '</div>';
   }).join('');
+}
+// Approves every still-pending item in one goal's group in sequence, each
+// with whatever's currently in its own edit fields (assignee/deadline/
+// priority) — same per-item validation and endpoint as a single approve,
+// just looped so a leader doesn't have to click through a 6-task goal one
+// at a time. Stops and reports if any item is missing a required field
+// rather than silently skipping it.
+async function approveAllGoalItems(goalId) {
+  const cards = Array.from(document.querySelectorAll('[id^="rv-card-"]'));
+  const ids = cards
+    .map(c => c.id.replace('rv-card-',''))
+    .filter(id => {
+      const descEl = document.getElementById('rv-desc-'+id);
+      return descEl && document.getElementById('rv-assignee-'+id);
+    });
+  // Filter to only items belonging to this goal by checking against the
+  // last-loaded review data — reuse renderReviewQueue's own item list via
+  // a lightweight re-fetch isn't needed since the cards already carry
+  // everything we need in their input fields; we just need the subset of
+  // ids that were rendered under this goal's header. Simplest reliable way:
+  // ids appear contiguously after this goal's header in DOM order, but
+  // rather than rely on that, re-derive from the last fetched pending list.
+  if (!window._lastReviewItems) { showToast('Reload the queue and try again', 'error'); return; }
+  const goalIds = window._lastReviewItems.filter(it => it['Goal_ID'] === goalId).map(it => it.ID);
+  let failed = 0;
+  for (const id of goalIds) {
+    if (!document.getElementById('rv-card-'+id)) continue; // already approved/rejected mid-loop
+    const desc = document.getElementById('rv-desc-'+id).value.trim();
+    const assignee = document.getElementById('rv-assignee-'+id).value;
+    const deadline = document.getElementById('rv-deadline-'+id).value;
+    const priority = document.getElementById('rv-priority-'+id).value;
+    if (!desc || !assignee) { failed++; continue; }
+    try {
+      const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({
+        action:'approvePendingAITask', id, token:getIdentityToken(),
+        data:{ taskDescription:desc, assignedTo:assignee, deadline, priority }
+      })});
+      const r = await res.json();
+      if (r.error) failed++;
+    } catch(e) { failed++; }
+  }
+  if (failed) showToast(failed+' item(s) need an assignee before they can be approved', 'error');
+  else showToast('Goal tasks approved → Master Tasks', 'success');
+  loadReviewQueue(); loadData();
+}
+function toggleReviewSummary(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const showing = el.style.display !== 'none';
+  el.style.display = showing ? 'none' : 'block';
+  if (btn) btn.textContent = showing ? 'Show summary' : 'Hide summary';
 }
 function toggleReviewSummary(id, btn) {
   const el = document.getElementById(id);
@@ -3213,6 +3423,133 @@ async function rejectReviewItem(id) {
     const r = await res.json();
     if (r.error) { showToast(r.error, 'error'); return; }
     showToast('Rejected', 'success');
+    loadReviewQueue();
+  } catch(e) { showToast('Error: '+e.message, 'error'); }
+}
+
+// ============================================================
+//  GOALS — describe an outcome, AI decomposes it into tasks that land in
+//  the Review Queue above (grouped, editable, approve-or-reject per item,
+//  same as the Fireflies pipeline). This block only handles the "describe
+//  a goal" input + the Goals tracking list; the actual review UI is the
+//  renderReviewQueue() code above, reused as-is.
+// ============================================================
+function openGoalModal() {
+  if (!isLeader()) { showToast('Leader login required', 'error'); return; }
+  document.getElementById('goal-input').value = '';
+  document.getElementById('goal-error').textContent = '';
+  document.getElementById('goal-modal').classList.add('show');
+  document.getElementById('goal-input').focus();
+}
+function closeGoalModal() { document.getElementById('goal-modal').classList.remove('show'); }
+async function submitGoal() {
+  const goalText = document.getElementById('goal-input').value.trim();
+  const errEl = document.getElementById('goal-error');
+  const btn = document.getElementById('goal-btn');
+  errEl.textContent = '';
+  if (!goalText) { errEl.textContent = 'Describe the goal first.'; return; }
+  btn.disabled = true;
+  const originalLabel = btn.innerHTML;
+  btn.innerHTML = 'Breaking it down…';
+  try {
+    const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({
+      action:'decomposeGoal', goal: goalText, token: getIdentityToken()
+    })});
+    const r = await res.json();
+    if (r.error) { errEl.textContent = r.error; return; }
+    closeGoalModal();
+    showToast((r.tasksCreated||0)+' task(s) proposed — review below', 'success');
+    loadView('review');
+  } catch(e) {
+    errEl.textContent = 'Error: '+e.message;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalLabel;
+  }
+}
+
+async function loadGoals() {
+  if (!isLeader()) { showToast('Leader login required','error'); loadView('dashboard'); return; }
+  const listEl = document.getElementById('goals-list');
+  listEl.innerHTML = '<div class="sub">Loading…</div>';
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=getGoals&token=' + encodeURIComponent(getIdentityToken()||'') + '&_=' + Date.now(), { redirect:'follow', cache:'no-store' });
+    const r = await res.json();
+    if (r.error) { listEl.innerHTML = '<div class="sub">'+r.error+'</div>'; return; }
+    renderGoalsList(r.goals || []);
+  } catch(e) {
+    listEl.innerHTML = '<div class="sub">Failed to load — '+e.message+'</div>';
+  }
+}
+function renderGoalsList(goals) {
+  const listEl = document.getElementById('goals-list');
+  if (!goals.length) {
+    listEl.innerHTML = '<div class="sub">No goals yet — click "+ Goal" in the top bar to describe one.</div>';
+    return;
+  }
+  // Active + Drafting first (most actionable), then Completed, then Archived.
+  const rank = { 'Drafting':0, 'Active':0, 'Completed':1, 'Archived':2 };
+  const sorted = goals.slice().sort((a,b) => (rank[a.Status]??1) - (rank[b.Status]??1));
+
+  listEl.innerHTML = sorted.map(g => {
+    const total = g.total || 0;
+    const done = g.done || 0;
+    const pct = total ? Math.round((done/total)*100) : 0;
+    const statusMap = {Drafting:'badge-yellow', Active:'badge-blue', Completed:'badge-green', Archived:'badge-gray'};
+    const statusBadgeHtml = '<span class="badge-pill '+(statusMap[g.Status]||'badge-gray')+'">'+g.Status+'</span>';
+    const childRows = (g.children||[]).map(c =>
+      '<div class="goal-child-row">'
+      + '<span style="cursor:pointer" onclick="closeGoalModal();loadView(\'tasks\');setTimeout(()=>editRow(\''+escQ(c.ID)+'\',\'1. Master Tasks\'),50)">'+escHtml((c['Task Description']||'').substring(0,60))+'</span>'
+      + statusBadge(c.Status)
+      + '</div>'
+    ).join('') || '<div class="sub" style="padding:8px 0">No approved tasks yet — check the Review Queue.</div>';
+    const childListId = 'goal-children-'+g.ID;
+    return '<div class="card goal-card">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">'
+      +   '<div class="goal-card-desc" style="flex:1;min-width:200px">'+escHtml(g.Description)+'</div>'
+      +   statusBadgeHtml
+      + '</div>'
+      + '<div class="goal-progress-row" style="margin-top:8px">'
+      +   '<span>'+done+' / '+total+' tasks done</span>'
+      +   progressBar(pct)
+      +   (g.PendingCount>0 ? '<span style="color:var(--warn)">'+g.PendingCount+' awaiting review</span>' : '')
+      + '</div>'
+      + '<div style="display:flex;gap:8px;margin-top:10px">'
+      +   '<button class="btn-sm" onclick="toggleGoalChildren(\''+childListId+'\',this)">'+(g.children&&g.children.length?'Show tasks ('+g.children.length+')':'Show tasks')+'</button>'
+      +   (g.PendingCount>0 ? '<button class="btn-sm" onclick="loadView(\'review\')">Go to Review Queue</button>' : '')
+      +   (g.Status!=='Archived' ? '<button class="btn-sm" style="color:var(--danger);margin-left:auto" onclick="archiveGoalUI(\''+escQ(g.ID)+'\')">Archive</button>' : '')
+      + '</div>'
+      + '<div class="goal-child-list" id="'+childListId+'">'+childRows+'</div>'
+      + '</div>';
+  }).join('');
+}
+function toggleGoalChildren(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const open = el.classList.toggle('open');
+  if (btn) btn.textContent = open ? 'Hide tasks' : 'Show tasks';
+}
+async function archiveGoalUI(id) {
+  if (!confirm('Archive this goal? Its approved tasks stay untouched in Master Tasks — this only closes the goal itself.')) return;
+  try {
+    const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({action:'archiveGoal', id, token:getIdentityToken()})});
+    const r = await res.json();
+    if (r.error) { showToast(r.error, 'error'); return; }
+    showToast('Goal archived', 'success');
+    loadGoals();
+  } catch(e) { showToast('Error: '+e.message, 'error'); }
+}
+// Discards this goal's still-pending review items and re-runs decomposition
+// from scratch — already-approved/rejected items are untouched (see
+// regenerateGoalTasks server-side). Called from the "Regenerate" button on
+// a goal's group header in the Review Queue.
+async function regenerateGoalUI(id) {
+  if (!confirm('Discard the still-pending proposed tasks for this goal and generate a fresh set? Already-approved or rejected tasks are not affected.')) return;
+  try {
+    const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({action:'regenerateGoalTasks', id, token:getIdentityToken()})});
+    const r = await res.json();
+    if (r.error) { showToast(r.error, 'error'); return; }
+    showToast((r.tasksCreated||0)+' new task(s) proposed', 'success');
     loadReviewQueue();
   } catch(e) { showToast('Error: '+e.message, 'error'); }
 }
@@ -4685,6 +5022,10 @@ function updateLeaderUI() {
   if(teamNav) teamNav.style.display=leaderFlag?'flex':'none';
   const reviewNav=document.getElementById('nav-review-item');
   if(reviewNav) reviewNav.style.display=leaderFlag?'flex':'none';
+  const goalsNav=document.getElementById('nav-goals-item');
+  if(goalsNav) goalsNav.style.display=leaderFlag?'flex':'none';
+  const goalBtn=document.getElementById('btn-add-goal');
+  if(goalBtn) goalBtn.style.display=leaderFlag?'':'none';
   const aiAnalystNav=document.getElementById('nav-aianalyst-item');
   if(aiAnalystNav) aiAnalystNav.style.display=leaderFlag?'flex':'none';
   const kpiNav=document.getElementById('nav-kpi-item');
@@ -4695,6 +5036,7 @@ function updateLeaderUI() {
   // hidden nav item as the only way back to a visible view.
   if(!leaderFlag && currentView==='kpi') loadView('dashboard');
   if(!leaderFlag && currentView==='review') loadView('dashboard');
+  if(!leaderFlag && currentView==='goals') loadView('dashboard');
   if(!leaderFlag && currentView==='aianalyst') loadView('dashboard');
   refreshAddButtonAccess();
 }
