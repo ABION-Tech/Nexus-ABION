@@ -43,9 +43,13 @@
     @media (min-width: 701px) {
       #sidebar-collapse-btn { display: flex; }
       #sidebar.collapsed { width: 60px; }
-      /* Text hidden via font-size:0 rather than display:none — icons are
-         sized in px (see .nav-item svg) so they're unaffected, and this
-         avoids needing to wrap every nav-item's label in its own span. */
+      /* Text hidden via display:none on a dedicated .nav-label span rather
+         than font-size:0 on the whole .nav-item — the old approach left a
+         zero-size but still-participating inline text box next to the
+         icon, which could overlap/misalign depending on label length and
+         wrapping (reported on "AI Analyst"). display:none removes the
+         label from layout entirely, so this is robust regardless of label
+         text. */
       #sidebar.collapsed .nav-section,
       #sidebar.collapsed .sidebar-logo p,
       #sidebar.collapsed .sidebar-logo .version-pill,
@@ -61,7 +65,8 @@
          inline style's justify-content/flex-direction. */
       #sidebar.collapsed .sidebar-logo { flex-direction: column !important; justify-content: center !important; padding: 14px 6px !important; gap: 10px !important; }
       #sidebar.collapsed .sidebar-logo > div:first-child { text-align: center; }
-      #sidebar.collapsed .nav-item { font-size: 0; justify-content: center; gap: 0; padding: 8px; }
+      #sidebar.collapsed .nav-item { justify-content: center; gap: 0; padding: 8px; }
+      #sidebar.collapsed .nav-item .nav-label { display: none; }
       #sidebar.collapsed .nav-item .badge { display: none; }
       #sidebar.collapsed .lb-name { font-size: 0; text-align: center; }
       #sidebar.collapsed .lb-name::after { content: ''; display: inline-block; width: 14px; height: 14px; vertical-align: -2px; background-repeat: no-repeat; background-size: contain; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235a5a7a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E"); }
@@ -375,6 +380,17 @@
     .chat-msg-system .cm-author { color: var(--accent2); }
     .chat-msg-ai { align-self: flex-start; max-width: 92%; background: rgba(136,128,255,0.08); border: 1px solid rgba(136,128,255,0.28); }
     .chat-msg-ai .cm-author { color: #8880ff; font-weight: 700; }
+    /* Agent handoff — distinct from a plain @AI Q&A bubble (chat-msg-ai
+       above) so it reads as "work was delegated" rather than "a question
+       was answered". The instruction itself (agent_handoff) reuses the
+       system-message style (centered, muted) since it's really a log
+       line; the agent's actual reply (agent_response) gets its own
+       left-aligned colored bubble, same shape as chat-msg-ai but gold to
+       match the Ocean Gradient accent instead of purple. */
+    .chat-msg-agent-handoff { align-self: center; max-width: 92%; background: rgba(240,160,48,0.06); border-color: rgba(240,160,48,0.22); }
+    .chat-msg-agent-handoff .cm-author { color: #f0a030; }
+    .chat-msg-agent { align-self: flex-start; max-width: 92%; background: rgba(240,160,48,0.08); border: 1px solid rgba(240,160,48,0.3); }
+    .chat-msg-agent .cm-author { color: #f0a030; font-weight: 700; }
     .chat-task-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
     .chat-action-btn { font-size: 11px; font-family: 'Space Mono', monospace; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--accent2); background: rgba(0,212,160,0.12); color: var(--accent2); cursor: pointer; transition: opacity 0.15s; }
     .chat-action-btn:hover:not(:disabled) { background: rgba(0,212,160,0.22); }
@@ -546,10 +562,17 @@
     .goal-child-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; font-size: 12px; border-bottom: 1px solid var(--border); }
     .goal-child-row:last-child { border-bottom: none; }
     .goal-dep-tag { font-size: 9px; font-family: "Space Mono", monospace; color: var(--info); background: rgba(64,144,240,0.12); border-radius: 10px; padding: 2px 7px; margin-left: 6px; white-space: nowrap; }
+    .goal-progress-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.15); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px; margin-right: 2px; }
+    #goal-progress-widget { display: none; position: fixed; bottom: 20px; right: 20px; z-index: 210; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; box-shadow: 0 6px 24px rgba(0,0,0,0.4); font-size: 12px; color: var(--text); align-items: center; gap: 8px; cursor: pointer; }
+    #goal-progress-widget.show { display: flex; }
+    .goal-reasoning-panel { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px; line-height: 1.6; color: var(--muted); white-space: pre-wrap; display: none; }
+    .goal-reasoning-panel.open { display: block; }
     #attach-help-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 220; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
     #attach-help-modal.show { display: flex; }
     #link-task-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 220; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
     #link-task-modal.show { display: flex; }
+    #agent-handoff-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 220; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    #agent-handoff-modal.show { display: flex; }
     .link-task-item { padding: 8px; border-bottom: 1px solid var(--border); cursor: pointer; border-radius: 6px; }
     .link-task-item:hover { background: rgba(255,255,255,0.05); }
     .link-task-item .lt-title { font-size: 12px; font-weight: 700; }
@@ -863,16 +886,41 @@
      this goal, grouped together, for you to edit/assign/approve. -->
 <div id="goal-modal">
   <div class="login-box">
-    <h2>Describe a Goal</h2>
-    <p>Describe what you're trying to achieve — NEXUS AI will break it into a set of concrete tasks for your review. Nothing is created in Master Tasks until you approve each one.</p>
-    <div class="form-group">
-      <label>Goal</label>
-      <textarea class="form-input" id="goal-input" placeholder="e.g. Get our Q3 partner report finalized and sent to the board by end of month" autocomplete="off"></textarea>
+    <div id="goal-modal-form-state">
+      <h2>Describe a Goal</h2>
+      <p>Describe what you're trying to achieve — NEXUS AI will break it into a set of concrete tasks for your review. Nothing is created in Master Tasks until you approve each one.</p>
+      <div class="form-group">
+        <label>Goal</label>
+        <textarea class="form-input" id="goal-input" placeholder="e.g. Get our Q3 partner report finalized and sent to the board by end of month" autocomplete="off"></textarea>
+      </div>
+      <div id="goal-error"></div>
+      <button class="btn-primary" id="goal-btn" style="width:100%;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="submitGoal()">Break Down Into Tasks</button>
+      <button class="btn-secondary" style="width:100%;font-size:12px" onclick="closeGoalModal()">Cancel</button>
     </div>
-    <div id="goal-error"></div>
-    <button class="btn-primary" id="goal-btn" style="width:100%;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="submitGoal()">Break Down Into Tasks</button>
-    <button class="btn-secondary" style="width:100%;font-size:12px" onclick="closeGoalModal()">Cancel</button>
+    <!-- Shown in place of the form above while decomposeGoal is in flight
+         (see submitGoal()). Minimize hides the whole modal but leaves the
+         request running in the background, tracked by the floating
+         goal-progress-widget bar; Cancel aborts the in-flight fetch. -->
+    <div id="goal-modal-progress-state" style="display:none">
+      <h2><span class="goal-progress-spinner"></span> Breaking it down…</h2>
+      <p id="goal-progress-text" style="font-style:italic"></p>
+      <p style="font-size:12px;color:var(--muted)">NEXUS AI is reading your goal and the live team roster to propose a set of assignable tasks. This usually takes a few seconds.</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn-secondary" style="flex:1;font-size:12px" onclick="minimizeGoalDecompose()">Minimize</button>
+        <button class="btn-secondary" style="flex:1;font-size:12px;color:var(--danger)" onclick="cancelGoalDecompose()">Cancel</button>
+      </div>
+    </div>
   </div>
+</div>
+
+<!-- Floating status bar shown when a goal decomposition is minimized —
+     lets a leader keep working elsewhere while NIM chews on their goal,
+     instead of being stuck staring at a blocked modal. Tapping it reopens
+     the modal's progress state (see reopenGoalDecompose()). -->
+<div id="goal-progress-widget" onclick="reopenGoalDecompose()">
+  <span class="goal-progress-spinner"></span>
+  <span id="goal-progress-widget-text">Breaking down goal…</span>
+  <button class="btn-sm" onclick="event.stopPropagation();cancelGoalDecompose()" style="margin-left:8px">Cancel</button>
 </div>
 
 <!-- SHARE-A-FILE HELP MODAL — NEXUS doesn't store files itself, so this
@@ -919,6 +967,28 @@
     </div>
     <div id="link-task-results" style="max-height:260px;overflow-y:auto;margin:8px 0"></div>
     <button class="btn-secondary" style="width:100%;font-size:12px" onclick="closeLinkTaskModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- HAND OFF TO AGENT MODAL — leader / AIAgent-trusted only. Fires from the
+     "Hand off to Agent" button in an open task thread (see
+     agent-handoff-btn). The instruction typed here plus that task's live
+     context get sent to handoffTaskToAgent server-side; both the
+     instruction and the agent's reply land back in this same thread as
+     ordinary chat rows once done, so this modal just closes on submit and
+     the thread refreshes to show them. -->
+<div id="agent-handoff-modal">
+  <div class="login-box" style="width:400px">
+    <h2><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;flex-shrink:0"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg> Hand off to Agent</h2>
+    <p id="agent-handoff-task-title" style="font-weight:700;color:var(--text)"></p>
+    <p>Give the agent a short instruction for this task — it'll work directly off the task's current status, notes, and recent discussion.</p>
+    <div class="form-group">
+      <label>Instructions</label>
+      <textarea class="form-input" id="agent-handoff-input" rows="3" placeholder="e.g. Draft a follow-up message to the assignee asking for a status update" autocomplete="off"></textarea>
+    </div>
+    <div id="agent-handoff-error"></div>
+    <button class="btn-primary" id="agent-handoff-btn-submit" style="width:100%;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="submitAgentHandoff()">Send to Agent</button>
+    <button class="btn-secondary" style="width:100%;font-size:12px" onclick="closeAgentHandoffModal()">Cancel</button>
   </div>
 </div>
 
@@ -977,7 +1047,7 @@
     <button class="btn-sm" onclick="promptIdentity(true)" title="Switch who you're logged in as">Switch account</button>
     <button class="btn-sm" onclick="teamLogoutClick()" title="Log out of chat" style="color:var(--danger)">Log out</button>
     <button class="btn-sm" id="chat-notify-btn" onclick="toggleChatNotifications()" style="margin-left:auto"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Enable notifications</button>
-    <button class="btn-sm" onclick="clearAllChatNotifications()" title="Chidi General + all my task chats as read">✓ Clear</button>
+    <button class="btn-sm" onclick="clearAllChatNotifications()" title="Mark General + all my task chats as read">✓ Clear</button>
   </div>
   <div id="chat-tabs" style="padding:8px 14px 0;border-bottom:1px solid var(--border);display:flex;gap:6px">
     <button class="chat-tab active" data-tab="team" onclick="switchChatTab('team')" style="flex:1;background:none;border:none;border-bottom:2px solid var(--accent);color:var(--text);font-size:11px;font-weight:700;font-family:'Space Mono',monospace;padding:8px 4px;cursor:pointer">General<span class="chat-tab-dot" id="chat-tab-dot-team" style="display:none;width:6px;height:6px;border-radius:50%;background:var(--danger);margin-left:5px;vertical-align:middle"></span></button>
@@ -986,8 +1056,11 @@
   </div>
   <div id="chat-threads-list" style="display:none;flex:1;overflow-y:auto;padding:6px 10px"></div>
   <div id="chat-thread-view" style="flex:1;display:flex;flex-direction:column;min-height:0">
-    <div id="chat-thread-back-row" style="display:none;padding:8px 18px 0">
+    <div id="chat-thread-back-row" style="display:none;padding:8px 18px 0;align-items:center;gap:8px">
       <button class="btn-sm" onclick="backToThreadsList()">← Back to threads</button>
+      <!-- Hidden by default; shown per-thread in openThreadFromList() only
+           when the caller has AIAgent access (see hasAIAgentAccess()). -->
+      <button class="btn-sm" id="agent-handoff-btn" style="display:none;margin-left:auto;align-items:center;gap:5px" onclick="openAgentHandoffModal()" title="Hand this task off to the execution agent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg> Hand off to Agent</button>
     </div>
     <div id="chat-messages" style="flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px"></div>
     <div style="padding:12px 14px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end">
@@ -1010,7 +1083,7 @@
     <button onclick="closeNotifyPanel()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1">×</button>
   </div>
   <div style="padding:10px 18px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center">
-    <button class="btn-sm" onclick="markAllNotificationsReadClick()" title="Chidi everything as read">✓ Chidi all read</button>
+    <button class="btn-sm" onclick="markAllNotificationsReadClick()" title="Mark everything as read">✓ Mark all read</button>
     <button class="btn-sm" onclick="openNotifyPrefsFromPanel()" style="margin-left:auto;display:flex;align-items:center;gap:5px" title="Choose how you're notified"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Preferences</button>
   </div>
   <div id="notify-list" style="flex:1;overflow-y:auto;padding:6px 10px">
@@ -1050,76 +1123,76 @@
     </div>
     <nav>
       <div class="nav-section">Overview</div>
-      <a class="nav-item active" data-view="dashboard">
+      <a class="nav-item active" data-view="dashboard" title="KPI Dashboard">
         <svg fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/></svg>
-        KPI Dashboard
+        <span class="nav-label">KPI Dashboard</span>
       </a>
-      <a class="nav-item" data-view="tasks">
+      <a class="nav-item" data-view="tasks" title="Master Tasks">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
-        Master Tasks
+        <span class="nav-label">Master Tasks</span>
         <span class="badge" id="nav-badge-tasks">0</span>
       </a>
-      <a class="nav-item" data-view="cos">
+      <a class="nav-item" data-view="cos" title="Network">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/></svg>
-        Network
+        <span class="nav-label">Network</span>
       </a>
-      <a class="nav-item" data-view="partners">
+      <a class="nav-item" data-view="partners" title="Partnerships">
         <svg fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>
-        Partnerships
+        <span class="nav-label">Partnerships</span>
       </a>
-      <a class="nav-item" data-view="org">
+      <a class="nav-item" data-view="org" title="Org Database">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
-        Org Database
+        <span class="nav-label">Org Database</span>
       </a>
-      <a class="nav-item" id="nav-kpi-item" data-view="kpi" style="display:none">
+      <a class="nav-item" id="nav-kpi-item" data-view="kpi" style="display:none" title="Activity Log">
         <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
-        Activity Log
+        <span class="nav-label">Activity Log</span>
       </a>
-      <a class="nav-item" data-view="marketing">
+      <a class="nav-item" data-view="marketing" title="Marketing">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
-        Marketing
+        <span class="nav-label">Marketing</span>
       </a>
       <div class="nav-section">Ops</div>
-      <a class="nav-item" data-view="eod">
+      <a class="nav-item" data-view="eod" title="EOD Report">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm11 1H6v8l4-2 4 2V6z" clip-rule="evenodd"/></svg>
-        EOD Report
+        <span class="nav-label">EOD Report</span>
       </a>
-      <a class="nav-item" data-view="meetings">
+      <a class="nav-item" data-view="meetings" title="Calendar">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
-        Calendar
+        <span class="nav-label">Calendar</span>
         <span class="badge" id="nav-badge-meetings">0</span>
       </a>
-      <a class="nav-item" data-view="followup">
+      <a class="nav-item" data-view="followup" title="Follow-Ups">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
-        Follow-Ups
+        <span class="nav-label">Follow-Ups</span>
         <span class="badge red" id="nav-badge-followup">0</span>
       </a>
-      <a class="nav-item" data-view="failsafe">
+      <a class="nav-item" data-view="failsafe" title="Failsafe Alerts">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-        Failsafe Alerts
+        <span class="nav-label">Failsafe Alerts</span>
         <span class="badge red" id="nav-badge-failsafe">0</span>
       </a>
       <div class="nav-section">Settings</div>
-      <a class="nav-item" data-view="automation">
+      <a class="nav-item" data-view="automation" title="Automation">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
-        Automation
+        <span class="nav-label">Automation</span>
       </a>
-      <a class="nav-item" id="nav-team-item" data-view="team" style="display:none">
+      <a class="nav-item" id="nav-team-item" data-view="team" style="display:none" title="Team Directory">
         <svg fill="currentColor" viewBox="0 0 20 20"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
-        Team Directory
+        <span class="nav-label">Team Directory</span>
       </a>
-      <a class="nav-item" id="nav-review-item" data-view="review" style="display:none">
+      <a class="nav-item" id="nav-review-item" data-view="review" style="display:none" title="Review Queue">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" clip-rule="evenodd"/></svg>
-        Review Queue
+        <span class="nav-label">Review Queue</span>
         <span class="badge" id="nav-badge-review">0</span>
       </a>
-      <a class="nav-item" id="nav-goals-item" data-view="goals" style="display:none">
+      <a class="nav-item" id="nav-goals-item" data-view="goals" style="display:none" title="Goals">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12zm0-2a4 4 0 100-8 4 4 0 000 8zm0-2a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
-        Goals
+        <span class="nav-label">Goals</span>
       </a>
-      <a class="nav-item" id="nav-aianalyst-item" data-view="aianalyst" style="display:none">
+      <a class="nav-item" id="nav-aianalyst-item" data-view="aianalyst" style="display:none" title="AI Analyst">
         <svg fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 10-2 0v1.07A7.002 7.002 0 003 11a7 7 0 007 7 7 7 0 007-7 7.002 7.002 0 00-6-6.93V3zM8.5 10a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z"/><path fill-rule="evenodd" d="M9 11a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
-        AI Analyst
+        <span class="nav-label">AI Analyst</span>
       </a>
     </nav>
     <div id="leader-badge" onclick="openProfileModal()" style="cursor:pointer">
@@ -3319,9 +3392,18 @@ function renderReviewQueue(items) {
         : (it['Source'] === 'AI Analyst')
         ? ('AI Analyst suggested: '+(it['Suggested Assignee']||'—'))
         : ('Fireflies suggested: '+(it['Suggested Assignee']||'—'));
+      // Policy Engine tag (NEXUS-vision.md §7) — backend attaches _policy
+      // per row from AI_ACTION_POLICY based on Source; every AI-sourced
+      // pathway today is Level 2 (human approval), which this queue IS —
+      // the tag just makes that explicit instead of implicit in "why is
+      // this row here at all."
+      const policyTag = it._policy
+        ? '<span style="margin-left:auto;font-size:9px;font-family:\'Space Mono\',monospace;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:2px 7px;border-radius:20px;white-space:nowrap">L'+it._policy.level+' · '+escHtml(it._policy.label)+'</span>'
+        : '';
       return '<div class="card" style="padding:14px;margin-bottom:8px" id="rv-card-'+id+'">'
-        + '<div style="font-size:11px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;flex-wrap:wrap">'
+        + '<div style="font-size:11px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;flex-wrap:wrap;gap:6px">'
         +   sourceLine
+        +   policyTag
         + '</div>'
         + '<textarea class="form-input" id="rv-desc-'+id+'" rows="2" style="width:100%;margin-bottom:8px">'+(it['Task Description']||'')+'</textarea>'
         + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">'
@@ -3332,6 +3414,7 @@ function renderReviewQueue(items) {
         +   '</select>'
         + '</div>'
         + warn
+        + renderReviewSuggestionFields(it, id, names)
         + '<div style="display:flex;gap:8px;margin-top:10px">'
         +   '<button class="btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px" onclick="approveReviewItem(\''+escQ(id)+'\')">'+icon('check',13)+' Approve → Master Tasks</button>'
         +   '<button class="btn-secondary" style="color:var(--danger)" onclick="rejectReviewItem(\''+escQ(id)+'\')">Reject</button>'
@@ -3348,6 +3431,46 @@ function renderReviewQueue(items) {
 // just looped so a leader doesn't have to click through a 6-task goal one
 // at a time. Stops and reports if any item is missing a required field
 // rather than silently skipping it.
+// v3.3 — Supervisor / Support Person / Department suggestion row for a
+// Review Queue card. Supervisor and Support Person use the exact same
+// "AI suggested a name, we exact-matched it against the live roster"
+// pattern as the existing Assignee dropdown above (see 'Matched Supervisor'
+// / 'Matched Support Person' from runGoalDecomposition_ / ingestMeetingSummary
+// server-side); Department is constrained to the same fixed list the
+// Master Tasks form itself offers (mirrors DEPARTMENT_OPTIONS in code.gs),
+// so a suggestion is never something the leader can't select. Only rendered
+// when the row actually carries at least one of these three suggestions —
+// most Fireflies-ingested rows won't, so this stays invisible there.
+const REVIEW_DEPARTMENT_OPTIONS = ['Technology','Partnerships','Marketing','Product','Operations','Finance','HR','Content & Media','Data & Research'];
+function renderReviewSuggestionFields(it, id, names) {
+  const suggSup = it['Suggested Supervisor'] || '';
+  const matchedSup = it['Matched Supervisor'] || '';
+  const suggSupport = it['Suggested Support Person'] || '';
+  const matchedSupport = it['Matched Support Person'] || '';
+  const suggDept = it['Suggested Department'] || '';
+  if (!suggSup && !suggSupport && !suggDept) return '';
+
+  const nameOptions = (matched) => ['<option value="">— none —</option>']
+    .concat(names.map(n => '<option value="'+escQ(n)+'"'+(n===matched?' selected':'')+'>'+n+'</option>'))
+    .join('');
+  const deptOptions = ['<option value="">— none —</option>']
+    .concat(REVIEW_DEPARTMENT_OPTIONS.map(d => '<option'+(d===suggDept?' selected':'')+'>'+d+'</option>'))
+    .join('');
+  const supWarn = (suggSup && !matchedSup)
+    ? '<div style="font-size:10px;color:var(--danger);margin-top:2px">Could not match "'+escHtml(suggSup)+'" for Supervisor.</div>' : '';
+  const supportWarn = (suggSupport && !matchedSupport)
+    ? '<div style="font-size:10px;color:var(--danger);margin-top:2px">Could not match "'+escHtml(suggSupport)+'" for Support Person.</div>' : '';
+
+  return '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">'
+    + '<div style="font-size:9px;font-family:\'Space Mono\',monospace;color:var(--muted);margin-bottom:6px">AI SUGGESTED — REVIEW BEFORE APPROVING</div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    +   '<div style="flex:1;min-width:140px"><label style="font-size:9px;color:var(--muted)">Supervisor</label><select class="form-input" id="rv-supervisor-'+id+'" style="width:100%">'+nameOptions(matchedSup)+'</select>'+supWarn+'</div>'
+    +   '<div style="flex:1;min-width:140px"><label style="font-size:9px;color:var(--muted)">Support Person</label><select class="form-input" id="rv-support-'+id+'" style="width:100%">'+nameOptions(matchedSupport)+'</select>'+supportWarn+'</div>'
+    +   '<div style="flex:1;min-width:140px"><label style="font-size:9px;color:var(--muted)">Department</label><select class="form-input" id="rv-dept-'+id+'" style="width:100%">'+deptOptions+'</select></div>'
+    + '</div>'
+    + '</div>';
+}
+
 async function approveAllGoalItems(goalId) {
   const cards = Array.from(document.querySelectorAll('[id^="rv-card-"]'));
   const ids = cards
@@ -3373,10 +3496,12 @@ async function approveAllGoalItems(goalId) {
     const deadline = document.getElementById('rv-deadline-'+id).value;
     const priority = document.getElementById('rv-priority-'+id).value;
     if (!desc || !assignee) { failed++; continue; }
+    const suggested = readReviewSuggestionFields(id);
     try {
       const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({
         action:'approvePendingAITask', id, token:getIdentityToken(),
-        data:{ taskDescription:desc, assignedTo:assignee, deadline, priority }
+        data:{ taskDescription:desc, assignedTo:assignee, deadline, priority,
+               supervisor:suggested.supervisor, supportPerson:suggested.supportPerson, department:suggested.department }
       })});
       const r = await res.json();
       if (r.error) failed++;
@@ -3400,16 +3525,31 @@ function toggleReviewSummary(id, btn) {
   el.style.display = showing ? 'none' : 'block';
   if (btn) btn.textContent = showing ? 'Show summary' : 'Hide summary';
 }
+// Reads the optional AI-suggestion fields (see renderReviewSuggestionFields)
+// off a review card if they were rendered for this row, otherwise returns
+// empties — approvePendingAITask treats blank as "don't set" either way.
+function readReviewSuggestionFields(id) {
+  const supEl = document.getElementById('rv-supervisor-'+id);
+  const supportEl = document.getElementById('rv-support-'+id);
+  const deptEl = document.getElementById('rv-dept-'+id);
+  return {
+    supervisor: supEl ? supEl.value : '',
+    supportPerson: supportEl ? supportEl.value : '',
+    department: deptEl ? deptEl.value : '',
+  };
+}
 async function approveReviewItem(id) {
   const desc      = document.getElementById('rv-desc-'+id).value.trim();
   const assignee  = document.getElementById('rv-assignee-'+id).value;
   const deadline  = document.getElementById('rv-deadline-'+id).value;
   const priority  = document.getElementById('rv-priority-'+id).value;
   if (!desc || !assignee) { showToast('Description and assignee are required', 'error'); return; }
+  const suggested = readReviewSuggestionFields(id);
   try {
     const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({
       action:'approvePendingAITask', id, token:getIdentityToken(),
-      data:{ taskDescription:desc, assignedTo:assignee, deadline, priority }
+      data:{ taskDescription:desc, assignedTo:assignee, deadline, priority,
+             supervisor:suggested.supervisor, supportPerson:suggested.supportPerson, department:suggested.department }
     })});
     const r = await res.json();
     if (r.error) { showToast(r.error, 'error'); return; }
@@ -3417,6 +3557,51 @@ async function approveReviewItem(id) {
     loadReviewQueue(); loadData();
   } catch(e) { showToast('Error: '+e.message, 'error'); }
 }
+// ============================================================
+//  HAND OFF TO AGENT — a leader (or AIAgent-trusted user) can push an
+//  already-approved task, plus a short instruction, to NEXUS Agent right
+//  from that task's chat thread. Both the instruction and the agent's
+//  reply land back in the same thread as ordinary chat rows (see
+//  handoffTaskToAgent / postAgentChatMessage_ server-side) — this modal is
+//  just the entry point, it doesn't render the result itself.
+// ============================================================
+function openAgentHandoffModal() {
+  if (!chatActiveTaskId) { showToast('Open a task\'s chat thread first', 'error'); return; }
+  if (!hasAIAgentAccess()) { showToast('You do not have Agent access', 'error'); return; }
+  document.getElementById('agent-handoff-input').value = '';
+  document.getElementById('agent-handoff-error').textContent = '';
+  document.getElementById('agent-handoff-task-title').textContent = chatActiveTaskTitle || ('Task ' + chatActiveTaskId);
+  document.getElementById('agent-handoff-modal').classList.add('show');
+  document.getElementById('agent-handoff-input').focus();
+}
+function closeAgentHandoffModal() { document.getElementById('agent-handoff-modal').classList.remove('show'); }
+async function submitAgentHandoff() {
+  const instructions = document.getElementById('agent-handoff-input').value.trim();
+  const errEl = document.getElementById('agent-handoff-error');
+  const btn = document.getElementById('agent-handoff-btn-submit');
+  errEl.textContent = '';
+  if (!instructions) { errEl.textContent = 'Add a short instruction first.'; return; }
+  if (!chatActiveTaskId) { errEl.textContent = 'No task selected — reopen the thread and try again.'; return; }
+  btn.disabled = true;
+  const originalLabel = btn.innerHTML;
+  btn.innerHTML = 'Sending to agent…';
+  try {
+    const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({
+      action:'handoffTaskToAgent', taskId: chatActiveTaskId, instructions, token: getIdentityToken()
+    })});
+    const r = await res.json();
+    if (r.error) { errEl.textContent = r.error; return; }
+    closeAgentHandoffModal();
+    showToast('Handed off to agent', 'success');
+    loadActiveTaskThread(true, false);
+  } catch(e) {
+    errEl.textContent = 'Error: '+e.message;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalLabel;
+  }
+}
+
 async function rejectReviewItem(id) {
   try {
     const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({action:'rejectPendingAITask', id, token:getIdentityToken()})});
@@ -3434,38 +3619,102 @@ async function rejectReviewItem(id) {
 //  a goal" input + the Goals tracking list; the actual review UI is the
 //  renderReviewQueue() code above, reused as-is.
 // ============================================================
+// Tracks one in-flight decomposeGoal request across modal open/minimize/
+// close so at most one goal can be "in progress" at a time from the UI's
+// point of view — a second "+ Goal" click while one is running reopens
+// its progress view (see openGoalModal) rather than starting a second.
+let goalDecomposeActive = false;
+let goalDecomposeController = null;
+let goalDecomposeGoalText = '';
+
 function openGoalModal() {
   if (!isLeader()) { showToast('Leader login required', 'error'); return; }
+  if (goalDecomposeActive) { reopenGoalDecompose(); return; }
   document.getElementById('goal-input').value = '';
   document.getElementById('goal-error').textContent = '';
+  document.getElementById('goal-modal-form-state').style.display = 'block';
+  document.getElementById('goal-modal-progress-state').style.display = 'none';
   document.getElementById('goal-modal').classList.add('show');
   document.getElementById('goal-input').focus();
 }
-function closeGoalModal() { document.getElementById('goal-modal').classList.remove('show'); }
+function closeGoalModal() {
+  // While a decomposition is running this only hides the modal chrome
+  // (same as Minimize) — Cancel (in the progress view or the floating
+  // widget) is the only thing that actually stops the request.
+  if (goalDecomposeActive) { minimizeGoalDecompose(); return; }
+  document.getElementById('goal-modal').classList.remove('show');
+}
 async function submitGoal() {
   const goalText = document.getElementById('goal-input').value.trim();
   const errEl = document.getElementById('goal-error');
-  const btn = document.getElementById('goal-btn');
   errEl.textContent = '';
   if (!goalText) { errEl.textContent = 'Describe the goal first.'; return; }
-  btn.disabled = true;
-  const originalLabel = btn.innerHTML;
-  btn.innerHTML = 'Breaking it down…';
+
+  goalDecomposeActive = true;
+  goalDecomposeGoalText = goalText;
+  goalDecomposeController = new AbortController();
+  document.getElementById('goal-modal-form-state').style.display = 'none';
+  document.getElementById('goal-modal-progress-state').style.display = 'block';
+  document.getElementById('goal-progress-text').textContent = '"' + goalText.substring(0,140) + (goalText.length>140?'…':'') + '"';
+  document.getElementById('goal-modal').classList.add('show');
+
   try {
-    const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({
+    const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', signal: goalDecomposeController.signal, body:JSON.stringify({
       action:'decomposeGoal', goal: goalText, token: getIdentityToken()
     })});
     const r = await res.json();
-    if (r.error) { errEl.textContent = r.error; return; }
-    closeGoalModal();
+    goalDecomposeActive = false;
+    hideGoalProgressWidget();
+    if (r.error) { showGoalDecomposeError(goalText, r.error); return; }
+    document.getElementById('goal-modal').classList.remove('show');
     showToast((r.tasksCreated||0)+' task(s) proposed — review below', 'success');
     loadView('review');
   } catch(e) {
-    errEl.textContent = 'Error: '+e.message;
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = originalLabel;
+    goalDecomposeActive = false;
+    hideGoalProgressWidget();
+    if (e.name === 'AbortError') {
+      // decomposeGoal has no server-side cancel hook (Apps Script keeps
+      // running once triggered) — this only stops the UI from waiting on
+      // it. Any tasks it still produces will simply appear in the Review
+      // Queue / Goals list next time either is opened.
+      showToast('Goal creation cancelled — it may still finish in the background', 'success');
+      document.getElementById('goal-modal').classList.remove('show');
+      return;
+    }
+    showGoalDecomposeError(goalText, 'Error: '+e.message);
   }
+}
+// Reopens the form view (not the progress view) with the goal text intact
+// and the error shown, so the leader can edit/retry without retyping.
+function showGoalDecomposeError(goalText, message) {
+  document.getElementById('goal-modal-form-state').style.display = 'block';
+  document.getElementById('goal-modal-progress-state').style.display = 'none';
+  document.getElementById('goal-input').value = goalText;
+  document.getElementById('goal-error').textContent = message;
+  document.getElementById('goal-modal').classList.add('show');
+}
+function minimizeGoalDecompose() {
+  document.getElementById('goal-modal').classList.remove('show');
+  showGoalProgressWidget();
+}
+function reopenGoalDecompose() {
+  hideGoalProgressWidget();
+  document.getElementById('goal-modal-form-state').style.display = 'none';
+  document.getElementById('goal-modal-progress-state').style.display = 'block';
+  document.getElementById('goal-modal').classList.add('show');
+}
+function cancelGoalDecompose() {
+  if (goalDecomposeController) goalDecomposeController.abort();
+}
+function showGoalProgressWidget() {
+  const w = document.getElementById('goal-progress-widget');
+  const t = document.getElementById('goal-progress-widget-text');
+  if (t) t.textContent = 'Breaking down: "' + goalDecomposeGoalText.substring(0,40) + (goalDecomposeGoalText.length>40?'…':'') + '"';
+  if (w) w.classList.add('show');
+}
+function hideGoalProgressWidget() {
+  const w = document.getElementById('goal-progress-widget');
+  if (w) w.classList.remove('show');
 }
 
 async function loadGoals() {
@@ -3504,6 +3753,18 @@ function renderGoalsList(goals) {
       + '</div>'
     ).join('') || '<div class="sub" style="padding:8px 0">No approved tasks yet — check the Review Queue.</div>';
     const childListId = 'goal-children-'+g.ID;
+    const reasoningId = 'goal-reasoning-'+g.ID;
+    // "Show your workings" — the AI's own short explanation of how it
+    // approached this goal's breakdown, stored once at decompose/regenerate
+    // time (see setGoalReasoning_ / AI_GOAL_DECOMPOSE_SYSTEM_PROMPT server-
+    // side) so this needs no extra AI call to display. Only rendered when
+    // present — older goals from before this field existed simply won't
+    // show the button.
+    const hasReasoning = !!(g.Reasoning && String(g.Reasoning).trim());
+    const reasoningBtn = hasReasoning
+      ? '<button class="btn-sm" onclick="toggleGoalReasoning(\''+reasoningId+'\',this)">Show reasoning</button>' : '';
+    const reasoningPanel = hasReasoning
+      ? '<div class="goal-reasoning-panel" id="'+reasoningId+'">'+escHtml(g.Reasoning)+'</div>' : '';
     return '<div class="card goal-card">'
       + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">'
       +   '<div class="goal-card-desc" style="flex:1;min-width:200px">'+escHtml(g.Description)+'</div>'
@@ -3514,11 +3775,13 @@ function renderGoalsList(goals) {
       +   progressBar(pct)
       +   (g.PendingCount>0 ? '<span style="color:var(--warn)">'+g.PendingCount+' awaiting review</span>' : '')
       + '</div>'
-      + '<div style="display:flex;gap:8px;margin-top:10px">'
+      + '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'
       +   '<button class="btn-sm" onclick="toggleGoalChildren(\''+childListId+'\',this)">'+(g.children&&g.children.length?'Show tasks ('+g.children.length+')':'Show tasks')+'</button>'
+      +   reasoningBtn
       +   (g.PendingCount>0 ? '<button class="btn-sm" onclick="loadView(\'review\')">Go to Review Queue</button>' : '')
       +   (g.Status!=='Archived' ? '<button class="btn-sm" style="color:var(--danger);margin-left:auto" onclick="archiveGoalUI(\''+escQ(g.ID)+'\')">Archive</button>' : '')
       + '</div>'
+      + reasoningPanel
       + '<div class="goal-child-list" id="'+childListId+'">'+childRows+'</div>'
       + '</div>';
   }).join('');
@@ -3528,6 +3791,12 @@ function toggleGoalChildren(id, btn) {
   if (!el) return;
   const open = el.classList.toggle('open');
   if (btn) btn.textContent = open ? 'Hide tasks' : 'Show tasks';
+}
+function toggleGoalReasoning(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const open = el.classList.toggle('open');
+  if (btn) btn.textContent = open ? 'Hide reasoning' : 'Show reasoning';
 }
 async function archiveGoalUI(id) {
   if (!confirm('Archive this goal? Its approved tasks stay untouched in Master Tasks — this only closes the goal itself.')) return;
@@ -3577,6 +3846,10 @@ function renderTeam() {
     // Not a real sheet tab — gates whether this non-leader sees/uses the
     // global "+ NEW" button at all (see can-add-new class / refreshAddButtonAccess()).
     {tab:'NewButton',       col:'Trusted_NewButton',    label:'+New'},
+    // Not a real sheet tab — gates the "Hand off to Agent" button on an
+    // approved task's chat thread for a non-leader (see handoffTaskToAgent
+    // in code.gs / hasAIAgentAccess() below). Leaders always have it.
+    {tab:'AIAgent',         col:'Trusted_AIAgent',      label:'AI Agent'},
   ];
   document.getElementById('team-grid').innerHTML = members.map(({name,email,row},i)=>{
     const info   = { role: (row&&row['Role']) || 'Team Member', dept: (row&&row['Department']) || 'Operations', leader: !!(row&&row['IsLeader']) };
@@ -3936,6 +4209,8 @@ function switchChatTab(tab) {
   });
   const titleEl = document.querySelector('#chat-panel h3');
   document.getElementById('chat-thread-back-row').style.display = 'none';
+  const handoffBtn = document.getElementById('agent-handoff-btn');
+  if (handoffBtn) handoffBtn.style.display = 'none';
   if (tab === 'team') {
     if (titleEl) titleEl.innerHTML = icon('message',15) + ' Team Chat';
     document.getElementById('chat-threads-list').style.display = 'none';
@@ -3987,10 +4262,14 @@ function openThreadFromList(taskId, title) {
   chatActiveTaskTitle = title;
   document.getElementById('chat-threads-list').style.display = 'none';
   document.getElementById('chat-thread-view').style.display = 'flex';
-  document.getElementById('chat-thread-back-row').style.display = 'block';
+  document.getElementById('chat-thread-back-row').style.display = 'flex';
   const titleEl = document.querySelector('#chat-panel h3');
   if (titleEl) titleEl.innerHTML = icon('message',15) + ' ' + escHtml(title);
   document.getElementById('chat-input').placeholder = isLeader() ? 'Comment on this task… (try "@AI is this on track?")' : 'Comment on this task…';
+  // "Hand off to Agent" only makes sense inside a specific task's thread,
+  // and only for leaders / AIAgent-trusted users (see hasAIAgentAccess()).
+  const handoffBtn = document.getElementById('agent-handoff-btn');
+  if (handoffBtn) handoffBtn.style.display = hasAIAgentAccess() ? 'flex' : 'none';
   loadActiveTaskThread(true);
   markChatReadRemote(taskId);
 }
@@ -3999,6 +4278,8 @@ function backToThreadsList() {
   chatActiveTaskId = null;
   document.getElementById('chat-thread-view').style.display = 'none';
   document.getElementById('chat-threads-list').style.display = 'block';
+  const handoffBtn = document.getElementById('agent-handoff-btn');
+  if (handoffBtn) handoffBtn.style.display = 'none';
   const titleEl = document.querySelector('#chat-panel h3');
   if (titleEl) titleEl.innerHTML = icon('message',15) + (chatActiveTab === 'mine' ? ' My Task Chats' : ' All Task Chats');
   loadChatThreadsList(chatActiveTab === 'mine');
@@ -4124,9 +4405,11 @@ function renderChatMessages(container, messages) {
     const time = new Date(m.Timestamp).toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, day: 'numeric', month: 'short' });
     const actionsHtml = m.MsgType === 'task_assigned' ? renderTaskAssignedActions(m.TaskID) : '';
     const isAI = m.MsgType === 'ai_response';
-    const authorAvatar = isAI ? (icon('bot',15) + ' ') : (m.MsgType ? '' : '<span style="display:inline-flex;vertical-align:middle;margin-right:5px">' + avatarHtml(m.Author, 16) + '</span>');
-    const authorLabel = isAI ? 'NEXUS AI' : escHtml(canonicalizeName(m.Author));
-    const bubbleClass = isAI ? ' chat-msg-ai' : (m.MsgType ? ' chat-msg-system' : '');
+    const isAgentReply = m.MsgType === 'agent_response';
+    const isAgentHandoff = m.MsgType === 'agent_handoff';
+    const authorAvatar = (isAI || isAgentReply) ? (icon('bot',15) + ' ') : (m.MsgType ? '' : '<span style="display:inline-flex;vertical-align:middle;margin-right:5px">' + avatarHtml(m.Author, 16) + '</span>');
+    const authorLabel = isAI ? 'NEXUS AI' : isAgentReply ? 'NEXUS Agent' : escHtml(canonicalizeName(m.Author));
+    const bubbleClass = isAI ? ' chat-msg-ai' : isAgentReply ? ' chat-msg-agent' : isAgentHandoff ? ' chat-msg-agent-handoff' : (m.MsgType ? ' chat-msg-system' : '');
     return '<div class="chat-msg' + (mine ? ' mine' : '') + bubbleClass + '"><div class="cm-author">' + authorAvatar + authorLabel + '</div><div>' + renderMessageBody(m.Message) + '</div>' + actionsHtml + '<div class="cm-time">' + time + '</div></div>';
   }).join('');
 }
@@ -4994,6 +5277,17 @@ function refreshAddButtonAccess() {
     String(r['Name']||'').trim()===name && String(r['Trusted_NewButton']||'').trim().toUpperCase()==='Y'
   );
   document.body.classList.toggle('can-add-new', trusted);
+}
+
+// Mirrors isTrustedForTab(name,'AIAgent') in code.gs / handoffTaskToAgent —
+// same pattern as refreshAddButtonAccess() above. Leaders always pass;
+// this only matters for a non-leader holding the AIAgent Team Directory grant.
+function hasAIAgentAccess() {
+  if (isLeader()) return true;
+  const name = getIdentity();
+  return !!name && (appData.team||[]).some(r =>
+    String(r['Name']||'').trim()===name && String(r['Trusted_AIAgent']||'').trim().toUpperCase()==='Y'
+  );
 }
 
 function updateLeaderUI() {
