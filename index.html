@@ -573,6 +573,10 @@
     #link-task-modal.show { display: flex; }
     #agent-handoff-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 220; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
     #agent-handoff-modal.show { display: flex; }
+    #leave-request-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 220; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    #leave-request-modal.show { display: flex; }
+    #onboarding-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 220; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    #onboarding-modal.show { display: flex; }
     .link-task-item { padding: 8px; border-bottom: 1px solid var(--border); cursor: pointer; border-radius: 6px; }
     .link-task-item:hover { background: rgba(255,255,255,0.05); }
     .link-task-item .lt-title { font-size: 12px; font-weight: 700; }
@@ -904,10 +908,23 @@
     <div id="goal-modal-progress-state" style="display:none">
       <h2><span class="goal-progress-spinner"></span> Breaking it down…</h2>
       <p id="goal-progress-text" style="font-style:italic"></p>
-      <p style="font-size:12px;color:var(--muted)">NEXUS AI is reading your goal and the live team roster to propose a set of assignable tasks. This usually takes a few seconds.</p>
+      <p id="goal-progress-stage" style="font-size:12px;color:var(--muted);min-height:32px;transition:opacity .2s"></p>
       <div style="display:flex;gap:8px">
         <button class="btn-secondary" style="flex:1;font-size:12px" onclick="minimizeGoalDecompose()">Minimize</button>
         <button class="btn-secondary" style="flex:1;font-size:12px;color:var(--danger)" onclick="cancelGoalDecompose()">Cancel</button>
+      </div>
+    </div>
+    <!-- Shown right after decomposeGoal succeeds — surfaces the AI's actual
+         reasoning text immediately instead of redirecting straight to the
+         Review Queue and leaving it buried behind a "Show reasoning"
+         toggle on the Goals tab that most people will never click. -->
+    <div id="goal-modal-result-state" style="display:none">
+      <h2>Here's what I found</h2>
+      <p id="goal-result-count" style="font-weight:600"></p>
+      <div id="goal-result-reasoning" style="font-size:13px;line-height:1.6;color:var(--text);white-space:pre-wrap;max-height:240px;overflow-y:auto;padding:10px 12px;background:var(--bg2,rgba(255,255,255,0.03));border-radius:8px;margin:10px 0"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-secondary" style="flex:1;font-size:12px" onclick="closeGoalModal()">Close</button>
+        <button class="btn-primary" style="flex:1;font-size:12px" onclick="goalResultReviewTasks()">Review Tasks</button>
       </div>
     </div>
   </div>
@@ -989,6 +1006,44 @@
     <div id="agent-handoff-error"></div>
     <button class="btn-primary" id="agent-handoff-btn-submit" style="width:100%;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="submitAgentHandoff()">Send to Agent</button>
     <button class="btn-secondary" style="width:100%;font-size:12px" onclick="closeAgentHandoffModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- LEAVE REQUEST MODAL — any logged-in person, self-service. Fires from
+     the "+ Request Leave" button on the HR view. -->
+<div id="leave-request-modal">
+  <div class="login-box" style="width:400px">
+    <h2><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Request Leave</h2>
+    <div class="form-group">
+      <label>Type</label>
+      <select class="form-input" id="leave-type">
+        <option>Annual</option><option>Sick</option><option>Compassionate</option><option>Unpaid</option><option>Other</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Start date</label><input type="date" class="form-input" id="leave-start"></div>
+    <div class="form-group"><label>End date</label><input type="date" class="form-input" id="leave-end"></div>
+    <div class="form-group"><label>Reason (optional)</label><textarea class="form-input" id="leave-reason" rows="2" placeholder="Optional — visible to whoever approves this"></textarea></div>
+    <div id="leave-request-error"></div>
+    <button class="btn-primary" id="leave-request-submit-btn" style="width:100%;margin-bottom:10px" onclick="submitLeaveRequestUI()">Submit Request</button>
+    <button class="btn-secondary" style="width:100%;font-size:12px" onclick="closeLeaveRequestModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- ONBOARDING MODAL — leader-only. Creates a Master Tasks row tagged
+     Business/Dept='HR' plus a standard checklist (see startOnboarding
+     server-side) — not a parallel system. -->
+<div id="onboarding-modal">
+  <div class="login-box" style="width:420px">
+    <h2><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;flex-shrink:0"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg> Start Onboarding</h2>
+    <p>Creates an onboarding task with a standard checklist, assigned to whoever you pick as owner below.</p>
+    <div class="form-group"><label>New hire name</label><input class="form-input" id="onboard-name" placeholder="e.g. Chidinma Okafor"></div>
+    <div class="form-group"><label>New hire email (optional)</label><input class="form-input" id="onboard-email" type="email"></div>
+    <div class="form-group"><label>Department (optional)</label><input class="form-input" id="onboard-department" placeholder="e.g. Marketing"></div>
+    <div class="form-group"><label>Onboarding owner</label><select class="form-input" id="onboard-owner"></select></div>
+    <div class="form-group"><label>Start date</label><input class="form-input" id="onboard-startdate" type="date"></div>
+    <div id="onboarding-error"></div>
+    <button class="btn-primary" id="onboarding-submit-btn" style="width:100%;margin-bottom:10px" onclick="submitOnboardingUI()">Start Onboarding</button>
+    <button class="btn-secondary" style="width:100%;font-size:12px" onclick="closeOnboardingModal()">Cancel</button>
   </div>
 </div>
 
@@ -1171,6 +1226,11 @@
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
         <span class="nav-label">Failsafe Alerts</span>
         <span class="badge red" id="nav-badge-failsafe">0</span>
+      </a>
+      <div class="nav-section">People</div>
+      <a class="nav-item" data-view="hr" title="HR">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
+        <span class="nav-label">HR</span>
       </a>
       <div class="nav-section">Settings</div>
       <a class="nav-item" data-view="automation" title="Automation">
@@ -1545,6 +1605,33 @@
           <span class="sub">Action items extracted from meetings — nothing here reaches Master Tasks until you approve it.</span>
         </div>
         <div id="review-list" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+
+      <!-- HR — Leave Requests (self-service, leader approves) + Onboarding
+           (leader-only, creates a tagged Master Tasks row + standard
+           checklist rather than a parallel system — see startOnboarding
+           server-side). -->
+      <div id="view-hr" class="view">
+        <div class="card-head" style="padding:0 0 16px">
+          <h3>HR</h3>
+          <span class="sub">Leave requests and new-hire onboarding.</span>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+            <h4 style="margin:0">Leave Requests</h4>
+            <button class="btn-primary btn-sm" onclick="openLeaveRequestModal()">+ Request Leave</button>
+          </div>
+          <div id="leave-requests-list" style="display:flex;flex-direction:column;gap:8px;margin-top:12px"></div>
+        </div>
+
+        <div class="card" id="onboarding-card" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+            <h4 style="margin:0">Onboarding</h4>
+            <button class="btn-secondary btn-sm" onclick="openOnboardingModal()">+ Start Onboarding</button>
+          </div>
+          <div id="onboarding-list" style="display:flex;flex-direction:column;gap:8px;margin-top:12px"></div>
+        </div>
       </div>
 
       <!-- GOALS — outcomes described in plain English, decomposed by AI into
@@ -2070,7 +2157,7 @@ function loadView(name) {
   currentView = name;
   document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.view===name));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id===('view-'+name)));
-  const titles = {dashboard:'KPI Dashboard',tasks:'Master Tasks',cos:'Network',partners:'Partnerships',org:'Org Database',kpi:'Activity Log',marketing:'Marketing',eod:'EOD Report',meetings:'Calendar',followup:'Follow-Up Tracker',failsafe:'Failsafe Alerts',automation:'Automation',team:'Team Directory',review:'Review Queue',aianalyst:'AI Analyst',goals:'Goals'};
+  const titles = {dashboard:'KPI Dashboard',tasks:'Master Tasks',cos:'Network',partners:'Partnerships',org:'Org Database',kpi:'Activity Log',marketing:'Marketing',eod:'EOD Report',meetings:'Calendar',followup:'Follow-Up Tracker',failsafe:'Failsafe Alerts',automation:'Automation',team:'Team Directory',review:'Review Queue',aianalyst:'AI Analyst',goals:'Goals',hr:'HR'};
   document.getElementById('topbar-title').textContent = titles[name]||name;
   const lbl = ADD_BTN_LABELS[name];
   const addBtn = document.getElementById('add-btn');
@@ -2307,6 +2394,7 @@ function renderView(name) {
     case 'team':       renderTeam(); break;
     case 'review':     loadReviewQueue(); break;
     case 'goals':      loadGoals(); break;
+    case 'hr':         loadHR(); break;
   }
 }
 
@@ -3336,6 +3424,7 @@ function renderReviewQueue(items) {
     const first = groupItems[0];
     const isGoal = gid.indexOf('goal:') === 0;
 
+    const groupElId = 'rv-group-' + gid.replace(/[^a-zA-Z0-9]/g,'');
     let headerPanel;
     if (isGoal) {
       const goalId = first['Goal_ID'];
@@ -3344,6 +3433,7 @@ function renderReviewQueue(items) {
         +   '<div style="font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px">'+icon('target',13)+' Goal · '+escHtml(first['Meeting_Summary']||'')+'</div>'
         +   '<button class="btn-primary" style="font-size:11px;padding:6px 12px" onclick="approveAllGoalItems(\''+escQ(goalId)+'\')">'+icon('check',12)+' Approve all ('+groupItems.length+')</button>'
         +   '<button class="btn-sm" style="font-size:11px;padding:6px 12px" onclick="regenerateGoalUI(\''+escQ(goalId)+'\')">'+icon('refresh',12)+' Regenerate</button>'
+        +   '<button class="btn-sm" id="'+groupElId+'-btn" style="font-size:11px;padding:6px 12px" onclick="toggleReviewGroup(\''+groupElId+'\',this)">Collapse</button>'
         + '</div>'
         + '<div style="font-size:10px;color:var(--muted);font-family:\'Space Mono\',monospace;margin-top:8px">'+groupItems.length+' task'+(groupItems.length===1?'':'s')+' proposed for this goal — review, edit, and assign each below</div>'
         + '</div>';
@@ -3422,8 +3512,15 @@ function renderReviewQueue(items) {
         + '</div>';
     }).join('');
 
-    return '<div style="margin-bottom:18px">' + headerPanel + taskCards + '</div>';
+    return '<div style="margin-bottom:18px">' + headerPanel + '<div id="'+groupElId+'">' + taskCards + '</div>' + '</div>';
   }).join('');
+}
+function toggleReviewGroup(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const collapsed = el.style.display === 'none';
+  el.style.display = collapsed ? '' : 'none';
+  if (btn) btn.textContent = collapsed ? 'Collapse' : 'Expand';
 }
 // Approves every still-pending item in one goal's group in sequence, each
 // with whatever's currently in its own edit fields (assignee/deadline/
@@ -3602,6 +3699,181 @@ async function submitAgentHandoff() {
   }
 }
 
+// ============================================================
+//  HR — Leave Requests + Onboarding (v3.4)
+//  Leave: self-service for anyone logged in, approve/reject for leaders.
+//  Onboarding: leader-only, creates a tagged Master Tasks row + standard
+//  checklist server-side (see startOnboarding in code.gs) — this UI just
+//  triggers it and shows progress, it doesn't own any new data model.
+// ============================================================
+async function loadHR() {
+  document.getElementById('onboarding-card').style.display = isLeader() ? '' : 'none';
+  const listEl = document.getElementById('leave-requests-list');
+  listEl.innerHTML = '<div class="sub">Loading…</div>';
+  try {
+    const res = await fetch(SCRIPT_URL+'?action=getLeaveRequests&token='+encodeURIComponent(getIdentityToken()||'')+'&_='+Date.now(), {redirect:'follow', cache:'no-store'});
+    const r = await res.json();
+    if (r.error) { listEl.innerHTML = '<div class="sub">'+r.error+'</div>'; return; }
+    renderLeaveRequests(r.requests || []);
+  } catch(e) {
+    listEl.innerHTML = '<div class="sub">Failed to load — '+e.message+'</div>';
+  }
+  if (isLeader()) loadOnboardingList();
+}
+
+function renderLeaveRequests(requests) {
+  const listEl = document.getElementById('leave-requests-list');
+  if (!requests.length) { listEl.innerHTML = '<div class="sub">No leave requests yet.</div>'; return; }
+  const statusMap = {Pending:'badge-yellow', Approved:'badge-green', Rejected:'badge-red'};
+  listEl.innerHTML = requests.map(r => {
+    const badge = '<span class="badge-pill '+(statusMap[r.Status]||'badge-gray')+'">'+r.Status+'</span>';
+    const canDecide = isLeader() && r.Status === 'Pending';
+    const actions = canDecide
+      ? '<div style="display:flex;gap:6px;margin-top:8px">'
+        + '<button class="btn-sm" style="color:var(--accent2)" onclick="decideLeave(\''+escQ(r.ID)+'\',\'Approved\')">Approve</button>'
+        + '<button class="btn-sm" style="color:var(--danger)" onclick="decideLeave(\''+escQ(r.ID)+'\',\'Rejected\')">Reject</button>'
+        + '</div>'
+      : '';
+    return '<div class="card" style="padding:12px 14px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">'
+      +   '<div><strong>'+escHtml(r.Name)+'</strong> · '+escHtml(r.Type)+'<div class="sub">'+r.StartDate+' → '+r.EndDate+'</div></div>'
+      +   badge
+      + '</div>'
+      + (r.Reason ? '<div class="sub" style="margin-top:6px">'+escHtml(r.Reason)+'</div>' : '')
+      + actions
+      + '</div>';
+  }).join('');
+}
+
+function openLeaveRequestModal() {
+  if (!getIdentity()) { showToast('Login required', 'error'); return; }
+  document.getElementById('leave-type').value = 'Annual';
+  document.getElementById('leave-start').value = '';
+  document.getElementById('leave-end').value = '';
+  document.getElementById('leave-reason').value = '';
+  document.getElementById('leave-request-error').textContent = '';
+  document.getElementById('leave-request-modal').classList.add('show');
+}
+function closeLeaveRequestModal() { document.getElementById('leave-request-modal').classList.remove('show'); }
+
+async function submitLeaveRequestUI() {
+  const type = document.getElementById('leave-type').value;
+  const start = document.getElementById('leave-start').value;
+  const end = document.getElementById('leave-end').value;
+  const reason = document.getElementById('leave-reason').value.trim();
+  const errEl = document.getElementById('leave-request-error');
+  errEl.textContent = '';
+  if (!start || !end) { errEl.textContent = 'Pick a start and end date.'; return; }
+  if (new Date(end) < new Date(start)) { errEl.textContent = 'End date is before the start date.'; return; }
+  const btn = document.getElementById('leave-request-submit-btn');
+  btn.disabled = true; const original = btn.textContent; btn.textContent = 'Submitting…';
+  try {
+    const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({
+      action:'submitLeaveRequest', type, startDate:start, endDate:end, reason, token:getIdentityToken()
+    })});
+    const r = await res.json();
+    if (r.error) { errEl.textContent = r.error; return; }
+    closeLeaveRequestModal();
+    showToast('Leave request submitted', 'success');
+    loadHR();
+  } catch(e) {
+    errEl.textContent = 'Error: '+e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = original;
+  }
+}
+
+async function decideLeave(id, decision) {
+  if (!confirm((decision==='Approved'?'Approve':'Reject')+' this leave request?')) return;
+  try {
+    const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({
+      action:'decideLeaveRequest', id, decision, token:getIdentityToken()
+    })});
+    const r = await res.json();
+    if (r.error) { showToast(r.error, 'error'); return; }
+    showToast('Leave request '+decision.toLowerCase(), 'success');
+    loadHR();
+  } catch(e) {
+    showToast('Error: '+e.message, 'error');
+  }
+}
+
+// ── Onboarding ──────────────────────────────────────────────
+async function loadOnboardingList() {
+  const listEl = document.getElementById('onboarding-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div class="sub">Loading…</div>';
+  try {
+    const res = await fetch(SCRIPT_URL+'?action=getOnboardingTasks&token='+encodeURIComponent(getIdentityToken()||'')+'&_='+Date.now(), {redirect:'follow', cache:'no-store'});
+    const r = await res.json();
+    if (r.error) { listEl.innerHTML = '<div class="sub">'+r.error+'</div>'; return; }
+    renderOnboardingList(r.tasks || []);
+  } catch(e) {
+    listEl.innerHTML = '<div class="sub">Failed to load — '+e.message+'</div>';
+  }
+}
+function renderOnboardingList(tasks) {
+  const listEl = document.getElementById('onboarding-list');
+  if (!tasks.length) { listEl.innerHTML = '<div class="sub">No onboarding in progress — click "+ Start Onboarding" above.</div>'; return; }
+  listEl.innerHTML = tasks.map(t => {
+    const total = t.checklistTotal || 0, done = t.checklistDone || 0;
+    const pct = total ? Math.round((done/total)*100) : 0;
+    return '<div class="card" style="padding:12px 14px;cursor:pointer" onclick="loadView(\'tasks\');setTimeout(()=>editRow(\''+escQ(t.ID)+'\',\'1. Master Tasks\'),50)">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
+      +   '<strong>'+escHtml(t['Task Description'])+'</strong>'
+      +   statusBadge(t.Status)
+      + '</div>'
+      + '<div class="goal-progress-row" style="margin-top:8px"><span>'+done+' / '+total+' steps done</span>'+progressBar(pct)+'</div>'
+      + '</div>';
+  }).join('');
+}
+function openOnboardingModal() {
+  if (!isLeader()) { showToast('Leader login required', 'error'); return; }
+  document.getElementById('onboard-name').value = '';
+  document.getElementById('onboard-email').value = '';
+  document.getElementById('onboard-department').value = '';
+  document.getElementById('onboard-startdate').value = todayISO();
+  populateOnboardingOwnerSelect();
+  document.getElementById('onboarding-error').textContent = '';
+  document.getElementById('onboarding-modal').classList.add('show');
+}
+function closeOnboardingModal() { document.getElementById('onboarding-modal').classList.remove('show'); }
+function populateOnboardingOwnerSelect() {
+  const sel = document.getElementById('onboard-owner');
+  if (!sel) return;
+  const team = (appData && appData.team) || [];
+  sel.innerHTML = team.length
+    ? team.map(m => '<option value="'+escQ(m.Name)+'">'+escHtml(m.Name)+'</option>').join('')
+    : '<option value="">No team members found</option>';
+}
+async function submitOnboardingUI() {
+  const name = document.getElementById('onboard-name').value.trim();
+  const email = document.getElementById('onboard-email').value.trim();
+  const department = document.getElementById('onboard-department').value.trim();
+  const owner = document.getElementById('onboard-owner').value;
+  const startDate = document.getElementById('onboard-startdate').value;
+  const errEl = document.getElementById('onboarding-error');
+  errEl.textContent = '';
+  if (!name) { errEl.textContent = 'New hire name is required.'; return; }
+  if (!owner) { errEl.textContent = 'Pick an onboarding owner.'; return; }
+  const btn = document.getElementById('onboarding-submit-btn');
+  btn.disabled = true; const original = btn.textContent; btn.textContent = 'Starting…';
+  try {
+    const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({
+      action:'startOnboarding', name, email, department, owner, startDate, token:getIdentityToken()
+    })});
+    const r = await res.json();
+    if (r.error) { errEl.textContent = r.error; return; }
+    closeOnboardingModal();
+    showToast('Onboarding started for '+name, 'success');
+    loadOnboardingList();
+  } catch(e) {
+    errEl.textContent = 'Error: '+e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = original;
+  }
+}
+
 async function rejectReviewItem(id) {
   try {
     const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', body:JSON.stringify({action:'rejectPendingAITask', id, token:getIdentityToken()})});
@@ -3644,6 +3916,33 @@ function closeGoalModal() {
   if (goalDecomposeActive) { minimizeGoalDecompose(); return; }
   document.getElementById('goal-modal').classList.remove('show');
 }
+// Real pipeline stages runGoalDecomposition_ actually goes through, on the
+// server, in this order — NOT a fake typing animation. Cycles while the
+// single NIM call is in flight so the wait isn't a silent black box; if
+// it runs long, it just loops back to the last stage rather than lying
+// about progress it can't actually observe from the client.
+const GOAL_PROGRESS_STAGES = [
+  'Reading your goal…',
+  'Pulling the live team roster…',
+  'Asking the AI to draft a task breakdown…',
+  'Matching suggested owners against the roster…',
+  'Structuring tasks for review…',
+];
+let goalProgressStageTimer = null;
+function startGoalProgressStages() {
+  const el = document.getElementById('goal-progress-stage');
+  let i = 0;
+  el.textContent = GOAL_PROGRESS_STAGES[0];
+  goalProgressStageTimer = setInterval(() => {
+    i = Math.min(i + 1, GOAL_PROGRESS_STAGES.length - 1); // holds on the last stage instead of cycling back — a long wait means it's genuinely still on that step, not restarting
+    el.style.opacity = '0';
+    setTimeout(() => { el.textContent = GOAL_PROGRESS_STAGES[i]; el.style.opacity = '1'; }, 200);
+  }, 3500);
+}
+function stopGoalProgressStages() {
+  if (goalProgressStageTimer) { clearInterval(goalProgressStageTimer); goalProgressStageTimer = null; }
+}
+
 async function submitGoal() {
   const goalText = document.getElementById('goal-input').value.trim();
   const errEl = document.getElementById('goal-error');
@@ -3654,9 +3953,11 @@ async function submitGoal() {
   goalDecomposeGoalText = goalText;
   goalDecomposeController = new AbortController();
   document.getElementById('goal-modal-form-state').style.display = 'none';
+  document.getElementById('goal-modal-result-state').style.display = 'none';
   document.getElementById('goal-modal-progress-state').style.display = 'block';
   document.getElementById('goal-progress-text').textContent = '"' + goalText.substring(0,140) + (goalText.length>140?'…':'') + '"';
   document.getElementById('goal-modal').classList.add('show');
+  startGoalProgressStages();
 
   try {
     const res = await fetch(SCRIPT_URL, {method:'POST', redirect:'follow', signal: goalDecomposeController.signal, body:JSON.stringify({
@@ -3664,13 +3965,13 @@ async function submitGoal() {
     })});
     const r = await res.json();
     goalDecomposeActive = false;
+    stopGoalProgressStages();
     hideGoalProgressWidget();
     if (r.error) { showGoalDecomposeError(goalText, r.error); return; }
-    document.getElementById('goal-modal').classList.remove('show');
-    showToast((r.tasksCreated||0)+' task(s) proposed — review below', 'success');
-    loadView('review');
+    showGoalResult(r);
   } catch(e) {
     goalDecomposeActive = false;
+    stopGoalProgressStages();
     hideGoalProgressWidget();
     if (e.name === 'AbortError') {
       // decomposeGoal has no server-side cancel hook (Apps Script keeps
@@ -3683,6 +3984,25 @@ async function submitGoal() {
     }
     showGoalDecomposeError(goalText, 'Error: '+e.message);
   }
+}
+// Shows the AI's own reasoning text right away, in place, instead of
+// silently jumping to the Review Queue — the actual "show your work" the
+// AI already produces (see AI_GOAL_DECOMPOSE_SYSTEM_PROMPT server-side),
+// just previously buried behind a collapsed toggle on the Goals tab.
+let goalResultGoalId = null;
+function showGoalResult(r) {
+  goalResultGoalId = r.goalId || null;
+  document.getElementById('goal-modal-progress-state').style.display = 'none';
+  document.getElementById('goal-modal-result-state').style.display = 'block';
+  const count = r.tasksCreated || 0;
+  document.getElementById('goal-result-count').textContent = count + ' task' + (count===1?'':'s') + ' proposed, waiting in Review Queue.';
+  const reasoningEl = document.getElementById('goal-result-reasoning');
+  const reasoning = String(r.reasoning || '').trim();
+  reasoningEl.textContent = reasoning || 'The AI didn\u2019t return a reasoning summary for this breakdown.';
+}
+function goalResultReviewTasks() {
+  document.getElementById('goal-modal').classList.remove('show');
+  loadView('review');
 }
 // Reopens the form view (not the progress view) with the goal text intact
 // and the error shown, so the leader can edit/retry without retyping.
@@ -3765,11 +4085,15 @@ function renderGoalsList(goals) {
       ? '<button class="btn-sm" onclick="toggleGoalReasoning(\''+reasoningId+'\',this)">Show reasoning</button>' : '';
     const reasoningPanel = hasReasoning
       ? '<div class="goal-reasoning-panel" id="'+reasoningId+'">'+escHtml(g.Reasoning)+'</div>' : '';
+    const bodyId = 'goal-body-'+g.ID;
+    const collapseBtnId = 'goal-collapse-btn-'+g.ID;
     return '<div class="card goal-card">'
       + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">'
-      +   '<div class="goal-card-desc" style="flex:1;min-width:200px">'+escHtml(g.Description)+'</div>'
+      +   '<div class="goal-card-desc" style="flex:1;min-width:200px;cursor:pointer" onclick="toggleGoalCard(\''+bodyId+'\',\''+collapseBtnId+'\')">'+escHtml(g.Description)+'</div>'
       +   statusBadgeHtml
+      +   '<button class="btn-sm" id="'+collapseBtnId+'" onclick="toggleGoalCard(\''+bodyId+'\',\''+collapseBtnId+'\')">Collapse</button>'
       + '</div>'
+      + '<div id="'+bodyId+'">'
       + '<div class="goal-progress-row" style="margin-top:8px">'
       +   '<span>'+done+' / '+total+' tasks done</span>'
       +   progressBar(pct)
@@ -3783,8 +4107,17 @@ function renderGoalsList(goals) {
       + '</div>'
       + reasoningPanel
       + '<div class="goal-child-list" id="'+childListId+'">'+childRows+'</div>'
+      + '</div>'
       + '</div>';
   }).join('');
+}
+function toggleGoalCard(bodyId, btnId) {
+  const el = document.getElementById(bodyId);
+  const btn = document.getElementById(btnId);
+  if (!el) return;
+  const collapsed = el.style.display === 'none';
+  el.style.display = collapsed ? '' : 'none';
+  if (btn) btn.textContent = collapsed ? 'Collapse' : 'Expand';
 }
 function toggleGoalChildren(id, btn) {
   const el = document.getElementById(id);
