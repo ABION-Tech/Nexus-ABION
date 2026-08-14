@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 · NEXUS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080810; --surface: #0f0f1c; --border: rgba(255,255,255,0.06);
+    --accent: #5b52f0; --accent2: #00d4a0; --text: #f5f5fb; --muted: #5a5a7a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%; background: var(--bg); color: var(--text);
+    font-family: "Syne", sans-serif; display: flex; align-items: center; justify-content: center;
+  }
+  .wrap { text-align: center; padding: 24px; max-width: 440px; }
+  .code {
+    font-family: "Space Mono", monospace; font-size: 13px; color: var(--accent2);
+    letter-spacing: 3px; margin-bottom: 14px;
+  }
+  h1 { font-size: 30px; font-weight: 800; margin-bottom: 10px; }
+  p { color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 28px; }
+  a.btn {
+    display: inline-block; text-decoration: none; font-weight: 700; font-size: 13px;
+    color: var(--text); background: var(--accent); padding: 11px 22px; border-radius: 8px;
+    transition: opacity 0.15s;
+  }
+  a.btn:hover { opacity: 0.85; }
+  .wordmark { font-size: 14px; font-weight: 800; letter-spacing: 4px; color: #ffffff; margin-top: 40px; }
+  .wordmark span { color: var(--accent2); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="code">ERROR 404</div>
+    <h1>Page not found</h1>
+    <p>Whatever you were looking for isn't at this address — it may have moved, or the link's off. Head back to the dashboard and navigate from there.</p>
+    <a class="btn" href="/">Back to NEXUS</a>
+    <div class="wordmark">NEX<span>US</span></div>
+  </div>
+</body>
+</html>
