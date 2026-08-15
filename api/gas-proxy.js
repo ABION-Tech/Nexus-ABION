@@ -16,6 +16,18 @@ export const config = {
   },
 };
 
+// Without this, Vercel enforces a duration ceiling on this function and
+// kills it mid-request on any call that takes longer (goal decomposition
+// regularly takes 10-30s since it waits on a live AI call). From the
+// browser that looks exactly like "Failed to fetch": the connection just
+// gets cut, no error body at all.
+//
+// 300 is Hobby's current default AND maximum with Fluid Compute enabled
+// (Project Settings → Functions in the Vercel dashboard — on by default
+// for newer projects). If Fluid Compute is OFF, Hobby is capped lower and
+// this value won't help — turn it on rather than fighting the number.
+export const maxDuration = 300;
+
 const GAS_URL =
   'https://script.google.com/macros/s/AKfycbzrR4cvDD0pwNkJQgOlVLufIzjaJADcdz4g2FAOy--3I3jdeB4yBvpe5CahfhiLWqti/exec';
 
