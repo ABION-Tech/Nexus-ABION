@@ -850,6 +850,15 @@
         </select>
         <div style="font-size:9px;color:var(--muted);margin-top:3px">Separate from the setting above — set this however you like without affecting escalations or chat.</div>
       </div>
+      <div style="text-align:left;margin-bottom:4px">
+        <div class="toggle-wrap">
+          <div>
+            <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:0.5px">SHOW DECOMPOSITION DATES</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:2px;max-width:190px">Applies everywhere at once — Goals list and Review Queue — not something you set per goal or per task.</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="profile-show-decomp-dates" onchange="toggleShowDecompDates(this.checked)"><span class="slider"></span></label>
+        </div>
+      </div>
       <button class="btn-sm" id="profile-notify-btn" onclick="toggleChatNotifications('profile-notify-btn')" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Enable push notifications</button>
       <button class="btn-secondary" id="profile-change-pw-btn" style="width:100%;font-size:12px;display:none" onclick="closeProfileModal();openChangePasswordModal()">Change passphrase</button>
       <button class="btn-secondary" style="width:100%;font-size:12px;color:var(--danger)" onclick="closeProfileModal();logoutLeader()">Sign out</button>
@@ -3462,9 +3471,11 @@ function renderReviewQueue(items) {
     let headerPanel;
     if (isGoal) {
       const goalId = first['Goal_ID'];
+      const decompDate = (wantsDecompDates() && first['Created_At']) ? new Date(first['Created_At']) : null;
+      const decompDateStr = (decompDate && !isNaN(decompDate)) ? ' · decomposed '+decompDate.toLocaleDateString() : '';
       headerPanel = '<div class="card" style="padding:14px;margin-bottom:8px;background:var(--surface2)">'
         + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
-        +   '<div style="font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px">'+icon('target',13)+' Goal · '+escHtml(first['Meeting_Summary']||'')+'</div>'
+        +   '<div style="font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px">'+icon('target',13)+' Goal · '+escHtml(first['Meeting_Summary']||'')+'<span style="font-size:10px;font-weight:400;color:var(--muted);font-family:\'Space Mono\',monospace">'+decompDateStr+'</span></div>'
         +   '<button class="btn-primary" style="font-size:11px;padding:6px 12px" onclick="approveAllGoalItems(\''+escQ(goalId)+'\')">'+icon('check',12)+' Approve all ('+groupItems.length+')</button>'
         +   '<button class="btn-sm" style="font-size:11px;padding:6px 12px" onclick="regenerateGoalUI(\''+escQ(goalId)+'\')">'+icon('refresh',12)+' Regenerate</button>'
         +   '<button class="btn-sm" id="'+groupElId+'-btn" style="font-size:11px;padding:6px 12px" onclick="toggleReviewGroup(\''+groupElId+'\',this)">Collapse</button>'
@@ -3804,7 +3815,7 @@ async function loadTaskTrends() {
 // progressBar()'s existing inline-SVG style elsewhere in the file.
 function renderTaskTrendsChart(rows) {
   const chartEl = document.getElementById('analytics-chart');
-  if (!rows.length) { chartEl.innerHTML = '<div class="sub">No trend data yet — the daily snapshot job (recordDailyTaskSnapshot_) needs at least one full day to run before a trend line appears here.</div>'; return; }
+  if (!rows.length) { chartEl.innerHTML = '<div class="sub">No trend data yet. The daily snapshot job (recordDailyTaskSnapshot_) writes one row per person going forward — for history before today, run backfillTaskTrends_ once from Extensions \u2192 Apps Script \u2192 Run.</div>'; return; }
 
   const byPerson = {};
   rows.forEach(r => { (byPerson[r.Person] = byPerson[r.Person] || []).push(r); });
@@ -4182,7 +4193,8 @@ async function loadGoals() {
     const res = await fetch(SCRIPT_URL + '?action=getGoals&token=' + encodeURIComponent(getIdentityToken()||'') + '&_=' + Date.now(), { redirect:'follow', cache:'no-store' });
     const r = await res.json();
     if (r.error) { listEl.innerHTML = '<div class="sub">'+r.error+'</div>'; return; }
-    renderGoalsList(r.goals || []);
+    window._lastGoals = r.goals || [];
+    renderGoalsList(window._lastGoals);
   } catch(e) {
     listEl.innerHTML = '<div class="sub">Failed to load — '+e.message+'</div>';
   }
@@ -4203,12 +4215,17 @@ function renderGoalsList(goals) {
     const pct = total ? Math.round((done/total)*100) : 0;
     const statusMap = {Drafting:'badge-yellow', Active:'badge-blue', Completed:'badge-green', Archived:'badge-gray'};
     const statusBadgeHtml = '<span class="badge-pill '+(statusMap[g.Status]||'badge-gray')+'">'+g.Status+'</span>';
-    const childRows = (g.children||[]).map(c =>
-      '<div class="goal-child-row">'
+    const showDates = wantsDecompDates();
+    const childRows = (g.children||[]).map(c => {
+      const decompDate = (showDates && c.Decomposed_At) ? new Date(c.Decomposed_At) : null;
+      const dateSpan = (decompDate && !isNaN(decompDate))
+        ? '<span style="font-size:9px;color:var(--muted);font-family:\'Space Mono\',monospace;margin-left:6px" title="Decomposed at '+decompDate.toLocaleString()+'">decomposed '+decompDate.toLocaleDateString()+'</span>' : '';
+      return '<div class="goal-child-row">'
       + '<span style="cursor:pointer" onclick="closeGoalModal();loadView(\'tasks\');setTimeout(()=>editRow(\''+escQ(c.ID)+'\',\'1. Master Tasks\'),50)">'+escHtml((c['Task Description']||'').substring(0,60))+'</span>'
       + statusBadge(c.Status)
-      + '</div>'
-    ).join('') || '<div class="sub" style="padding:8px 0">No approved tasks yet — check the Review Queue.</div>';
+      + dateSpan
+      + '</div>';
+    }).join('') || '<div class="sub" style="padding:8px 0">No approved tasks yet — check the Review Queue.</div>';
     const childListId = 'goal-children-'+g.ID;
     const reasoningId = 'goal-reasoning-'+g.ID;
     // "Show your workings" — the AI's own short explanation of how it
@@ -5115,6 +5132,41 @@ async function changeDigestNotifyPref(pref) {
   } catch (e) { showToast('Could not save digest preference: ' + e.message, 'error'); }
 }
 
+// One global read-only check for the "Show decomposition dates" preference
+// — deliberately NOT per-goal or per-task, see the toggle in the profile
+// modal. Default true (blank/'on') so it's opt-out, not opt-in. Reads the
+// caller's own row out of the already-loaded appData.team rather than a
+// separate round-trip, same pattern as isLeader()/getTeamEmail() elsewhere.
+function wantsDecompDates() {
+  const name = getIdentity();
+  if (!name) return true;
+  const canon = canonicalizeName(name).trim().toUpperCase();
+  const rosterRow = (appData.team||[]).find(m=>canonicalizeName(String(m['Name']||'').trim()).toUpperCase()===canon);
+  const pref = rosterRow && rosterRow['Show_Decomp_Dates'] ? String(rosterRow['Show_Decomp_Dates']).trim().toLowerCase() : 'on';
+  return pref !== 'off';
+}
+
+// Saves the toggle from the profile modal, updates the cached roster row
+// in-place so wantsDecompDates() reflects it immediately, then re-renders
+// whichever of Goals / Review Queue already has data cached — no need to
+// force a full reload just to show/hide a date label.
+async function toggleShowDecompDates(checked) {
+  if (!getIdentity()) return;
+  const value = checked ? 'on' : 'off';
+  try {
+    const res = await fetch(SCRIPT_URL, { method: 'POST', redirect: 'follow', body: JSON.stringify({ action: 'saveShowDecompDatesPref', token: getIdentityToken(), value: value }) });
+    const r = await res.json();
+    if (r.error) { showToast(r.error, 'error'); return; }
+    const name = getIdentity();
+    const canon = canonicalizeName(name).trim().toUpperCase();
+    const rosterRow = (appData.team||[]).find(m=>canonicalizeName(String(m['Name']||'').trim()).toUpperCase()===canon);
+    if (rosterRow) rosterRow['Show_Decomp_Dates'] = value;
+    if (window._lastGoals) renderGoalsList(window._lastGoals);
+    if (window._lastReviewItems) renderReviewQueue(window._lastReviewItems);
+    showToast('Decomposition dates ' + (checked ? 'shown' : 'hidden'), 'success');
+  } catch (e) { showToast('Could not save preference: ' + e.message, 'error'); }
+}
+
 function startNotifyPolling() {
   stopNotifyPolling();
   loadNotifications();
@@ -5524,6 +5576,8 @@ function openProfileModal() {
   if (prefSelect) prefSelect.value = (rosterRow && rosterRow['Notify_Pref']) ? String(rosterRow['Notify_Pref']).trim().toLowerCase() : 'both';
   const digestSelect = document.getElementById('profile-digest-pref');
   if (digestSelect) digestSelect.value = (rosterRow && rosterRow['Digest_Notify_Pref']) ? String(rosterRow['Digest_Notify_Pref']).trim().toLowerCase() : 'both';
+  const decompDatesToggle = document.getElementById('profile-show-decomp-dates');
+  if (decompDatesToggle) decompDatesToggle.checked = wantsDecompDates();
   document.getElementById('profile-modal').classList.add('show');
   refreshNotifyButtonState('profile-notify-btn');
 }
