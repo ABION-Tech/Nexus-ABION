@@ -1232,6 +1232,10 @@
         <svg fill="currentColor" viewBox="0 0 20 20"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
         <span class="nav-label">HR</span>
       </a>
+      <a class="nav-item" data-view="analytics" title="Analytics">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1H3a1 1 0 01-1-1v-6zM8 7a1 1 0 011-1h2a1 1 0 011 1v10a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 3a1 1 0 011-1h2a1 1 0 011 1v14a1 1 0 01-1 1h-2a1 1 0 01-1-1V3z"/></svg>
+        <span class="nav-label">Analytics</span>
+      </a>
       <div class="nav-section">Settings</div>
       <a class="nav-item" data-view="automation" title="Automation">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
@@ -1631,6 +1635,35 @@
             <button class="btn-secondary btn-sm" onclick="openOnboardingModal()">+ Start Onboarding</button>
           </div>
           <div id="onboarding-list" style="display:flex;flex-direction:column;gap:8px;margin-top:12px"></div>
+        </div>
+      </div>
+
+      <!-- Analytics — task-count trend per person, read from '22. Task Trends'
+           (see recordDailyTaskSnapshot_ / getTaskTrends server-side). Access
+           is enforced server-side, not just hidden in the UI: leaders get a
+           person picker across the whole team; everyone else only ever gets
+           their own trend back regardless of what this UI requests. -->
+      <div id="view-analytics" class="view">
+        <div class="card-head" style="padding:0 0 16px">
+          <h3>Analytics</h3>
+          <span class="sub" id="analytics-subtitle">Task trend over time.</span>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+            <div id="analytics-person-picker-wrap" style="display:none">
+              <select id="analytics-person-picker" class="form-input" style="width:auto" onchange="loadTaskTrends()"></select>
+            </div>
+            <select id="analytics-range-picker" class="form-input" style="width:auto;margin-left:auto" onchange="loadTaskTrends()">
+              <option value="14">Last 14 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card" id="analytics-chart-card">
+          <div id="analytics-chart" style="min-height:260px;display:flex;align-items:center;justify-content:center"><div class="sub">Loading…</div></div>
         </div>
       </div>
 
@@ -2157,7 +2190,7 @@ function loadView(name) {
   currentView = name;
   document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.view===name));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id===('view-'+name)));
-  const titles = {dashboard:'KPI Dashboard',tasks:'Master Tasks',cos:'Network',partners:'Partnerships',org:'Org Database',kpi:'Activity Log',marketing:'Marketing',eod:'EOD Report',meetings:'Calendar',followup:'Follow-Up Tracker',failsafe:'Failsafe Alerts',automation:'Automation',team:'Team Directory',review:'Review Queue',aianalyst:'AI Analyst',goals:'Goals',hr:'HR'};
+  const titles = {dashboard:'KPI Dashboard',tasks:'Master Tasks',cos:'Network',partners:'Partnerships',org:'Org Database',kpi:'Activity Log',marketing:'Marketing',eod:'EOD Report',meetings:'Calendar',followup:'Follow-Up Tracker',failsafe:'Failsafe Alerts',automation:'Automation',team:'Team Directory',review:'Review Queue',aianalyst:'AI Analyst',goals:'Goals',hr:'HR',analytics:'Analytics'};
   document.getElementById('topbar-title').textContent = titles[name]||name;
   const lbl = ADD_BTN_LABELS[name];
   const addBtn = document.getElementById('add-btn');
@@ -2395,6 +2428,7 @@ function renderView(name) {
     case 'review':     loadReviewQueue(); break;
     case 'goals':      loadGoals(); break;
     case 'hr':         loadHR(); break;
+    case 'analytics':  loadTaskTrends(); break;
   }
 }
 
@@ -3719,6 +3753,109 @@ async function loadHR() {
     listEl.innerHTML = '<div class="sub">Failed to load — '+e.message+'</div>';
   }
   if (isLeader()) loadOnboardingList();
+}
+
+// ============================================================
+//  ANALYTICS — task-count trend per person (v3.5)
+//  Reads '22. Task Trends', written daily by recordDailyTaskSnapshot_ in
+//  code.gs. Access is enforced server-side by getTaskTrends, not here —
+//  this UI just reflects what comes back: a leader gets a person picker
+//  and can request anyone's trend (or all, unfiltered); anyone else never
+//  even sees the picker, because their request is always pinned to their
+//  own name regardless of what this UI would otherwise send.
+// ============================================================
+async function loadTaskTrends() {
+  const pickerWrap = document.getElementById('analytics-person-picker-wrap');
+  const picker = document.getElementById('analytics-person-picker');
+  const subtitle = document.getElementById('analytics-subtitle');
+  const chartEl = document.getElementById('analytics-chart');
+
+  if (isLeader()) {
+    pickerWrap.style.display = '';
+    if (!picker.dataset.populated) {
+      const names = (appData.team||[]).map(m=>String(m['Name']||'').trim()).filter(Boolean).sort();
+      picker.innerHTML = '<option value="">All team members</option>' + names.map(n=>'<option value="'+escQ(n)+'">'+escHtml(n)+'</option>').join('');
+      picker.dataset.populated = '1';
+    }
+    subtitle.textContent = picker.value ? (picker.value + '\u2019s task trend.') : 'Task trend across the whole team.';
+  } else {
+    pickerWrap.style.display = 'none';
+    subtitle.textContent = 'Your task trend.';
+  }
+
+  const person = isLeader() ? (picker.value || '') : '';
+  const days = document.getElementById('analytics-range-picker').value || '30';
+
+  chartEl.innerHTML = '<div class="sub">Loading…</div>';
+  try {
+    const res = await fetch(SCRIPT_URL+'?action=getTaskTrends&token='+encodeURIComponent(getIdentityToken()||'')+'&person='+encodeURIComponent(person)+'&days='+days+'&_='+Date.now(), {redirect:'follow', cache:'no-store'});
+    const r = await res.json();
+    if (r.error) { chartEl.innerHTML = '<div class="sub">'+r.error+'</div>'; return; }
+    renderTaskTrendsChart(r.trends || []);
+  } catch(e) {
+    chartEl.innerHTML = '<div class="sub">Failed to load — '+e.message+'</div>';
+  }
+}
+
+// Groups rows by Person, draws one SVG polyline per person for OpenTasks
+// over time, plus a small stat strip (peak overdue / at-risk) per person
+// below the chart. No charting library in this codebase (checked before
+// building this) — plain SVG keeps it dependency-free and consistent with
+// progressBar()'s existing inline-SVG style elsewhere in the file.
+function renderTaskTrendsChart(rows) {
+  const chartEl = document.getElementById('analytics-chart');
+  if (!rows.length) { chartEl.innerHTML = '<div class="sub">No trend data yet — the daily snapshot job (recordDailyTaskSnapshot_) needs at least one full day to run before a trend line appears here.</div>'; return; }
+
+  const byPerson = {};
+  rows.forEach(r => { (byPerson[r.Person] = byPerson[r.Person] || []).push(r); });
+  const people = Object.keys(byPerson).sort();
+  const dates = [...new Set(rows.map(r=>r.Date))].sort();
+
+  const W = 640, H = 240, padL = 36, padR = 16, padT = 16, padB = 28;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const maxOpen = Math.max(1, ...rows.map(r => Number(r.OpenTasks)||0));
+  const colors = ['#5b52f0','#00d4a0','#f0a030','#f05060','#4090f0','#f0c040'];
+
+  const xFor = d => padL + (dates.indexOf(d) / Math.max(1, dates.length-1)) * plotW;
+  const yFor = v => padT + plotH - (v / maxOpen) * plotH;
+
+  let svg = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto" xmlns="http://www.w3.org/2000/svg">';
+  // gridlines
+  for (let i=0;i<=4;i++) { const y = padT + (plotH/4)*i; svg += '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="var(--border)" stroke-width="1"/>'; }
+  // axis labels (first/last date only, to stay readable)
+  if (dates.length) {
+    svg += '<text x="'+padL+'" y="'+(H-8)+'" font-size="10" fill="var(--muted)">'+dates[0]+'</text>';
+    svg += '<text x="'+(W-padR)+'" y="'+(H-8)+'" font-size="10" fill="var(--muted)" text-anchor="end">'+dates[dates.length-1]+'</text>';
+  }
+
+  people.forEach((person, i) => {
+    const color = colors[i % colors.length];
+    const series = byPerson[person].sort((a,b)=> dates.indexOf(a.Date)-dates.indexOf(b.Date));
+    const pts = series.map(r => xFor(r.Date)+','+yFor(Number(r.OpenTasks)||0)).join(' ');
+    svg += '<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2"/>';
+    series.forEach(r => { svg += '<circle cx="'+xFor(r.Date)+'" cy="'+yFor(Number(r.OpenTasks)||0)+'" r="2.5" fill="'+color+'"/>'; });
+  });
+  svg += '</svg>';
+
+  const legend = people.length > 1
+    ? '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px">' + people.map((p,i) =>
+        '<span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)">'
+        + '<span style="width:9px;height:9px;border-radius:50%;background:'+colors[i%colors.length]+';display:inline-block"></span>'+escHtml(p)+'</span>'
+      ).join('') + '</div>'
+    : '';
+
+  const stats = people.map(p => {
+    const series = byPerson[p];
+    const latest = series[series.length-1];
+    const peakOverdue = Math.max(0, ...series.map(r=>Number(r.OverdueTasks)||0));
+    const peakAtRisk = Math.max(0, ...series.map(r=>Number(r.AtRiskTasks)||0));
+    return '<div class="card" style="padding:10px 12px;margin-top:8px">'
+      + '<strong>'+escHtml(p)+'</strong>'
+      + '<div class="sub">Open now: '+(latest.OpenTasks||0)+' \u00b7 Peak overdue: '+peakOverdue+' \u00b7 Peak at-risk: '+peakAtRisk+'</div>'
+      + '</div>';
+  }).join('');
+
+  chartEl.innerHTML = '<div style="width:100%">' + svg + legend + '</div>' + (people.length > 1 ? stats : '');
 }
 
 function renderLeaveRequests(requests) {
