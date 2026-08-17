@@ -850,15 +850,6 @@
         </select>
         <div style="font-size:9px;color:var(--muted);margin-top:3px">Separate from the setting above — set this however you like without affecting escalations or chat.</div>
       </div>
-      <div style="text-align:left;margin-bottom:4px">
-        <div class="toggle-wrap">
-          <div>
-            <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:0.5px">SHOW DECOMPOSITION DATES</div>
-            <div style="font-size:9px;color:var(--muted);margin-top:2px;max-width:190px">Applies everywhere at once — Goals list and Review Queue — not something you set per goal or per task.</div>
-          </div>
-          <label class="toggle"><input type="checkbox" id="profile-show-decomp-dates" onchange="toggleShowDecompDates(this.checked)"><span class="slider"></span></label>
-        </div>
-      </div>
       <button class="btn-sm" id="profile-notify-btn" onclick="toggleChatNotifications('profile-notify-btn')" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Enable push notifications</button>
       <button class="btn-secondary" id="profile-change-pw-btn" style="width:100%;font-size:12px;display:none" onclick="closeProfileModal();openChangePasswordModal()">Change passphrase</button>
       <button class="btn-secondary" style="width:100%;font-size:12px;color:var(--danger)" onclick="closeProfileModal();logoutLeader()">Sign out</button>
@@ -1250,9 +1241,9 @@
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
         <span class="nav-label">Automation</span>
       </a>
-      <a class="nav-item" id="nav-team-item" data-view="team" style="display:none" title="Team Directory">
-        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
-        <span class="nav-label">Team Directory</span>
+      <a class="nav-item" data-view="knowledge" title="Knowledge Base">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/></svg>
+        <span class="nav-label">Knowledge Base</span>
       </a>
       <a class="nav-item" id="nav-review-item" data-view="review" style="display:none" title="Review Queue">
         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" clip-rule="evenodd"/></svg>
@@ -1606,11 +1597,6 @@
       </div>
 
       <!-- TEAM -->
-      <div id="view-team" class="view">
-        <div class="card-head" style="padding:0 0 16px"><h3>Team Directory</h3></div>
-        <div id="team-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px"></div>
-      </div>
-
       <!-- REVIEW QUEUE (Fireflies meeting action items) -->
       <div id="view-review" class="view">
         <div class="card-head" style="padding:0 0 16px">
@@ -1620,14 +1606,20 @@
         <div id="review-list" style="display:flex;flex-direction:column;gap:10px"></div>
       </div>
 
-      <!-- HR — Leave Requests (self-service, leader approves) + Onboarding
+      <!-- HR — Team Directory (moved here from its own top-level nav item),
+           Leave Requests (self-service, leader approves), and Onboarding
            (leader-only, creates a tagged Master Tasks row + standard
            checklist rather than a parallel system — see startOnboarding
            server-side). -->
       <div id="view-hr" class="view">
         <div class="card-head" style="padding:0 0 16px">
           <h3>HR</h3>
-          <span class="sub">Leave requests and new-hire onboarding.</span>
+          <span class="sub">Team directory, leave requests, and new-hire onboarding.</span>
+        </div>
+
+        <div class="card" id="team-directory-card" style="margin-bottom:16px">
+          <h4 style="margin:0 0 12px">Team Directory</h4>
+          <div id="team-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px"></div>
         </div>
 
         <div class="card" style="margin-bottom:16px">
@@ -1663,6 +1655,20 @@
             <div id="analytics-person-picker-wrap" style="display:none">
               <select id="analytics-person-picker" class="form-input" style="width:auto" onchange="loadTaskTrends()"></select>
             </div>
+            <select id="analytics-metric-picker" class="form-input" style="width:auto" onchange="renderTaskTrendsChart(taskTrendsCache)">
+              <option value="OpenTasks" selected>Open tasks</option>
+              <option value="DoneToday">Completed</option>
+              <option value="OverdueTasks">Overdue</option>
+              <option value="AtRiskTasks">At risk</option>
+            </select>
+            <label id="analytics-aggregate-wrap" style="display:none;align-items:center;gap:6px;font-size:12px;color:var(--muted)">
+              View:
+              <select id="analytics-groupby-picker" class="form-input" style="width:auto;font-size:11px;padding:4px 8px" onchange="renderTaskTrendsChart(taskTrendsCache)">
+                <option value="individuals" selected>Individuals</option>
+                <option value="team_total">Team total</option>
+                <option value="department">By department</option>
+              </select>
+            </label>
             <select id="analytics-range-picker" class="form-input" style="width:auto;margin-left:auto" onchange="loadTaskTrends()">
               <option value="14">Last 14 days</option>
               <option value="30" selected>Last 30 days</option>
@@ -1674,6 +1680,30 @@
         <div class="card" id="analytics-chart-card">
           <div id="analytics-chart" style="min-height:260px;display:flex;align-items:center;justify-content:center"><div class="sub">Loading…</div></div>
         </div>
+      </div>
+
+      <!-- Knowledge Base — leader-written business context (project names,
+           terms, standing policies) that gets injected into every AI call
+           via callNIMApi_/callNIMApiReport_ on the backend. Read-only for
+           non-leaders — they can already see its effects in AI answers, so
+           hiding the entries would just be inconsistent, not more secure. -->
+      <div id="view-knowledge" class="view">
+        <div class="card-head" style="padding:0 0 16px">
+          <h3>Knowledge Base</h3>
+          <span class="sub">What the AI knows about your business \u2014 project names, terms, standing context. Feeds every AI feature in NEXUS.</span>
+        </div>
+
+        <div class="card" id="knowledge-add-card" style="display:none;margin-bottom:16px">
+          <h4 style="margin:0 0 10px">Add entry</h4>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <input type="text" class="form-input" id="knowledge-new-title" placeholder="Title \u2014 e.g. &quot;What is ABION City&quot;">
+            <input type="text" class="form-input" id="knowledge-new-category" placeholder="Category (optional) \u2014 e.g. Product, Policy, Terminology">
+            <textarea class="form-input" id="knowledge-new-content" placeholder="Content \u2014 the actual explanation the AI should use" rows="3"></textarea>
+            <button class="btn-primary btn-sm" onclick="submitKnowledgeEntry()">Save entry</button>
+          </div>
+        </div>
+
+        <div id="knowledge-list" style="display:flex;flex-direction:column;gap:10px"></div>
       </div>
 
       <!-- GOALS — outcomes described in plain English, decomposed by AI into
@@ -1700,15 +1730,21 @@
           <button class="btn-secondary" onclick="loadAIAnalystMode('attention')" style="display:flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Attention Queue</button>
           <button class="btn-secondary" onclick="loadAIAnalystMode('predictions')" style="display:flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Predictions</button>
         </div>
-        <div id="ai-report-range-row" style="display:none;justify-content:flex-end;align-items:center;gap:6px;margin:-10px 0 12px">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);vertical-align:-2px;flex-shrink:0"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-          <select class="form-input" id="ai-report-range" style="width:auto;font-size:11px;padding:6px 10px" onchange="onAIReportRangeChange()">
-            <option value="all">All time</option>
-            <option value="this_week">This week</option>
-            <option value="last_week">Last week</option>
-            <option value="this_month">This month</option>
-            <option value="last_month">Last month</option>
+        <div id="ai-analyst-filter-row" style="display:none;justify-content:flex-end;align-items:center;gap:6px;margin:-10px 0 12px;flex-wrap:wrap">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);vertical-align:-2px;flex-shrink:0"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <select class="form-input" id="ai-analyst-person-picker" style="width:auto;font-size:11px;padding:6px 10px" onchange="onAIAnalystPersonChange()">
+            <option value="">Whole team</option>
           </select>
+          <div id="ai-report-range-row" style="display:none;align-items:center;gap:6px">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);vertical-align:-2px;flex-shrink:0"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <select class="form-input" id="ai-report-range" style="width:auto;font-size:11px;padding:6px 10px" onchange="onAIReportRangeChange()">
+              <option value="all">All time</option>
+              <option value="this_week">This week</option>
+              <option value="last_week">Last week</option>
+              <option value="this_month">This month</option>
+              <option value="last_month">Last month</option>
+            </select>
+          </div>
         </div>
         <div class="card">
           <div id="ai-analyst-output" style="white-space:pre-wrap;line-height:1.7;font-size:13.5px;min-height:120px;overflow-wrap:break-word;word-break:break-word;padding:22px 24px;max-width:100%;box-sizing:border-box">
@@ -2199,7 +2235,7 @@ function loadView(name) {
   currentView = name;
   document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.view===name));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id===('view-'+name)));
-  const titles = {dashboard:'KPI Dashboard',tasks:'Master Tasks',cos:'Network',partners:'Partnerships',org:'Org Database',kpi:'Activity Log',marketing:'Marketing',eod:'EOD Report',meetings:'Calendar',followup:'Follow-Up Tracker',failsafe:'Failsafe Alerts',automation:'Automation',team:'Team Directory',review:'Review Queue',aianalyst:'AI Analyst',goals:'Goals',hr:'HR',analytics:'Analytics'};
+  const titles = {dashboard:'KPI Dashboard',tasks:'Master Tasks',cos:'Network',partners:'Partnerships',org:'Org Database',kpi:'Activity Log',marketing:'Marketing',eod:'EOD Report',meetings:'Calendar',followup:'Follow-Up Tracker',failsafe:'Failsafe Alerts',automation:'Automation',review:'Review Queue',aianalyst:'AI Analyst',goals:'Goals',hr:'HR',analytics:'Analytics',knowledge:'Knowledge Base'};
   document.getElementById('topbar-title').textContent = titles[name]||name;
   const lbl = ADD_BTN_LABELS[name];
   const addBtn = document.getElementById('add-btn');
@@ -2226,6 +2262,37 @@ function openDeepLinkedTaskIfAny() {
   _deepLinkHandled = true;
   navigateToDeepLink(window.location.href);
 }
+// ============================================================
+//  SYSTEM PAUSE OVERLAY
+// ============================================================
+// Shown when the backend's kill switch (sys_config!A1 = "DOWN") reports
+// `paused: true` on the main data load — everyone except the founder is
+// blocked at the API level (see doGet/doPost pause gate in code.gs), this
+// is just the honest, visible version of that for whoever hits it. A Log In
+// button stays available since the founder needs a way in while paused —
+// once they authenticate as the founder, the next loadData() call passes
+// the backend check and this overlay is dismissed automatically.
+function showSystemPausedScreen(message) {
+  let el = document.getElementById('system-paused-overlay');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'system-paused-overlay';
+    el.style.cssText = 'position:fixed;inset:0;z-index:500;background:var(--bg,#0a0a12);display:flex;align-items:center;justify-content:center;padding:24px;text-align:center';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = `
+    <div style="max-width:380px">
+      <div style="font-size:20px;font-weight:800;letter-spacing:5px;margin-bottom:18px">NEX<span style="color:var(--accent2,#00d4a0)">US</span></div>
+      <h3 style="margin:0 0 10px">Access Paused</h3>
+      <p style="color:var(--muted,#8a8aa8);font-size:13px;line-height:1.6;margin:0 0 22px">${escHtml(message || 'NEXUS access has been paused by the administrator.')}</p>
+      <button class="btn-primary" onclick="openLoginModal()">Log In</button>
+    </div>`;
+}
+function hideSystemPausedScreen() {
+  const el = document.getElementById('system-paused-overlay');
+  if (el) el.remove();
+}
+
 async function loadData() {
   if (SCRIPT_URL.includes('YOUR_SCRIPT_ID_HERE')) {
     showToast('SCRIPT_URL not configured — open the file and set your Apps Script URL', 'error');
@@ -2237,6 +2304,11 @@ async function loadData() {
     const res = await fetch(SCRIPT_URL+'?action=read&token='+encodeURIComponent(getIdentityToken()||'')+'&_='+Date.now(), {redirect:'follow', cache:'no-store', mode:'cors'});
     if (!res.ok) throw new Error('HTTP '+res.status);
     appData = await res.json();
+    if (appData.paused) {
+      showSystemPausedScreen(appData.error);
+      return;
+    }
+    hideSystemPausedScreen();
     if (appData.error === 'Login required.') {
       clearTeamSession(); leaderToken=null; leaderName=null; sessionStorage.removeItem('nexus_leader_token'); sessionStorage.removeItem('nexus_leader_name');
       document.getElementById('login-modal').classList.add('show');
@@ -2433,11 +2505,11 @@ function renderView(name) {
     case 'followup':   renderFollowup(); break;
     case 'failsafe':   renderFailsafe(); break;
     case 'automation': renderAutomation(); break;
-    case 'team':       renderTeam(); break;
     case 'review':     loadReviewQueue(); break;
     case 'goals':      loadGoals(); break;
     case 'hr':         loadHR(); break;
     case 'analytics':  loadTaskTrends(); break;
+    case 'knowledge':  loadKnowledgeBase(); break;
   }
 }
 
@@ -3070,9 +3142,9 @@ const AI_ANALYST_CACHE_PREFIX = 'nexus_ai_analyst_cache_';
 
 // Turns the "This week / Last week / This month / Last month / All time"
 // dropdown into concrete ISO date bounds. Sent to the backend as
-// rangeStart/rangeEnd alongside the human-readable `range` key — if
-// getAIInsights doesn't use them yet, they're simply ignored server-side,
-// but the client-side cache and label always respect the selection.
+// rangeStart/rangeEnd alongside the human-readable `range` key — getAIInsights
+// honors these for all three modes (see resolveAsOf_/resolveWindow_ in
+// code.gs), and the client-side cache key/label respect the selection too.
 function getAIReportRangeBounds(rangeKey) {
   const now = new Date();
   const startOfDay = d => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
@@ -3111,6 +3183,26 @@ function onAIReportRangeChange() {
   loadAIAnalystMode(aiAnalystCurrentMode, true);
 }
 
+// Person picker — populated once from appData.team, same "Whole team" /
+// named-person shape as the Analytics person picker. Applies to all three
+// modes (report/attention/predictions), not just Report, since the backend
+// filters every mode's underlying data by assignee when a person is set.
+function currentAIAnalystPerson() {
+  const sel = document.getElementById('ai-analyst-person-picker');
+  return sel ? sel.value : '';
+}
+function populateAIAnalystPersonPicker() {
+  const picker = document.getElementById('ai-analyst-person-picker');
+  if (!picker || picker.dataset.populated) return;
+  const names = (appData.team||[]).map(m=>String(m['Name']||'').trim()).filter(Boolean).sort();
+  picker.innerHTML = '<option value="">Whole team</option>' + names.map(n=>'<option value="'+escQ(n)+'">'+escHtml(n)+'</option>').join('');
+  picker.dataset.populated = '1';
+}
+function onAIAnalystPersonChange() {
+  if (!aiAnalystCurrentMode) return;
+  loadAIAnalystMode(aiAnalystCurrentMode, true);
+}
+
 async function loadAIAnalystMode(mode, force) {
   if (!isLeader()) { showToast('Leader login required', 'error'); loadView('dashboard'); return; }
   // Clear chat UI when switching modes; each mode's history is kept in _aiChatHistory
@@ -3122,10 +3214,14 @@ async function loadAIAnalystMode(mode, force) {
     if (histEl)  histEl.innerHTML = '';
   }
   aiAnalystCurrentMode = mode;
+  populateAIAnalystPersonPicker();
+  const filterRow = document.getElementById('ai-analyst-filter-row');
+  if (filterRow) filterRow.style.display = 'flex';
   const rangeRow = document.getElementById('ai-report-range-row');
   if (rangeRow) rangeRow.style.display = mode === 'report' ? 'flex' : 'none';
   const rangeKey = mode === 'report' ? currentAIReportRange() : 'all';
-  const cacheKey = AI_ANALYST_CACHE_PREFIX + mode + '_' + rangeKey;
+  const person = currentAIAnalystPerson();
+  const cacheKey = AI_ANALYST_CACHE_PREFIX + mode + '_' + rangeKey + '_' + (person || 'all');
   const outEl = document.getElementById('ai-analyst-output');
   const metaEl = document.getElementById('ai-analyst-meta');
 
@@ -3145,7 +3241,8 @@ async function loadAIAnalystMode(mode, force) {
     const bounds = mode === 'report' ? getAIReportRangeBounds(rangeKey) : null;
     let url = SCRIPT_URL + '?action=getAIInsights&mode=' + encodeURIComponent(mode)
       + (force ? '&force=1' : '')
-      + (mode === 'report' ? '&range=' + encodeURIComponent(rangeKey) : '');
+      + (mode === 'report' ? '&range=' + encodeURIComponent(rangeKey) : '')
+      + (person ? '&person=' + encodeURIComponent(person) : '');
     if (bounds) url += '&rangeStart=' + encodeURIComponent(bounds.start.toISOString()) + '&rangeEnd=' + encodeURIComponent(bounds.end.toISOString());
     url += '&token=' + encodeURIComponent(getIdentityToken() || '') + '&_=' + Date.now();
     const res = await fetch(url, { redirect: 'follow', cache: 'no-store' });
@@ -3168,7 +3265,7 @@ function renderAIAnalystOutput(r, fromLocalCache) {
   const chatEl   = document.getElementById('ai-analyst-chat');
   outEl.textContent = r.text || '(No output.)';
   const when = r.generatedAt ? timeAgoLabel(r.generatedAt) : 'just now';
-  metaText.textContent = 'Generated ' + when + (fromLocalCache ? ' · from local cache — refreshing…' : (r.cached ? ' · cached' : ''));
+  metaText.textContent = 'Generated ' + when + (r.person ? ' · ' + r.person : '') + (fromLocalCache ? ' · from local cache — refreshing…' : (r.cached ? ' · cached' : ''));
   metaEl.style.display = 'flex';
   // Show the follow-up chat panel and repaint the thread for the current mode
   if (chatEl) chatEl.style.display = 'block';
@@ -3196,8 +3293,10 @@ function downloadAIAnalystOutput() {
   if (!text.trim()) { showToast('Nothing to download yet', 'error'); return; }
   const mode = aiAnalystCurrentMode || 'report';
   const rangeKey = mode === 'report' ? currentAIReportRange() : 'all';
+  const person = currentAIAnalystPerson();
+  const personSlug = person ? '-' + person.toLowerCase().replace(/[^a-z0-9]+/g,'') : '';
   const dateStamp = new Date().toISOString().slice(0,10);
-  const filename = 'nexus-' + mode + (mode === 'report' ? '-' + rangeKey : '') + '-' + dateStamp + '.txt';
+  const filename = 'nexus-' + mode + (mode === 'report' ? '-' + rangeKey : '') + personSlug + '-' + dateStamp + '.txt';
   const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -3315,6 +3414,7 @@ async function sendAIAnalystChat() {
     const priorText = outEl ? (outEl.textContent || '').substring(0, 4000) : '';
     const rangeKey = aiAnalystCurrentMode === 'report' ? currentAIReportRange() : 'all';
     const bounds   = aiAnalystCurrentMode === 'report' ? getAIReportRangeBounds(rangeKey) : null;
+    const person   = currentAIAnalystPerson();
 
     const payload = {
       action   : 'queryAIAnalystFollowup',
@@ -3323,7 +3423,8 @@ async function sendAIAnalystChat() {
       question,
       priorText,
       history  : _currentAIChatHistory().slice(-6),
-      ...(bounds ? { rangeStart: bounds.start.toISOString(), rangeEnd: bounds.end.toISOString() } : {})
+      ...(bounds ? { rangeStart: bounds.start.toISOString(), rangeEnd: bounds.end.toISOString() } : {}),
+      ...(person ? { person } : {})
     };
 
     const res = await fetch(SCRIPT_URL, {
@@ -3471,11 +3572,9 @@ function renderReviewQueue(items) {
     let headerPanel;
     if (isGoal) {
       const goalId = first['Goal_ID'];
-      const decompDate = (wantsDecompDates() && first['Created_At']) ? new Date(first['Created_At']) : null;
-      const decompDateStr = (decompDate && !isNaN(decompDate)) ? ' · decomposed '+decompDate.toLocaleDateString() : '';
       headerPanel = '<div class="card" style="padding:14px;margin-bottom:8px;background:var(--surface2)">'
         + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
-        +   '<div style="font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px">'+icon('target',13)+' Goal · '+escHtml(first['Meeting_Summary']||'')+'<span style="font-size:10px;font-weight:400;color:var(--muted);font-family:\'Space Mono\',monospace">'+decompDateStr+'</span></div>'
+        +   '<div style="font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px">'+icon('target',13)+' Goal · '+escHtml(first['Meeting_Summary']||'')+'</div>'
         +   '<button class="btn-primary" style="font-size:11px;padding:6px 12px" onclick="approveAllGoalItems(\''+escQ(goalId)+'\')">'+icon('check',12)+' Approve all ('+groupItems.length+')</button>'
         +   '<button class="btn-sm" style="font-size:11px;padding:6px 12px" onclick="regenerateGoalUI(\''+escQ(goalId)+'\')">'+icon('refresh',12)+' Regenerate</button>'
         +   '<button class="btn-sm" id="'+groupElId+'-btn" style="font-size:11px;padding:6px 12px" onclick="toggleReviewGroup(\''+groupElId+'\',this)">Collapse</button>'
@@ -3752,6 +3851,14 @@ async function submitAgentHandoff() {
 //  triggers it and shows progress, it doesn't own any new data model.
 // ============================================================
 async function loadHR() {
+  // Team Directory (moved here from its own top-level nav item) and
+  // Onboarding are both leader-only. renderTeam() itself still guards and
+  // redirects if called for a non-leader — this check just avoids that
+  // redirect firing as a side effect for a regular member simply opening
+  // the HR view to request leave.
+  const teamCard = document.getElementById('team-directory-card');
+  if (isLeader()) { teamCard.style.display = ''; renderTeam(); }
+  else { teamCard.style.display = 'none'; }
   document.getElementById('onboarding-card').style.display = isLeader() ? '' : 'none';
   const listEl = document.getElementById('leave-requests-list');
   listEl.innerHTML = '<div class="sub">Loading…</div>';
@@ -3802,11 +3909,14 @@ async function loadTaskTrends() {
     const res = await fetch(SCRIPT_URL+'?action=getTaskTrends&token='+encodeURIComponent(getIdentityToken()||'')+'&person='+encodeURIComponent(person)+'&days='+days+'&_='+Date.now(), {redirect:'follow', cache:'no-store'});
     const r = await res.json();
     if (r.error) { chartEl.innerHTML = '<div class="sub">'+r.error+'</div>'; return; }
-    renderTaskTrendsChart(r.trends || []);
+    taskTrendsCache = r.trends || [];
+    document.getElementById('analytics-aggregate-wrap').style.display = (isLeader() && !person) ? 'flex' : 'none';
+    renderTaskTrendsChart(taskTrendsCache);
   } catch(e) {
     chartEl.innerHTML = '<div class="sub">Failed to load — '+e.message+'</div>';
   }
 }
+let taskTrendsCache = [];
 
 // Groups rows by Person, draws one SVG polyline per person for OpenTasks
 // over time, plus a small stat strip (peak overdue / at-risk) per person
@@ -3815,20 +3925,114 @@ async function loadTaskTrends() {
 // progressBar()'s existing inline-SVG style elsewhere in the file.
 function renderTaskTrendsChart(rows) {
   const chartEl = document.getElementById('analytics-chart');
-  if (!rows.length) { chartEl.innerHTML = '<div class="sub">No trend data yet. The daily snapshot job (recordDailyTaskSnapshot_) writes one row per person going forward — for history before today, run backfillTaskTrends_ once from Extensions \u2192 Apps Script \u2192 Run.</div>'; return; }
+  if (!rows.length) { chartEl.innerHTML = '<div class="sub">No trend data yet — the daily snapshot job (recordDailyTaskSnapshot_) needs at least one full day to run before a trend line appears here.</div>'; return; }
+
+  const metric = document.getElementById('analytics-metric-picker').value || 'OpenTasks';
+  const metricLabel = {OpenTasks:'Open tasks', DoneToday:'Completed', OverdueTasks:'Overdue', AtRiskTasks:'At risk'}[metric];
+  const groupByVisible = document.getElementById('analytics-aggregate-wrap').style.display !== 'none';
+  const groupBy = groupByVisible ? (document.getElementById('analytics-groupby-picker').value || 'individuals') : 'individuals';
+  const aggregate = groupBy === 'team_total';
+
+  const dates = [...new Set(rows.map(r=>r.Date))].sort();
+  const colors = ['#5b52f0','#00d4a0','#f0a030','#f05060','#4090f0','#f0c040'];
+  const W = 640, H = 240, padL = 36, padR = 16, padT = 16, padB = 28;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const xFor = d => padL + (dates.indexOf(d) / Math.max(1, dates.length-1)) * plotW;
+
+  // Aggregate mode collapses every person into one summed-per-date series
+  // for the selected metric — answers "is the whole team's total trending
+  // up or down", which overlaid per-person lines can't answer well past a
+  // handful of people.
+  let series, legend, stats;
+  if (aggregate) {
+    const byDate = {};
+    dates.forEach(d => byDate[d] = 0);
+    rows.forEach(r => { byDate[r.Date] += Number(r[metric])||0; });
+    series = dates.map(d => ({ Date: d, v: byDate[d] }));
+    const maxV = Math.max(1, ...series.map(s=>s.v));
+    const yFor = v => padT + plotH - (v / maxV) * plotH;
+    let svg = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto" xmlns="http://www.w3.org/2000/svg">';
+    for (let i=0;i<=4;i++) { const y = padT + (plotH/4)*i; svg += '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="var(--border)" stroke-width="1"/>'; }
+    svg += '<text x="'+padL+'" y="'+(H-8)+'" font-size="10" fill="var(--muted)">'+dates[0]+'</text>';
+    svg += '<text x="'+(W-padR)+'" y="'+(H-8)+'" font-size="10" fill="var(--muted)" text-anchor="end">'+dates[dates.length-1]+'</text>';
+    const pts = series.map(s => xFor(s.Date)+','+yFor(s.v)).join(' ');
+    svg += '<polyline points="'+pts+'" fill="none" stroke="'+colors[0]+'" stroke-width="2"/>';
+    series.forEach(s => { svg += '<circle cx="'+xFor(s.Date)+'" cy="'+yFor(s.v)+'" r="2.5" fill="'+colors[0]+'"/>'; });
+    svg += '</svg>';
+    const last = series[series.length-1].v, prior = series.length>7 ? series[series.length-8].v : series[0].v;
+    const delta = last - prior;
+    const arrow = delta > 0 ? '\u2191' : delta < 0 ? '\u2193' : '\u2192';
+    legend = '';
+    stats = '<div class="card" style="padding:10px 12px;margin-top:8px"><strong>Whole team</strong>'
+      + '<div class="sub">'+metricLabel+' now: '+last+' \u00b7 '+arrow+' '+Math.abs(delta)+' vs 7 days ago</div></div>';
+    chartEl.innerHTML = '<div style="width:100%">' + svg + '</div>' + stats;
+    return;
+  }
+
+  // Department mode (Tier 2) — sums each department's members into one
+  // line per department per date. Department comes from '9. Team Members'
+  // (Department column), not the task's own Business/Dept field — this is
+  // a per-person time-series sheet, so rollup has to go through whichever
+  // department each snapshot's Person currently belongs to. Anyone not
+  // found on the roster (e.g. a since-removed member with historical rows)
+  // falls into "Unassigned".
+  if (groupBy === 'department') {
+    const deptByPerson = {};
+    (appData.team||[]).forEach(m => { deptByPerson[canonicalizeName(m['Name'])] = String(m['Department']||'').trim() || 'Unassigned'; });
+    const byDeptDate = {}, membersByDept = {};
+    rows.forEach(r => {
+      const dept = deptByPerson[canonicalizeName(r.Person)] || 'Unassigned';
+      if (!byDeptDate[dept]) { byDeptDate[dept] = {}; dates.forEach(dt => byDeptDate[dept][dt] = 0); }
+      byDeptDate[dept][r.Date] = (byDeptDate[dept][r.Date] || 0) + (Number(r[metric])||0);
+      (membersByDept[dept] = membersByDept[dept] || new Set()).add(r.Person);
+    });
+    const depts = Object.keys(byDeptDate).sort();
+    const maxV = Math.max(1, ...depts.flatMap(d => dates.map(dt => byDeptDate[d][dt])));
+    const yFor = v => padT + plotH - (v / maxV) * plotH;
+
+    let svg = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto" xmlns="http://www.w3.org/2000/svg">';
+    for (let i=0;i<=4;i++) { const y = padT + (plotH/4)*i; svg += '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="var(--border)" stroke-width="1"/>'; }
+    if (dates.length) {
+      svg += '<text x="'+padL+'" y="'+(H-8)+'" font-size="10" fill="var(--muted)">'+dates[0]+'</text>';
+      svg += '<text x="'+(W-padR)+'" y="'+(H-8)+'" font-size="10" fill="var(--muted)" text-anchor="end">'+dates[dates.length-1]+'</text>';
+    }
+    depts.forEach((dept, i) => {
+      const color = colors[i % colors.length];
+      const pts = dates.map(dt => xFor(dt)+','+yFor(byDeptDate[dept][dt])).join(' ');
+      svg += '<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2"/>';
+      dates.forEach(dt => { svg += '<circle cx="'+xFor(dt)+'" cy="'+yFor(byDeptDate[dept][dt])+'" r="2.5" fill="'+color+'"/>'; });
+    });
+    svg += '</svg>';
+
+    const deptLegend = depts.length > 1
+      ? '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px">' + depts.map((d,i) =>
+          '<span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)">'
+          + '<span style="width:9px;height:9px;border-radius:50%;background:'+colors[i%colors.length]+';display:inline-block"></span>'+escHtml(d)+'</span>'
+        ).join('') + '</div>'
+      : '';
+
+    const deptStats = depts.map(dept => {
+      const series = dates.map(dt => byDeptDate[dept][dt]);
+      const last = series[series.length-1] || 0;
+      const prior = series.length > 7 ? series[series.length-8] : series[0];
+      const delta = last - (prior||0);
+      const arrow = delta > 0 ? '\u2191' : delta < 0 ? '\u2193' : '\u2192';
+      const memberCount = (membersByDept[dept]||new Set()).size;
+      return '<div class="card" style="padding:10px 12px;margin-top:8px">'
+        + '<strong>'+escHtml(dept)+'</strong> <span class="sub">('+memberCount+' '+(memberCount===1?'person':'people')+')</span>'
+        + '<div class="sub">'+metricLabel+' now: '+last+' \u00b7 '+arrow+' '+Math.abs(delta)+' vs 7 days ago</div>'
+        + '</div>';
+    }).join('');
+
+    chartEl.innerHTML = '<div style="width:100%">' + svg + deptLegend + '</div>' + deptStats;
+    return;
+  }
 
   const byPerson = {};
   rows.forEach(r => { (byPerson[r.Person] = byPerson[r.Person] || []).push(r); });
   const people = Object.keys(byPerson).sort();
-  const dates = [...new Set(rows.map(r=>r.Date))].sort();
-
-  const W = 640, H = 240, padL = 36, padR = 16, padT = 16, padB = 28;
-  const plotW = W - padL - padR, plotH = H - padT - padB;
-  const maxOpen = Math.max(1, ...rows.map(r => Number(r.OpenTasks)||0));
-  const colors = ['#5b52f0','#00d4a0','#f0a030','#f05060','#4090f0','#f0c040'];
-
-  const xFor = d => padL + (dates.indexOf(d) / Math.max(1, dates.length-1)) * plotW;
-  const yFor = v => padT + plotH - (v / maxOpen) * plotH;
+  const maxV = Math.max(1, ...rows.map(r => Number(r[metric])||0));
+  const yFor = v => padT + plotH - (v / maxV) * plotH;
 
   let svg = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto" xmlns="http://www.w3.org/2000/svg">';
   // gridlines
@@ -3841,32 +4045,149 @@ function renderTaskTrendsChart(rows) {
 
   people.forEach((person, i) => {
     const color = colors[i % colors.length];
-    const series = byPerson[person].sort((a,b)=> dates.indexOf(a.Date)-dates.indexOf(b.Date));
-    const pts = series.map(r => xFor(r.Date)+','+yFor(Number(r.OpenTasks)||0)).join(' ');
+    const s = byPerson[person].sort((a,b)=> dates.indexOf(a.Date)-dates.indexOf(b.Date));
+    const pts = s.map(r => xFor(r.Date)+','+yFor(Number(r[metric])||0)).join(' ');
     svg += '<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2"/>';
-    series.forEach(r => { svg += '<circle cx="'+xFor(r.Date)+'" cy="'+yFor(Number(r.OpenTasks)||0)+'" r="2.5" fill="'+color+'"/>'; });
+    s.forEach(r => { svg += '<circle cx="'+xFor(r.Date)+'" cy="'+yFor(Number(r[metric])||0)+'" r="2.5" fill="'+color+'"/>'; });
   });
   svg += '</svg>';
 
-  const legend = people.length > 1
+  legend = people.length > 1
     ? '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px">' + people.map((p,i) =>
         '<span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)">'
         + '<span style="width:9px;height:9px;border-radius:50%;background:'+colors[i%colors.length]+';display:inline-block"></span>'+escHtml(p)+'</span>'
       ).join('') + '</div>'
     : '';
 
-  const stats = people.map(p => {
-    const series = byPerson[p];
-    const latest = series[series.length-1];
-    const peakOverdue = Math.max(0, ...series.map(r=>Number(r.OverdueTasks)||0));
-    const peakAtRisk = Math.max(0, ...series.map(r=>Number(r.AtRiskTasks)||0));
+  stats = people.map(p => {
+    const s = byPerson[p];
+    const latest = s[s.length-1];
+    const prior = s.length > 7 ? s[s.length-8] : s[0];
+    const delta = (Number(latest[metric])||0) - (Number(prior[metric])||0);
+    const arrow = delta > 0 ? '\u2191' : delta < 0 ? '\u2193' : '\u2192';
+    const peakOverdue = Math.max(0, ...s.map(r=>Number(r.OverdueTasks)||0));
+    const peakAtRisk = Math.max(0, ...s.map(r=>Number(r.AtRiskTasks)||0));
     return '<div class="card" style="padding:10px 12px;margin-top:8px">'
       + '<strong>'+escHtml(p)+'</strong>'
-      + '<div class="sub">Open now: '+(latest.OpenTasks||0)+' \u00b7 Peak overdue: '+peakOverdue+' \u00b7 Peak at-risk: '+peakAtRisk+'</div>'
+      + '<div class="sub">'+metricLabel+' now: '+(latest[metric]||0)+' \u00b7 '+arrow+' '+Math.abs(delta)+' vs 7 days ago \u00b7 Peak overdue: '+peakOverdue+' \u00b7 Peak at-risk: '+peakAtRisk+'</div>'
       + '</div>';
   }).join('');
 
-  chartEl.innerHTML = '<div style="width:100%">' + svg + legend + '</div>' + (people.length > 1 ? stats : '');
+  chartEl.innerHTML = '<div style="width:100%">' + svg + legend + '</div>' + (people.length > 1 ? stats : stats);
+}
+
+// ============================================================
+//  KNOWLEDGE BASE (v3.5)
+//  Read is open to any logged-in member (see getKnowledgeBase server-side
+//  comment — they already see this context reflected in every AI answer,
+//  so hiding the entries themselves adds no real protection). Writes are
+//  leader-only, enforced server-side, mirrored here by simply not
+//  rendering the add/edit/delete controls for non-leaders.
+// ============================================================
+let knowledgeEntriesCache = [];
+
+async function loadKnowledgeBase() {
+  document.getElementById('knowledge-add-card').style.display = isLeader() ? '' : 'none';
+  const listEl = document.getElementById('knowledge-list');
+  listEl.innerHTML = '<div class="sub">Loading…</div>';
+  try {
+    const res = await fetch(SCRIPT_URL+'?action=getKnowledgeBase&token='+encodeURIComponent(getIdentityToken()||'')+'&_='+Date.now(), {redirect:'follow', cache:'no-store'});
+    const r = await res.json();
+    if (r.error) { listEl.innerHTML = '<div class="sub">'+r.error+'</div>'; return; }
+    knowledgeEntriesCache = r.entries || [];
+    renderKnowledgeList();
+  } catch(e) {
+    listEl.innerHTML = '<div class="sub">Failed to load — '+e.message+'</div>';
+  }
+}
+
+function renderKnowledgeList() {
+  const listEl = document.getElementById('knowledge-list');
+  if (!knowledgeEntriesCache.length) {
+    listEl.innerHTML = '<div class="sub">No entries yet. '+(isLeader()?'Add the first one above \u2014 start with anything the AI would otherwise have to guess at (project names, product terms, standing policies).':'Nothing here yet.')+'</div>';
+    return;
+  }
+  listEl.innerHTML = knowledgeEntriesCache.map(e => {
+    const editFormId = 'kb-edit-'+e.ID;
+    const editControls = isLeader() ? `
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn-sm" onclick="toggleKnowledgeEdit('${editFormId}')">Edit</button>
+        <button class="btn-sm" style="color:var(--danger)" onclick="deleteKnowledgeEntryUI('${escQ(e.ID)}')">Delete</button>
+      </div>` : '';
+    const editForm = isLeader() ? `
+      <div id="${editFormId}" style="display:none;flex-direction:column;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        <input type="text" class="form-input" id="${editFormId}-title" value="${escHtml(e.Title)}" placeholder="Title">
+        <input type="text" class="form-input" id="${editFormId}-category" value="${escHtml(e.Category||'')}" placeholder="Category (optional)">
+        <textarea class="form-input" id="${editFormId}-content" rows="3">${escHtml(e.Content)}</textarea>
+        <div style="display:flex;gap:6px">
+          <button class="btn-primary btn-sm" style="flex:1" onclick="saveKnowledgeEdit('${escQ(e.ID)}','${editFormId}',this)">Save</button>
+          <button class="btn-secondary btn-sm" style="flex:1" onclick="toggleKnowledgeEdit('${editFormId}')">Cancel</button>
+        </div>
+      </div>` : '';
+    return `<div class="card" style="padding:14px 16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
+        <div style="min-width:0;flex:1">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <strong style="font-size:13px">${escHtml(e.Title)}</strong>
+            ${e.Category ? '<span class="badge-pill badge-gray" style="font-size:9px">'+escHtml(e.Category)+'</span>' : ''}
+          </div>
+          <div class="sub" style="margin-top:6px;white-space:pre-wrap">${escHtml(e.Content)}</div>
+          <div class="sub" style="margin-top:8px;font-size:10px">Updated by ${escHtml(e.UpdatedBy||'')} \u00b7 ${e.UpdatedAt ? new Date(e.UpdatedAt).toLocaleDateString() : ''}</div>
+        </div>
+        ${editControls}
+      </div>
+      ${editForm}
+    </div>`;
+  }).join('');
+}
+
+function toggleKnowledgeEdit(formId) {
+  const el = document.getElementById(formId);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+async function submitKnowledgeEntry() {
+  const title = document.getElementById('knowledge-new-title').value.trim();
+  const category = document.getElementById('knowledge-new-category').value.trim();
+  const content = document.getElementById('knowledge-new-content').value.trim();
+  if (!title || !content) { showToast('Title and content are both required', 'error'); return; }
+  try {
+    const res = await fetch(SCRIPT_URL, { method:'POST', redirect:'follow', body: JSON.stringify({ action:'addKnowledgeEntry', data:{Title:title, Category:category, Content:content}, token: getIdentityToken()||'' }) });
+    const r = await res.json();
+    if (r.error) { showToast(r.error, 'error'); return; }
+    document.getElementById('knowledge-new-title').value = '';
+    document.getElementById('knowledge-new-category').value = '';
+    document.getElementById('knowledge-new-content').value = '';
+    showToast('Saved \u2014 every AI feature will use this from now on', 'success');
+    loadKnowledgeBase();
+  } catch(e) { showToast('Network error saving entry', 'error'); }
+}
+
+async function saveKnowledgeEdit(id, formId, btn) {
+  const title = document.getElementById(formId+'-title').value.trim();
+  const category = document.getElementById(formId+'-category').value.trim();
+  const content = document.getElementById(formId+'-content').value.trim();
+  if (!title || !content) { showToast('Title and content are both required', 'error'); return; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const res = await fetch(SCRIPT_URL, { method:'POST', redirect:'follow', body: JSON.stringify({ action:'updateKnowledgeEntry', id, data:{Title:title, Category:category, Content:content}, token: getIdentityToken()||'' }) });
+    const r = await res.json();
+    if (r.error) { showToast(r.error, 'error'); if (btn) { btn.disabled = false; btn.textContent = 'Save'; } return; }
+    showToast('Saved', 'success');
+    loadKnowledgeBase();
+  } catch(e) { showToast('Network error saving changes', 'error'); if (btn) { btn.disabled = false; btn.textContent = 'Save'; } }
+}
+
+async function deleteKnowledgeEntryUI(id) {
+  if (!confirm('Delete this entry? The AI will stop using it immediately.')) return;
+  try {
+    const res = await fetch(SCRIPT_URL, { method:'POST', redirect:'follow', body: JSON.stringify({ action:'deleteKnowledgeEntry', id, token: getIdentityToken()||'' }) });
+    const r = await res.json();
+    if (r.error) { showToast(r.error, 'error'); return; }
+    showToast('Deleted', 'success');
+    loadKnowledgeBase();
+  } catch(e) { showToast('Network error deleting entry', 'error'); }
 }
 
 function renderLeaveRequests(requests) {
@@ -4143,7 +4464,21 @@ function showGoalResult(r) {
   document.getElementById('goal-modal-progress-state').style.display = 'none';
   document.getElementById('goal-modal-result-state').style.display = 'block';
   const count = r.tasksCreated || 0;
-  document.getElementById('goal-result-count').textContent = count + ' task' + (count===1?'':'s') + ' proposed, waiting in Review Queue.';
+  const countEl = document.getElementById('goal-result-count');
+  if (r.dedupedRetry) {
+    // Backend recognized this as a repeat of a request already submitted in
+    // the last few minutes — most likely the earlier attempt only *looked*
+    // like it failed (a dropped connection, a timeout, the modal getting
+    // closed) while Apps Script kept running it to completion regardless.
+    // count can legitimately be 0 here if the original run is still
+    // mid-decomposition — that's not a real failure, so say so plainly
+    // instead of implying the goal produced nothing.
+    countEl.textContent = count > 0
+      ? count + ' task' + (count===1?'':'s') + ' already proposed from your earlier attempt — no new goal was created.'
+      : 'This goal was already submitted a moment ago and is still being processed — no new goal was created. Check the Goals list shortly.';
+  } else {
+    countEl.textContent = count + ' task' + (count===1?'':'s') + ' proposed, waiting in Review Queue.';
+  }
   const reasoningEl = document.getElementById('goal-result-reasoning');
   const reasoning = String(r.reasoning || '').trim();
   reasoningEl.textContent = reasoning || 'The AI didn\u2019t return a reasoning summary for this breakdown.';
@@ -4193,8 +4528,7 @@ async function loadGoals() {
     const res = await fetch(SCRIPT_URL + '?action=getGoals&token=' + encodeURIComponent(getIdentityToken()||'') + '&_=' + Date.now(), { redirect:'follow', cache:'no-store' });
     const r = await res.json();
     if (r.error) { listEl.innerHTML = '<div class="sub">'+r.error+'</div>'; return; }
-    window._lastGoals = r.goals || [];
-    renderGoalsList(window._lastGoals);
+    renderGoalsList(r.goals || []);
   } catch(e) {
     listEl.innerHTML = '<div class="sub">Failed to load — '+e.message+'</div>';
   }
@@ -4215,17 +4549,12 @@ function renderGoalsList(goals) {
     const pct = total ? Math.round((done/total)*100) : 0;
     const statusMap = {Drafting:'badge-yellow', Active:'badge-blue', Completed:'badge-green', Archived:'badge-gray'};
     const statusBadgeHtml = '<span class="badge-pill '+(statusMap[g.Status]||'badge-gray')+'">'+g.Status+'</span>';
-    const showDates = wantsDecompDates();
-    const childRows = (g.children||[]).map(c => {
-      const decompDate = (showDates && c.Decomposed_At) ? new Date(c.Decomposed_At) : null;
-      const dateSpan = (decompDate && !isNaN(decompDate))
-        ? '<span style="font-size:9px;color:var(--muted);font-family:\'Space Mono\',monospace;margin-left:6px" title="Decomposed at '+decompDate.toLocaleString()+'">decomposed '+decompDate.toLocaleDateString()+'</span>' : '';
-      return '<div class="goal-child-row">'
+    const childRows = (g.children||[]).map(c =>
+      '<div class="goal-child-row">'
       + '<span style="cursor:pointer" onclick="closeGoalModal();loadView(\'tasks\');setTimeout(()=>editRow(\''+escQ(c.ID)+'\',\'1. Master Tasks\'),50)">'+escHtml((c['Task Description']||'').substring(0,60))+'</span>'
       + statusBadge(c.Status)
-      + dateSpan
-      + '</div>';
-    }).join('') || '<div class="sub" style="padding:8px 0">No approved tasks yet — check the Review Queue.</div>';
+      + '</div>'
+    ).join('') || '<div class="sub" style="padding:8px 0">No approved tasks yet — check the Review Queue.</div>';
     const childListId = 'goal-children-'+g.ID;
     const reasoningId = 'goal-reasoning-'+g.ID;
     // "Show your workings" — the AI's own short explanation of how it
@@ -4362,6 +4691,22 @@ function renderTeam() {
     // this person's own Notify_Pref decides instead.
     const assignFollowsPref = row && String(row['Assign_Notify_Mode']||'').trim().toLowerCase()==='follow_pref';
     const assignNotifyHtml = row ? '<div class="toggle-wrap" style="margin-top:2px;padding-top:8px;border-top:1px solid var(--border);align-items:flex-start"><div><div style="font-size:10px;font-family:\'Space Mono\',monospace;color:var(--text)">Assignment notifications</div><div style="font-size:9px;color:var(--muted);margin-top:2px;max-width:150px">'+(assignFollowsPref?'Follows their own notification preference':'Forced to Email + In-App for every assignment')+'</div></div><label class="toggle" title="Off = forced Email + In-App (default). On = this person'+"'"+'s own Notify Me Via setting decides instead."><input type="checkbox" '+(assignFollowsPref?'checked':'')+' onchange="toggleAssignNotifyMode(\''+escQ(name)+'\',this.checked,this)"><span class="slider"></span></label></div>' : '';
+    const editFormId = 'edit-member-'+String(i);
+    // Inline edit form, hidden by default — toggled by the Edit button.
+    // Deliberately narrow to Name/Email/Role/Department (see
+    // updateTeamMember comment server-side for why IsLeader/permissions
+    // stay out of this form). Prefilled from current values so a leader
+    // only has to change what's actually wrong.
+    const editFormHtml = `<div id="${editFormId}" style="display:none;flex-direction:column;gap:6px;margin-top:4px;padding-top:8px;border-top:1px solid var(--border)">
+      <input type="text" class="form-input" id="${editFormId}-name" value="${escHtml(name)}" placeholder="Name" style="font-size:12px">
+      <input type="email" class="form-input" id="${editFormId}-email" value="${escHtml(email)}" placeholder="Email" style="font-size:12px">
+      <input type="text" class="form-input" id="${editFormId}-role" value="${escHtml(info.role)}" placeholder="Role" style="font-size:12px">
+      <input type="text" class="form-input" id="${editFormId}-dept" value="${escHtml(info.dept)}" placeholder="Department" style="font-size:12px">
+      <div style="display:flex;gap:6px;margin-top:2px">
+        <button class="btn-primary btn-sm" style="flex:1" onclick="saveTeamMemberEdit('${escQ(name)}','${editFormId}',this)">Save</button>
+        <button class="btn-secondary btn-sm" style="flex:1" onclick="toggleTeamMemberEdit('${editFormId}')">Cancel</button>
+      </div>
+    </div>`;
     return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px">
       <div style="display:flex;align-items:center;gap:10px">
         <div style="flex-shrink:0">${avatarHtml(name, 38)}</div>
@@ -4369,15 +4714,44 @@ function renderTeam() {
           <div style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</div>
           <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace">${info.role}</div>
         </div>
-        ${info.leader?'<span style="margin-left:auto;font-size:9px;background:rgba(91,82,240,0.15);color:#8880ff;border:1px solid rgba(91,82,240,0.3);padding:2px 7px;border-radius:20px;font-family:Space Mono,monospace;flex-shrink:0">LEAD</span>':''}
+        ${info.leader?'<span style="font-size:9px;background:rgba(91,82,240,0.15);color:#8880ff;border:1px solid rgba(91,82,240,0.3);padding:2px 7px;border-radius:20px;font-family:Space Mono,monospace;flex-shrink:0">LEAD</span>':''}
+        <button class="btn-sm" style="flex-shrink:0;margin-left:${info.leader?'6px':'auto'}" onclick="toggleTeamMemberEdit('${editFormId}')">Edit</button>
       </div>
       <div style="font-size:10px;font-family:'Space Mono',monospace;padding:6px 8px;background:var(--surface2);border-radius:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)" title="${email}">${email}</div>
       <div style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace">${info.dept}</div>
       ${pendingHtml}
       ${permsHtml}
       ${assignNotifyHtml}
+      ${editFormHtml}
     </div>`;
   }).join('');
+}
+function toggleTeamMemberEdit(formId) {
+  const el = document.getElementById(formId);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+async function saveTeamMemberEdit(originalName, formId, btn) {
+  const updates = {
+    Name: document.getElementById(formId+'-name').value.trim(),
+    Email: document.getElementById(formId+'-email').value.trim(),
+    Role: document.getElementById(formId+'-role').value.trim(),
+    Department: document.getElementById(formId+'-dept').value.trim(),
+  };
+  if (!updates.Name) { showToast('Name cannot be blank', 'error'); return; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const res = await fetch(SCRIPT_URL, { method:'POST', redirect:'follow', body: JSON.stringify({ action:'updateTeamMember', name: originalName, updates, token: getIdentityToken()||'' }) });
+    const r = await res.json();
+    if (r.error) { showToast(r.error, 'error'); if (btn) { btn.disabled = false; btn.textContent = 'Save'; } return; }
+    if (r.renamed) showToast(originalName + ' renamed to ' + updates.Name + ' — note: existing tasks/records under the old name won\u2019t auto-update', 'success');
+    else showToast('Saved', 'success');
+    await loadData(); // refresh appData.team with the new values
+    renderTeam();
+  } catch (e) {
+    showToast('Network error saving changes', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Save'; }
+  }
 }
 
 // Leader-only: flips a Pending roster row straight to Active (covers a
@@ -5132,41 +5506,6 @@ async function changeDigestNotifyPref(pref) {
   } catch (e) { showToast('Could not save digest preference: ' + e.message, 'error'); }
 }
 
-// One global read-only check for the "Show decomposition dates" preference
-// — deliberately NOT per-goal or per-task, see the toggle in the profile
-// modal. Default true (blank/'on') so it's opt-out, not opt-in. Reads the
-// caller's own row out of the already-loaded appData.team rather than a
-// separate round-trip, same pattern as isLeader()/getTeamEmail() elsewhere.
-function wantsDecompDates() {
-  const name = getIdentity();
-  if (!name) return true;
-  const canon = canonicalizeName(name).trim().toUpperCase();
-  const rosterRow = (appData.team||[]).find(m=>canonicalizeName(String(m['Name']||'').trim()).toUpperCase()===canon);
-  const pref = rosterRow && rosterRow['Show_Decomp_Dates'] ? String(rosterRow['Show_Decomp_Dates']).trim().toLowerCase() : 'on';
-  return pref !== 'off';
-}
-
-// Saves the toggle from the profile modal, updates the cached roster row
-// in-place so wantsDecompDates() reflects it immediately, then re-renders
-// whichever of Goals / Review Queue already has data cached — no need to
-// force a full reload just to show/hide a date label.
-async function toggleShowDecompDates(checked) {
-  if (!getIdentity()) return;
-  const value = checked ? 'on' : 'off';
-  try {
-    const res = await fetch(SCRIPT_URL, { method: 'POST', redirect: 'follow', body: JSON.stringify({ action: 'saveShowDecompDatesPref', token: getIdentityToken(), value: value }) });
-    const r = await res.json();
-    if (r.error) { showToast(r.error, 'error'); return; }
-    const name = getIdentity();
-    const canon = canonicalizeName(name).trim().toUpperCase();
-    const rosterRow = (appData.team||[]).find(m=>canonicalizeName(String(m['Name']||'').trim()).toUpperCase()===canon);
-    if (rosterRow) rosterRow['Show_Decomp_Dates'] = value;
-    if (window._lastGoals) renderGoalsList(window._lastGoals);
-    if (window._lastReviewItems) renderReviewQueue(window._lastReviewItems);
-    showToast('Decomposition dates ' + (checked ? 'shown' : 'hidden'), 'success');
-  } catch (e) { showToast('Could not save preference: ' + e.message, 'error'); }
-}
-
 function startNotifyPolling() {
   stopNotifyPolling();
   loadNotifications();
@@ -5576,8 +5915,6 @@ function openProfileModal() {
   if (prefSelect) prefSelect.value = (rosterRow && rosterRow['Notify_Pref']) ? String(rosterRow['Notify_Pref']).trim().toLowerCase() : 'both';
   const digestSelect = document.getElementById('profile-digest-pref');
   if (digestSelect) digestSelect.value = (rosterRow && rosterRow['Digest_Notify_Pref']) ? String(rosterRow['Digest_Notify_Pref']).trim().toLowerCase() : 'both';
-  const decompDatesToggle = document.getElementById('profile-show-decomp-dates');
-  if (decompDatesToggle) decompDatesToggle.checked = wantsDecompDates();
   document.getElementById('profile-modal').classList.add('show');
   refreshNotifyButtonState('profile-notify-btn');
 }
@@ -5836,8 +6173,6 @@ function updateLeaderUI() {
   if(slb) { slb.style.display=loggedIn?'none':''; slb.textContent='Login'; slb.classList.remove('green'); }
   const stb=document.getElementById('su-theme-btn');
   if(stb) stb.innerHTML=(document.documentElement.getAttribute('data-theme')==='light'?icon('moon',13):icon('sun',13))+' Theme';
-  const teamNav=document.getElementById('nav-team-item');
-  if(teamNav) teamNav.style.display=leaderFlag?'flex':'none';
   const reviewNav=document.getElementById('nav-review-item');
   if(reviewNav) reviewNav.style.display=leaderFlag?'flex':'none';
   const goalsNav=document.getElementById('nav-goals-item');
